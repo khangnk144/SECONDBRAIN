@@ -1,0 +1,23 @@
+{
+  "name": "@second-brain/server",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch --clear-screen=false src/index.ts --dev",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/index.js"
+  },
+  "devDependencies": {
+    "@types/ws": "8.18.2",
+    "vite": "8.3.4",
+    "ws": "8.22.0"
+  },
+  "dependencies": {
+    "@fastify/middie": "9.3.5",
+    "@fastify/static": "10.1.6",
+    "@fastify/websocket": "11.3.4",
+    "fastify": "5.12.7"
+  }
+}

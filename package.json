@@ -1,0 +1,42 @@
+{
+  "name": "second-brain",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Local-first second brain app (see ../SPEC.md)",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "workspaces": [
+    "server",
+    "web"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w server",
+    "build": "npm run build -w web && npm run build -w server",
+    "start": "node server/dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "npm run build && playwright test",
+    "lint": "eslint . --max-warnings=0 && tsx scripts/check-raw-colors.ts && tsx scripts/check-i18n-parity.ts && tsx scripts/check-contrast.ts",
+    "typecheck": "tsc -p server/tsconfig.json --noEmit && tsc -p web/tsconfig.json --noEmit && tsc -p tsconfig.tooling.json --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "gen-vault": "tsx scripts/gen-vault.ts"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.56.1",
+    "@types/node": "22.20.5",
+    "@vitest/coverage-v8": "5.0.5",
+    "eslint": "10.13.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "globals": "17.13.0",
+    "prettier": "3.9.10",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.71.2",
+    "vitest": "5.0.5"
+  }
+}

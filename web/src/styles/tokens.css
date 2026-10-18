@@ -1,0 +1,136 @@
+/*
+ * Design tokens, copied from design.md §10 (and §2.5 for the alternate palettes).
+ * This is the ONLY file in web/src allowed to contain raw color values.
+ * Default = dark theme ("Đêm tím") with the "Dâu tằm" palette.
+ */
+:root {
+  --bg: #1c1622;
+  --paper: #241d2b;
+  --ink: #f1e9f2;
+  --ink-2: #a595ac;
+  --line: #352c3c;
+  --accent: #d88ab6;
+  --on-accent: #2a1a24;
+  --accent-soft: #3a2c45;
+  --blush: #3d2a35;
+  --focus: #e7a9cf;
+  --urgent: #f06b86;
+  --soon: #f2b255;
+  --ok: #5fb89e;
+  --done: #6e6276;
+  --urgent-text: #ff9db0;
+  --soon-text: #f7c97f;
+  --ok-text: #8fd3bf;
+  --toast-bg: #f1e9f2;
+  --toast-fg: #1c1622;
+  --graph-projects: #d88ab6;
+  --graph-areas: #b9a0d6;
+  --graph-resources: #5fb89e;
+  --graph-wiki: #f2b255;
+  --graph-daily: #8a7e90;
+  --graph-other: #4a3e52;
+
+  --font: 'Be Vietnam Pro', system-ui, sans-serif; /* bundled locally, never from a CDN */
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --radius-s: 6px;
+  --radius-m: 10px;
+  --radius-l: 14px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  --measure: 68ch; /* maximum line length for body text */
+  --sidebar-w: 260px;
+  --panel-w: 280px;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur: 200ms;
+
+  color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+  --bg: #fbf8fa;
+  --paper: #ffffff;
+  --ink: #2e2335;
+  --ink-2: #7a6b82;
+  --line: #ede4ec;
+  --accent: #9e3f73;
+  --on-accent: #ffffff;
+  --accent-soft: #efe3f3;
+  --blush: #fbe7ee;
+  --focus: #9e3f73;
+  --urgent: #d9536f;
+  --soon: #bf7d1c;
+  --ok: #4e9e86;
+  --done: #b8a9be;
+  --urgent-text: #b83a55;
+  --soon-text: #8a5a0b;
+  --ok-text: #2e7a66;
+  --toast-bg: #2e2335;
+  --toast-fg: #ffffff;
+  --graph-projects: #9e3f73;
+  --graph-areas: #7b5ea7;
+  --graph-resources: #2e7a66;
+  --graph-wiki: #b8761a;
+  --graph-daily: #8a7e90;
+  --graph-other: #d8cfda;
+
+  color-scheme: light;
+}
+
+/*
+ * Alternate palettes: full sets (accent, on-accent, accent-soft, blush, focus, graph-projects)
+ * for BOTH themes. The [data-palette][data-theme="light"] rules are more specific than
+ * [data-palette] alone, so light mode always wins over the dark palette values.
+ */
+:root[data-palette='hoa-dao'] {
+  --accent: #e58aa3;
+  --on-accent: #2a1a1f;
+  --accent-soft: #45303a;
+  --blush: #3f2b31;
+  --focus: #f2afc0;
+  --graph-projects: #e58aa3;
+}
+:root[data-palette='hoa-dao'][data-theme='light'] {
+  --accent: #b03858;
+  --on-accent: #ffffff;
+  --accent-soft: #fbe3e8;
+  --blush: #fdeef1;
+  --focus: #b03858;
+  --graph-projects: #b03858;
+}
+:root[data-palette='oai-huong'] {
+  --accent: #b9a0e0;
+  --on-accent: #201a2c;
+  --accent-soft: #3a3150;
+  --blush: #352e42;
+  --focus: #cdb9ec;
+  --graph-projects: #b9a0e0;
+}
+:root[data-palette='oai-huong'][data-theme='light'] {
+  --accent: #6f52a3;
+  --on-accent: #ffffff;
+  --accent-soft: #eae3f5;
+  --blush: #f3eef9;
+  --focus: #6f52a3;
+  --graph-projects: #6f52a3;
+}
+
+/* Base font size (Settings: 14 / 16 / 18 px). The type scale in base.css is in rem. */
+:root {
+  font-size: 16px;
+}
+:root[data-font-size='14'] {
+  font-size: 14px;
+}
+:root[data-font-size='16'] {
+  font-size: 16px;
+}
+:root[data-font-size='18'] {
+  font-size: 18px;
+}

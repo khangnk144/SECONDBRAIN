@@ -1,0 +1,22 @@
+.today__date {
+  margin-bottom: 6px;
+  font-size: 0.875rem;
+  color: var(--ink-2);
+}
+
+.today__greeting {
+  margin-bottom: 6px;
+}
+
+.today__summary {
+  max-width: var(--measure);
+  color: var(--ink-2);
+}
+
+.today__hint {
+  max-width: var(--measure);
+  margin-top: var(--space-12);
+  font-size: max(12px, 0.78125rem); /* design.md §3: never below 12px */
+  line-height: 1.5;
+  color: var(--ink-2);
+}

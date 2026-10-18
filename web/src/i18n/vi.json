@@ -1,0 +1,54 @@
+{
+  "app": {
+    "skipToContent": "Bỏ qua, tới nội dung chính"
+  },
+  "nav": {
+    "label": "Điều hướng chính",
+    "today": "Hôm nay",
+    "tasks": "Việc cần làm",
+    "calendar": "Lịch",
+    "graph": "Bản đồ não"
+  },
+  "sidebar": {
+    "label": "Ngăn bên trái",
+    "searchLabel": "Tìm ghi chú và lệnh",
+    "searchPlaceholder": "Tìm…",
+    "searchSoon": "Tìm kiếm sẽ có ở bản sau",
+    "foldersHeading": "Thư mục",
+    "foldersEmpty": "Chưa có ghi chú nào. Thư mục của bạn sẽ hiện ở đây."
+  },
+  "panel": {
+    "label": "Ngăn bên phải"
+  },
+  "today": {
+    "dateFormat": "dddd, D [tháng] M",
+    "greeting": {
+      "morning": "Chào buổi sáng, {{name}}.",
+      "noon": "Chào buổi trưa, {{name}}.",
+      "afternoon": "Chào buổi chiều, {{name}}.",
+      "evening": "Chào buổi tối, {{name}}.",
+      "late": "Chào khuya, {{name}}."
+    },
+    "summaryNothingUrgent": "Hôm nay không có gì gấp. Viết gì đó nhé?",
+    "emptyHint": "Khi bạn có ghi chú, dải 14 ngày, việc hôm nay và đồ án đang làm sẽ hiện ở đây."
+  },
+  "placeholder": {
+    "tasks": {
+      "title": "Việc cần làm",
+      "body": "Mọi việc có checkbox trong ghi chú của bạn sẽ được gom về đây, xếp theo hạn."
+    },
+    "calendar": {
+      "title": "Lịch",
+      "body": "Deadline của bạn sẽ hiện theo tháng ở đây, bấm vào một ngày để xem chi tiết."
+    },
+    "graph": {
+      "title": "Bản đồ não",
+      "body": "Khi các ghi chú nối với nhau, bạn sẽ thấy bộ não thứ hai của mình sáng lên ở đây."
+    },
+    "notFound": {
+      "title": "Không tìm thấy trang này",
+      "body": "Có thể đường dẫn đã cũ.",
+      "back": "Về trang Hôm nay"
+    }
+  }
+}

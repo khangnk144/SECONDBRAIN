@@ -1,0 +1,54 @@
+{
+  "app": {
+    "skipToContent": "Skip to main content"
+  },
+  "nav": {
+    "label": "Main navigation",
+    "today": "Today",
+    "tasks": "Tasks",
+    "calendar": "Calendar",
+    "graph": "Brain map"
+  },
+  "sidebar": {
+    "label": "Left pane",
+    "searchLabel": "Search notes and commands",
+    "searchPlaceholder": "Search…",
+    "searchSoon": "Search arrives in a later version",
+    "foldersHeading": "Folders",
+    "foldersEmpty": "No notes yet. Your folders will show up here."
+  },
+  "panel": {
+    "label": "Right pane"
+  },
+  "today": {
+    "dateFormat": "dddd, MMMM D",
+    "greeting": {
+      "morning": "Good morning, {{name}}.",
+      "noon": "Good midday, {{name}}.",
+      "afternoon": "Good afternoon, {{name}}.",
+      "evening": "Good evening, {{name}}.",
+      "late": "Up late, {{name}}."
+    },
+    "summaryNothingUrgent": "Nothing urgent today. Feel like writing something?",
+    "emptyHint": "Once you have notes, your next 14 days, today's tasks and projects in progress will show up here."
+  },
+  "placeholder": {
+    "tasks": {
+      "title": "Tasks",
+      "body": "Every checkbox in your notes will be gathered here, sorted by due date."
+    },
+    "calendar": {
+      "title": "Calendar",
+      "body": "Your deadlines will appear here month by month; click a day to see its details."
+    },
+    "graph": {
+      "title": "Brain map",
+      "body": "Once your notes link to each other, you will see your second brain light up here."
+    },
+    "notFound": {
+      "title": "This page could not be found",
+      "body": "The link may be out of date.",
+      "back": "Back to Today"
+    }
+  }
+}

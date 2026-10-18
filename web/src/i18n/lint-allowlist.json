@@ -1,0 +1,6 @@
+{
+  "$comment": "Exceptions for the i18n/no-literal-ui-strings lint rule. Keep this list short: icons, units, code, brand names. Everything a user reads goes through t(). Middle dots are not allowed as separators (design.md §7).",
+  "strings": ["Second Brain", "khangnie", "Ctrl+K"],
+  "patterns": ["^[\\s\\d.,:;!?%+\\-–—/()[\\]{}|…#@*&'\"]*$"],
+  "ignoreFiles": ["web/src/**/*.test.ts", "web/src/**/*.test.tsx", "web/src/**/__tests__/**"]
+}

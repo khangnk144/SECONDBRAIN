@@ -1,0 +1,52 @@
+/* Three-pane frame: left 260px, main (content max 720px, left-aligned), right 280px. */
+.app-shell {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.app-shell--with-panel {
+  grid-template-columns: var(--sidebar-w) minmax(0, 1fr) var(--panel-w);
+}
+
+.app-main {
+  min-width: 0;
+  padding: var(--space-12) var(--space-8);
+}
+
+.app-main:focus {
+  outline: none;
+}
+
+.app-main__inner {
+  max-width: 720px;
+}
+
+.right-panel {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  border-left: 1px solid var(--line);
+  padding: var(--space-6) var(--space-4);
+}
+
+/* Narrow windows: the sidebar sits above the content; the right panel follows below. */
+@media (max-width: 899px) {
+  .app-shell,
+  .app-shell--with-panel {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+  }
+
+  .app-main {
+    padding: var(--space-6) var(--space-4) var(--space-8);
+  }
+
+  .right-panel {
+    position: static;
+    height: auto;
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+}

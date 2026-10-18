@@ -1,0 +1,137 @@
+/* Global base styles. Colors come only from tokens.css custom properties. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 1rem; /* 16px body at the default size */
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Type scale: 34 / 26 / 20 / 17 / 16 / 14 / 12.5 px at base 16. */
+.text-display {
+  font-size: 2.125rem;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+}
+h1 {
+  font-size: 1.625rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+}
+h2 {
+  font-size: 1.25rem;
+  line-height: 1.3;
+  font-weight: 600;
+}
+h3 {
+  font-size: 1.0625rem;
+  line-height: 1.4;
+  font-weight: 600;
+}
+.text-ui {
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.text-small {
+  font-size: max(12px, 0.78125rem); /* design.md §3: never below 12px */
+  line-height: 1.4;
+  color: var(--ink-2);
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+/* Monospace only inside code; small labels such as <kbd> keep the sans face. */
+code,
+pre {
+  font-family: var(--font-mono);
+}
+
+kbd {
+  font-family: var(--font);
+  font-size: max(12px, 0.75rem);
+  line-height: 1.4;
+  padding: 0 5px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  color: var(--ink-2);
+}
+
+a {
+  color: var(--accent);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+
+/* Keyboard focus is always visible: 2px --focus ring, following the component radius. */
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: var(--space-4);
+  top: -100px;
+  z-index: 10;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-m);
+  background: var(--accent);
+  color: var(--on-accent);
+  text-decoration: none;
+}
+.skip-link:focus-visible {
+  top: var(--space-4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,54 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.*
+
+# build output
+dist/
+build/
+*.tsbuildinfo
+
+# tests
+coverage/
+playwright-report/
+test-results/
+.nyc_output
+
+# env & secrets
+.env*
+!.env.example
+*.pem
+
+# logs
+*.log
+npm-debug.log*
+logs.txt
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+
+# tool output
+repomix-output.xml
+screenshots/
+docs/screenshots/
+__pycache__/
+
+# ClaudeKit runtime state (the kit itself stays tracked)
+.claude/session-state/*
+!.claude/session-state/.gitkeep
+.claude/hooks/.logs/
+.claude/agent-memory/
+.claude/settings.local.json
+.claude/settings.bak.json
+.claude/.env
+.claude/skills/.venv/
+.mcp.json
+
+# git worktrees
+worktrees/
+
+# delivery bundles
+.transfer/

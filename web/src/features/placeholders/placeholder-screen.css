@@ -1,0 +1,10 @@
+.placeholder-screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.placeholder-screen__body {
+  max-width: var(--measure);
+  color: var(--ink-2);
+}

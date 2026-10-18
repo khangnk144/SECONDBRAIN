@@ -16,5 +16,38 @@ Node.js server (Fastify, 127.0.0.1:4747)
 ```
 Data flow: UI → REST → VaultService writes file → watcher → indexer → WS `note:changed` → UI refresh. The UI never writes files directly; MCP tools call the same services as REST.
 
-## As built
-(Not started. Fill in after M0.)
+## As built (after M0, 2026-10-18)
+
+```
+app/
+├── package.json            npm workspaces (server, web); scripts dev/build/start/test/test:e2e/lint/typecheck/gen-vault
+├── vitest.config.ts        one run, three projects: server (node), web (jsdom), tooling (scripts + lint rules)
+├── eslint.config.js        flat config + local plugins from eslint-rules/
+├── playwright.config.ts    e2e against the built server on port 4799 with a temp home
+├── server/src/
+│   ├── index.ts            CLI entry: --dev --home --port (env SB_HOME/SB_PORT); exit 0 already running, 2 port busy, 64 bad args
+│   ├── config/             app paths (home = parent of app/), CLI args, global settings.json (atomic, token on first run, corrupt-file backup)
+│   ├── runtime/            start-server (listen 127.0.0.1, server.json, signals), probe for an already-running instance
+│   ├── security/           Host allowlist 421, Origin check 403, session token 401 (constant time), baseline headers + CSP
+│   ├── http/               buildApp() factory used by index.ts and every test; JSON error helper
+│   ├── api/                GET /api/health (public), GET /api/settings (ui prefs + port, never secrets)
+│   ├── ws/                 /ws?token= sends {type:"hello"}
+│   ├── shell/              UI shell: prod = web/dist + placeholder injection; dev = Vite middleware (@fastify/middie)
+│   ├── logging/            rotating file logger (5 MB, 3 files), one line per request, no query strings or tokens
+│   └── fs/                 atomic write (temp file in the same dir + fsync + rename)
+├── web/
+│   ├── index.html          placeholders __SB_TOKEN__ __SB_BOOT__ __SB_LANG__ __SB_THEME__ __SB_PALETTE__ __SB_FONT_SIZE__ (filled by the server)
+│   └── src/
+│       ├── app/            hash router, 3-pane layout, sidebar (search placeholder, nav, folders empty state), right panel
+│       ├── features/       today (greeting + summary placeholder), placeholders for tasks/calendar/graph, not found
+│       ├── i18n/           i18next init, vi.json (default), en.json, lint-allowlist.json
+│       ├── lib/            boot config from meta tags, API client (X-SB-Token), UI prefs store + <html> attributes, greeting, dates
+│       └── styles/         tokens.css (only file with colors: dark/light × dau-tam/hoa-dao/oai-huong, font sizes), base, layout, sidebar
+├── eslint-rules/           i18n/no-literal-ui-strings, colors/no-raw-color (+ RuleTester tests)
+├── scripts/                check-contrast, check-raw-colors, check-i18n-parity, gen-vault (5k notes / 51 MB / 20k links / 3k tasks)
+└── launcher/               start-second-brain.ps1 (start/stop, hidden server, health probe), Mở Second Brain.cmd, root-wrapper.cmd
+```
+
+**Request path today:** browser → `http://localhost:4747` → security hook (Host → Origin → token → 127.0.0.1 shell redirect) → `/api/*` routes, `/ws`, or the UI shell. The shell is rendered per request with the session token in a meta tag; the web app reads it and sends it as `X-SB-Token`.
+
+**Not built yet:** vault service, indexer, watcher, everything from M1 onward. Logs live in the global `.secondbrain/logs/` until the vault exists (see DECISIONS.md).

@@ -1,8 +1,11 @@
 import fastifyWebsocket from '@fastify/websocket';
 import Fastify, { type FastifyInstance } from 'fastify';
 import { registerHealthRoute } from '../api/health-route.js';
+import { registerVaultRoutes } from '../api/register-vault-routes.js';
 import { registerSettingsRoute } from '../api/settings-route.js';
 import { registerShutdownRoute } from '../api/shutdown-route.js';
+import { errorCodeOf } from '../app-context/app-context-errors.js';
+import type { AppContext } from '../app-context/create-app-context.js';
 import type { GlobalSettings } from '../config/global-settings.js';
 import { registerRequestLogging } from '../logging/register-request-logging.js';
 import { createSilentLogger, type AppLogger } from '../logging/rotating-file-logger.js';
@@ -11,9 +14,11 @@ import type { ServerMode } from '../security/security-headers.js';
 import { DEFAULT_HMR_PORT, registerDevShellSource } from '../shell/dev-shell-source.js';
 import { registerProdShellSource } from '../shell/prod-shell-source.js';
 import { registerUiShellRoutes } from '../shell/register-ui-shell-routes.js';
+import { isVaultError } from '../vault/vault-types.js';
 import { SERVER_VERSION } from '../version.js';
 import { registerWebSocketRoute } from '../ws/register-websocket-route.js';
 import { sendApiError, type ApiErrorCode } from './api-errors.js';
+import { VAULT_ERROR_STATUS } from './vault-error-status.js';
 
 function errorCodeForStatus(status: number): ApiErrorCode {
   if (status === 401) return 'UNAUTHORIZED';
@@ -39,6 +44,11 @@ export interface BuildAppOptions {
   serveUi?: boolean;
   /** Enables POST /api/shutdown; called after the 202 reply has been sent. */
   requestShutdown?: () => void;
+  /**
+   * The open vault: enables the vault routes and WS events. Without it (M0 tests) only the
+   * shell, health, settings and shutdown exist.
+   */
+  context?: AppContext;
 }
 
 /**
@@ -67,21 +77,43 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
   registerRequestLogging(app, logger);
 
   app.setErrorHandler((error, request, reply) => {
+    if (isVaultError(error)) {
+      // The disk refused a write: worth a log line (code only, no path: paths are note titles).
+      if (error.code === 'WRITE_FAILED') {
+        const cause = String(error.details?.cause ?? 'unknown');
+        logger.error(`Write failed on ${request.method} ${request.url.split('?')[0]} (${cause}).`);
+      }
+      return sendApiError(
+        reply,
+        VAULT_ERROR_STATUS[error.code],
+        error.code,
+        error.message,
+        error.details,
+      );
+    }
     const err = error as { statusCode?: number; validation?: unknown; message?: string };
     const status =
       err.statusCode && err.statusCode >= 400 && err.statusCode < 500 ? err.statusCode : 500;
-    if (status === 500)
+    // Code or name only: messages can carry absolute paths and note titles (SPEC §5 Logs).
+    if (status === 500) {
       logger.error(
-        `Unhandled error on ${request.method} ${request.url.split('?')[0]}: ${err.message ?? 'unknown'}`,
+        `Unhandled error on ${request.method} ${request.url.split('?')[0]} (${errorCodeOf(error)}).`,
       );
+    }
     const code = err.validation ? 'VALIDATION' : errorCodeForStatus(status);
     const message = status === 500 ? 'Internal server error.' : (err.message ?? 'Bad request.');
     return sendApiError(reply, status, code, message);
   });
 
-  registerHealthRoute(app, version, () => null);
+  const { context } = options;
+  registerHealthRoute(app, version, () => context?.vault.id ?? null);
   registerSettingsRoute(app, options.getSettings, options.port);
-  registerWebSocketRoute(app, version);
+  registerWebSocketRoute(
+    app,
+    version,
+    context ? { hub: context.hub, onConnect: (send) => context.greet(send) } : {},
+  );
+  if (context) registerVaultRoutes(app, context);
   if (options.requestShutdown) await registerShutdownRoute(app, options.requestShutdown);
 
   if (options.serveUi === false) {

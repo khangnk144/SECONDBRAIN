@@ -52,3 +52,4 @@ worktrees/
 
 # delivery bundles
 .transfer/
+.vitest/

@@ -50,4 +50,28 @@ app/
 
 **Request path today:** browser → `http://localhost:4747` → security hook (Host → Origin → token → 127.0.0.1 shell redirect) → `/api/*` routes, `/ws`, or the UI shell. The shell is rendered per request with the session token in a meta tag; the web app reads it and sends it as `X-SB-Token`.
 
-**Not built yet:** vault service, indexer, watcher, everything from M1 onward. Logs live in the global `.secondbrain/logs/` until the vault exists (see DECISIONS.md).
+## As built (after M1, 2026-10-19)
+
+```
+server/src/
+├── vault/          VaultService (vault-service.ts → read/write/rename/trash ops), write queue, disk-name mapping (NFC/NFD, case),
+│                   journal (store, runner, step actions, validation), trash (store, ops), open-vault (layout, identity, housekeeping),
+│                   vault-watcher.ts (chokidar → VaultChange 'external'), vault-types.ts (contract)
+├── fs/             atomic write (short .sb-<hex>.tmp names, mode kept, no-clobber link), move with EXDEV copy fallback, realpath fallback
+├── security/       path-guard.ts (syntax + realpath containment) + the M0 Host/Origin/token hooks
+├── templates/      bundled templates + CLAUDE.md skeleton (TS strings)
+├── markdown/       parseNote (fast-* scanner, mdast fallback), normalize-text, content-classes, link-catalog/resolve-link, relink
+├── index/          open-index (service + change queue), schema, builder, rebuild-and-swap, database-swap, writer/reader/mutations,
+│                   reconcile, link re-resolution, search (parser, FTS query, snippets, due filter), deadline service + today view,
+│                   event log, index-relink-planner
+├── lib/            local-date (calendar dates in local time)
+├── app-context/    createAppContext: vault → index → deadlines → relink planner → watcher → change router → WS hub
+├── api/            vault routes (note, note operations, journal, queries, listing/tree, files, maintenance incl. sample data)
+├── ws/             hub + server event shapes
+├── sample-data/    opt-in sample set (Vietnamese notes, wiki pages, 3 one-page PDFs via a tiny PDF writer)
+└── (M0) config, runtime, http, shell, logging
+```
+
+**Data flow:** REST mutation → VaultService (queue, revision check, journal) → `VaultChange` (origin app) → change router → index update → WS event. Outside edits: chokidar → `VaultChange` (origin external) → same router (echoes of app writes dropped only when the index already agrees). Rename/move with relink: the planner (inside the write queue) waits for pending index updates, plans edits from the index catalog + candidates, the journal applies them and the rename.
+
+**Files on disk:** `<vault>/.secondbrain/{vault.json, cache/index.sqlite, state/{events.jsonl, journal/, drafts/, ingest/, sample.json}, trash/, logs/app.log}`; global `<home>/.secondbrain/{settings.json, server.json, logs/server.log}`.

@@ -22,7 +22,8 @@
     "typecheck": "tsc -p server/tsconfig.json --noEmit && tsc -p web/tsconfig.json --noEmit && tsc -p tsconfig.tooling.json --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "gen-vault": "tsx scripts/gen-vault.ts"
+    "gen-vault": "tsx scripts/gen-vault.ts",
+    "bench:index": "tsx scripts/bench-index.ts"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

@@ -3,7 +3,10 @@
  * Second Brain server entry point.
  *   node server/dist/index.js [--dev] [--home <dir>] [--port <n>]
  * Exit codes: 0 = stopped normally or another Second Brain server is already running,
- *             1 = unexpected error, 2 = the port is used by another program, 64 = bad arguments.
+ *             1 = unexpected error, 2 = the port is used by another program,
+ *             3 = the vault folder cannot be used, 64 = bad arguments.
+ * Startup failures are also written to <home>/.secondbrain/logs/server.log, which the launcher
+ * shows when the server does not come up.
  */
 import { CliUsageError } from './config/cli-args.js';
 import { startServer } from './runtime/start-server.js';
@@ -11,6 +14,7 @@ import { startServer } from './runtime/start-server.js';
 const EXIT_OK = 0;
 const EXIT_FAILURE = 1;
 const EXIT_PORT_BUSY = 2;
+const EXIT_VAULT_UNUSABLE = 3;
 const EXIT_USAGE = 64;
 
 async function main(): Promise<number> {
@@ -27,6 +31,13 @@ async function main(): Promise<number> {
         `Close that program or choose another port (--port <n> or "port" in .secondbrain/settings.json).`,
     );
     return EXIT_PORT_BUSY;
+  }
+  if (result.kind === 'vault-unusable') {
+    console.error(result.message);
+    console.error(
+      'Choose another vault folder ("vaultPath" in .secondbrain/settings.json) or fix its permissions.',
+    );
+    return EXIT_VAULT_UNUSABLE;
   }
 
   console.log(`Second Brain is running at http://localhost:${result.port}`);

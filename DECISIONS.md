@@ -87,3 +87,70 @@ Context: `launcher/start-second-brain.ps1` grew to ~345 lines (start, stop, lock
 Decision: Keep the launcher as one file (splitting it would mean dot-sourcing several UTF-8-with-BOM files on Windows PowerShell 5.1). In message-helper calls, identifier-like ASCII arguments (`'info'`, `'save-ok'`, `'fieldName'`, camelCase allowed) are treated as kinds/keys, not UI text.
 Why: Fewer moving parts on the owner's machine; no false positives on variant arguments.
 Spec sections affected: none (code-size guideline only).
+
+## 2026-10-18 M1: scope pulled forward and spec readings
+Context: Some M1 acceptance criteria depend on features scheduled later, and a few SPEC rules leave room for interpretation.
+Decision:
+- **Relink in M1 (server side).** F1.7 needs an interrupted rename-relink, so the relink planner (F4 rules: title/path/alias/heading/embed/`course:` forms, never inside code) and `POST /note/rename|move` exist from M1. F4 acceptance (UI, autocomplete) stays in M2.
+- **F1.3 without a sidebar.** The sidebar UI is M2 (F2); in M1 "external edits reflected within 1 s" is verified through the index, `GET /note`, `GET /tree` and the WebSocket events.
+- **Title ties.** "Shortest path" in SPEC §4.4 = fewest path segments; still tied → ambiguous. "Same folder" = same parent folder. Templates are excluded from title lookup (the path form still reaches them) so `[[Paper]]` never turns ambiguous because of a template.
+- **Done items.** An item is done when the task is ticked **or** its note has `status: done` (both kinds), so a finished project stops producing reminders for leftover tasks.
+- **User folders.** `.md` files in a top folder the user created (not one of SPEC §3) are user notes.
+- **Templates on start.** Bundled templates and `CLAUDE.md` are written only when a vault is initialized (no `vault.json` yet); standard folders are re-created on every start. A template the user deletes stays deleted until Settings "Khôi phục mẫu gốc" (resolves F1 "create if absent" vs F14.1 "restore action").
+- **Empty search.** With no query and no filters the server returns the 8 most recently modified notes; the client replaces them with recently opened notes in M3.
+Why: Keeps every M1 AC testable now and picks the least surprising behaviour for the owner.
+Spec sections affected: §4.4, §4.7, §4.2, F1, F4, F8, F14 (interpretations, no contract change).
+
+## 2026-10-18 M1: vault service details
+Context: SPEC §4.10–§4.13 fix the contract; the implementation needed concrete choices.
+Decision:
+- Path guard does not percent-decode (the HTTP layer decodes once; a literal `%2e%2e` is a file name). Reserved names include `COM¹–³`/`LPT¹–³`. `list()` skips symlinks and names the guard would refuse.
+- Reads match names case-insensitively only on Windows; existence checks for create/rename/restore targets are case- and NFC-insensitive on every platform; NFD names on disk are reached through their NFC vault path.
+- Trash layout: `trash/<ulid>/meta.json` + `trash/<ulid>/files/<original path>`; restore collisions get ` (restored)`, ` (restored 2)`…; `purgeTrash` (30 days, at start) keeps entries an unfinished operation still needs.
+- Journal: entries in `state/journal/<id>.json`; content rewrites keep `before`/`after` copies in `state/journal/<id>/`; rename/trash/restore steps keep no byte copy (the file moves unchanged and its revision is re-checked). Status `undoing` added so an interrupted undo resumes. A runtime failure mid-operation rolls back automatically (`undone`); only a failed rollback stays pending (`failed`). Finished entries are pruned after 30 days.
+- Case-only/NFC-only renames go through an interim `.<name>.<hex>.renaming` name (never removed by the temp cleanup).
+- A write producing identical bytes is a no-op (no disk write, no event). An unreadable `vault.json` stops the open (the identity is never replaced).
+Why: Data safety first; everything stays recoverable from the journal or the trash.
+Spec sections affected: §4.10–§4.13, §5 Path guard (implementation detail).
+
+## 2026-10-18 M1: fast Markdown scanner for indexing
+Context: Parsing the 5k/51 MB performance vault with the full remark pipeline took ~45 s on the build container; the whole cold reindex budget is 15 s (SPEC §5).
+Decision: `parseNote` uses a dependency-free line scanner that follows CommonMark/micromark block and inline rules for what the index needs (front matter, code/HTML exclusion, wikilinks, tags, tasks, headings, links, readable text). Notes with constructs it does not model exactly (link-reference or footnote definitions, uncommon named entities, a few bare-URL edge cases) fall back to the full remark parse. Differential tests compare both paths on fixtures (LF/CRLF/BOM/NFD variants), 1,800 seeded random documents in CI and the whole generated vault (0 differences). `plainText` is readable text, not byte-exact mdast text. Front matter uses its own fence detection (also accepts the `...` closer) and `yaml` with the core schema. The M2 editor keeps remark for its block model.
+Why: 1.3–2.3 s instead of ~45 s for the 5k vault, with the same links/tags/tasks.
+Spec sections affected: §4.14 (implementation), §5 Performance.
+
+## 2026-10-18 M1: index, search and event log details
+Context: SPEC §4.14/§4.15/F8 define the schema and behaviour; details were open.
+Decision:
+- Additive tables/columns: original plain text for snippets, a `files` table for non-note link targets, link kind/alias/front-matter key/target key/line text, task line text and invalid dates. The index file is ~2.8× the vault text size (normalized + original text). Startup corruption check = `quick_check` per table (0.1 s on 5k notes).
+- `.html` files in `3 Resources` are indexed as raw sources (text without tags, title = file name, `<title>` searchable).
+- Search: AND of prefix terms; a "title match" needs every term in the title; multiple `tag:` filters must all match, the last `folder:`/`type:`/`due:` wins, an unknown `due:`/`class:` value is searched as text; `tag:x` includes nested `x/…`; `due:7d|30d` = open items 0…N days ahead, overdue only via `due:overdue`. Tag lists/counts include searchable classes only. Backlinks omit self-links (relink still sees them).
+- Event log: `note_*` events for `.md` files only; a deletion logs only `note_deleted`; re-resolution is logged on the linking note; the first index writes approximate `note_created` lines only. Known noise: a relinked rename logs a transient ghost `link_added`/`link_removed` pair per affected note (same millisecond), harmless for the Phase 2 time scrubber.
+- Task groups: `today` = due today, `next7` = 1–7 days.
+Why: Matches what the screens in M2/M3 need while staying inside the §5 budgets.
+Spec sections affected: §4.14, §4.15, F8 (additive).
+
+## 2026-10-18 M1: server wiring details
+Context: SPEC §9 lists the routes; M1 serves the ones its features need.
+Decision:
+- Routes served in M1: health (with `vaultId`), tree, note GET/PUT/POST, note rename/move/trash, journal pending/undo/complete, folder create, search, today, calendar, tasks, tags, files, templates list/restore, index rebuild, sample-data GET/POST/DELETE. Property/task/append patches, daily, attachments upload, history, reminders and settings writes come with their features.
+- Note routes accept `.md` only; other files go through `GET /files` (images inline; SVG only with a sandbox CSP; everything else as attachment + nosniff). `POST /note` without a template writes `type: note` + `created`; `template` is a path under `Templates/`; `{{title}} {{date}} {{time}}` substituted, `{{cursor}}` removed (caret placement is M3).
+- WebSocket `note:*` events cover every vault file (attachments too) so the tree can refresh; `note:renamed` carries the revision; after a watcher error the server re-scans and sends `index:progress` `done` so clients reload. An external folder deletion/rename triggers a re-scan. Saves during a rebuild answer immediately; their events follow after the swap. The watcher's echo of an app write is dropped only when the index already agrees.
+- Startup outcome `vault-unusable` → exit code 3 with a line in the global log. After the log moves to `vault/.secondbrain/logs/app.log`, errors are also copied to the global `server.log` the launcher shows.
+- Sample data: 22 files (incl. the ambiguous pair `1 Projects/Ghi chú.md` / `2 Areas/Ghi chú.md`). `DELETE` keeps `state/sample.json` with `files: []` + `removedAt` so the first-run offer does not come back; `POST` refuses (409 `EXISTS`, nothing created) when a user file already uses a sample name.
+Why: Smallest surface that M2/M3 can build on; nothing user-visible depends on routes that do not exist yet.
+Spec sections affected: §9 (subset + additive), §10.
+
+## 2026-10-19 M1 review round: stricter data-safety and link rules
+Context: Two independent reviews (data safety/security; parsing/index correctness) found defects; the fixes needed a few rules SPEC does not spell out.
+Decision:
+- **Never re-encode a file.** `NoteRead.utf8` reports whether the bytes are valid UTF-8. `write`/`patch` refuse a non-UTF-8 file (`VALIDATION`, `reason: 'not-utf8'`), relink leaves it unchanged and lists it in `skipped`. Writes/patches also refuse symlinks (`reason: 'symlink'`) and files over 1 GiB (`reason: 'too-large'`); rename/trash refuse symlink sources.
+- **Relink keeps every link's meaning.** Besides SPEC F4 (links to the renamed note follow it), any other link in a candidate note whose resolution would change because of the operation (renaming into an existing title, the moved note's own same-folder links) is pinned to its old target's path form. Links that were ghost or ambiguous before stay untouched. Candidates = notes resolving to the note, notes naming its old or new title/path, and the note itself; the planner first waits for pending index updates. Links that cannot be written so they still resolve (titles with `#`, `[`, `]`, `|`) are left as they are and reported as `unresolvable`. Front-matter rewrites respect YAML quoting and must still parse.
+- **Link identity is NFC + lowercase only** (`linkIdentityKey`): `đ` and `d` are different letters for resolution (SPEC §4.14 "never use normalized forms for file identity"); search and tags keep the đ→d folding. `tag:` filters are also diacritic-insensitive (F6.1), schema version 2.
+- **Temp names** are short fixed-length `.sb-<12 hex>.tmp` / `.sb-<12 hex>.renaming` (older long forms still recognised), so names up to 255 characters stay writable; `ENAMETOOLONG` → `WRITE_FAILED`. `create()` uses a hard link for no-clobber creation, falling back to check-then-rename where links are unsupported (FAT/exFAT). Atomic replace keeps the POSIX mode. Results and events always carry the canonical on-disk spelling (NFC).
+- **Boot never fails on housekeeping** (temp cleanup, journal pruning, trash purge, template/folder creation): failures are logged as warnings with counts and codes only.
+- **A vault may not overlap the install**: a vault folder equal to, containing or inside `<home>/.secondbrain` or the app folder is refused (`vault-unusable`), so settings.json can never become a vault file.
+- Interrupted case/NFC-only renames never land on a name that a file now uses (conflict instead). Journal/trash JSON is validated (ULIDs, guarded paths) before use.
+- Index: links to paths that vanished during a rebuild are re-resolved after the build and in the post-swap queue; reconcile repairs dangling resolved links; a failed open after the swap restores `index.sqlite.previous`; Windows side-file deletes retry. Server tests run with `TZ=Asia/Ho_Chi_Minh` by default (override with `TZ=…`).
+Why: The owner's files must never be silently changed, re-encoded or lost, and a rename must never change what an unrelated link points to.
+Spec sections affected: §4.4, §4.9, §4.10, §4.14, §5 Path guard/Reliability, F4 (stricter, additive).

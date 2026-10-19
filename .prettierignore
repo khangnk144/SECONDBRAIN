@@ -9,3 +9,4 @@ plans
 *.md
 package-lock.json
 server/test/fixtures
+.vitest/

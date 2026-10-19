@@ -6,6 +6,7 @@ import {
   type AppContext,
   type AppContextOptions,
 } from '../../src/app-context/create-app-context.js';
+import type { VaultRouteOptions } from '../../src/api/register-vault-routes.js';
 import { buildApp } from '../../src/http/build-app.js';
 import { createSilentLogger, type AppLogger } from '../../src/logging/rotating-file-logger.js';
 import { authHeaders, makeSettings, makeTempDir, removeDir } from '../helpers/test-environment.js';
@@ -40,6 +41,7 @@ export async function createVaultTestApp(
     /** Reopens an existing install (a restart); the caller then removes it. */
     home?: string;
     logger?: AppLogger;
+    vaultRoutes?: VaultRouteOptions;
   } = {},
 ): Promise<VaultTestApp> {
   const home = options.home ?? makeTempDir('sb vault home Ghi chú');
@@ -65,6 +67,7 @@ export async function createVaultTestApp(
     serveUi: false,
     context,
     logger: options.logger,
+    vaultRoutes: options.vaultRoutes,
   });
   if (options.listen) await app.listen({ host: '127.0.0.1', port });
   else await app.ready();

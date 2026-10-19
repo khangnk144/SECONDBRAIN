@@ -1,0 +1,60 @@
+{
+  "missingPath": "Chưa chọn ghi chú nào. Mở một ghi chú ở ngăn bên trái nhé.",
+  "loading": "Đang mở ghi chú…",
+  "notFound": "Không tìm thấy ghi chú này. Có thể nó đã được đổi tên hoặc xóa.",
+  "loadFailed": "Chưa mở được ghi chú vì chưa kết nối được với máy chủ. Mình sẽ thử lại khi có kết nối.",
+  "editorLabel": "Nội dung ghi chú {{title}}",
+  "title": {
+    "label": "Tiêu đề ghi chú (cũng là tên file)"
+  },
+  "save": {
+    "saving": "Đang lưu…",
+    "saved": "Đã lưu",
+    "draft": "Bản nháp",
+    "error": "Lỗi lưu",
+    "conflict": "Xung đột",
+    "retry": "Thử lại"
+  },
+  "saveErrors": {
+    "offline": "Chưa kết nối được với máy chủ. Bản nháp vẫn được giữ trong trình duyệt, mình sẽ tự lưu khi có kết nối.",
+    "disk-full": "Không lưu được vì ổ đĩa đã đầy. Dọn bớt chỗ trống rồi bấm Thử lại.",
+    "locked": "Không lưu được vì file đang được mở hoặc bị khóa ở chỗ khác. Đóng file đó rồi bấm Thử lại.",
+    "write-failed": "Không ghi được file. Bản nháp vẫn được giữ; hãy kiểm tra ổ đĩa rồi bấm Thử lại.",
+    "other": "Chưa lưu được ghi chú. Bản nháp vẫn được giữ; bấm Thử lại."
+  },
+  "banners": {
+    "draftRestored": "Đã khôi phục bản nháp chưa lưu.",
+    "discardDraft": "Bỏ bản nháp",
+    "keepDraft": "Giữ bản nháp",
+    "discardTitle": "Bỏ bản nháp đã khôi phục?",
+    "discardBody": "Ghi chú sẽ quay về đúng bản trên đĩa lúc bạn mở nó. Những gì có trong bản nháp sẽ mất.",
+    "dismiss": "Ẩn thông báo",
+    "notUtf8": "Ghi chú này không phải UTF-8 nên chỉ xem được.",
+    "wiki": "AI duy trì trang này.",
+    "control": "Đây là tài liệu hướng dẫn AI làm việc với kho của bạn. Sửa cẩn thận nhé.",
+    "template": "Đây là một mẫu. Ghi chú mới tạo từ mẫu này sẽ bắt đầu bằng nội dung này.",
+    "kept_one": "Có {{count}} bản đã cất khi tải lại.",
+    "kept_other": "Có {{count}} bản đã cất khi tải lại.",
+    "reviewKept": "Xem"
+  },
+  "source": {
+    "toggle": "Nguồn",
+    "toggleWithKeys": "Chế độ nguồn (Alt+S)",
+    "shortcut": "Bật hoặc tắt chế độ nguồn",
+    "label": "Markdown của ghi chú (chế độ nguồn)"
+  },
+  "notices": {
+    "reloaded": "Đã tải lại bản trên đĩa. Bản của bạn được cất trong bản nháp của trình duyệt.",
+    "keptMine": "Đã giữ bản của bạn. Bản trên đĩa đã được chuyển vào thùng rác.",
+    "keepAsideFailed": "Chưa cất được bản của bạn nên mình chưa tải lại. Hãy thử lại, hoặc chọn Giữ bản của tôi.",
+    "diskChangedAgain": "File trên đĩa vừa đổi thêm lần nữa. Hãy xem lại các bản rồi chọn.",
+    "patch": {
+      "invalid-yaml": "Phần thuộc tính đang có lỗi YAML. Sửa trong chế độ nguồn (Alt+S) trước nhé.",
+      "duplicate-key": "Phần thuộc tính có một tên bị lặp. Sửa trong chế độ nguồn (Alt+S) trước nhé.",
+      "not-mapping": "Phần thuộc tính không ở dạng tên: giá trị. Sửa trong chế độ nguồn (Alt+S) nhé.",
+      "invalid-key": "Tên thuộc tính bắt đầu bằng chữ cái hoặc _, chỉ gồm chữ cái không dấu, số, - và _.",
+      "unsupported-value": "Giá trị này không lưu được từ thanh thuộc tính. Hãy sửa trong chế độ nguồn (Alt+S)."
+    },
+    "keptDiscarded": "Đã bỏ bản đã cất."
+  }
+}

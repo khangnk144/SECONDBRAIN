@@ -71,7 +71,7 @@ export function createIndexReader(db: Database.Database) {
     notes: db.prepare(`SELECT ${NOTE_COLUMNS} FROM notes ORDER BY path`),
     backlinks: db.prepare(
       `SELECT n.path AS fromPath, n.title AS fromTitle, l.line AS line, l.context AS context,
-         MIN(l.rowid) AS first
+         l.context_start AS hlStart, l.context_end AS hlEnd, MIN(l.rowid) AS first
        FROM links l JOIN notes n ON n.id = l.from_id
        WHERE l.to_path = ? AND n.path <> ? GROUP BY n.id, l.line`,
     ),
@@ -99,6 +99,8 @@ export function createIndexReader(db: Database.Database) {
       `SELECT ${TASK_COLUMNS} FROM tasks t JOIN notes n ON n.id = t.note_id ORDER BY n.path, t.line`,
     ),
     notePaths: db.prepare('SELECT path FROM notes').pluck(),
+    noteTitles: db.prepare('SELECT path, title, class FROM notes ORDER BY path'),
+    phrase: db.prepare('SELECT path FROM notes_fts WHERE notes_fts MATCH ? ORDER BY path').pluck(),
     filePaths: db.prepare('SELECT path FROM files').pluck(),
     noteStates: db.prepare('SELECT path, size, mtime, revision FROM notes'),
     fileStates: db.prepare('SELECT path, size, mtime, NULL AS revision FROM files'),
@@ -113,9 +115,16 @@ export function createIndexReader(db: Database.Database) {
       return (s.notes.all() as NoteRow[]).map(toIndexedNote);
     },
     backlinks(path: VaultPath): BacklinkRef[] {
-      const rows = s.backlinks.all(path, path) as (BacklinkRef & { first: number })[];
+      type Row = Omit<BacklinkRef, 'highlight'> & { hlStart: number; hlEnd: number };
+      const rows = s.backlinks.all(path, path) as Row[];
       return rows
-        .map(({ fromPath, fromTitle, line, context }) => ({ fromPath, fromTitle, line, context }))
+        .map(({ fromPath, fromTitle, line, context, hlStart, hlEnd }) => ({
+          fromPath,
+          fromTitle,
+          line,
+          context,
+          highlight: [hlStart, hlEnd] as [number, number],
+        }))
         .sort(
           (a, b) =>
             compareTitles(a.fromTitle, b.fromTitle) ||
@@ -145,6 +154,13 @@ export function createIndexReader(db: Database.Database) {
       return (s.tasks.all() as Parameters<typeof toIndexedTask>[0][]).map(toIndexedTask);
     },
     deadlineRows: createDeadlineRowsQuery(db),
+    noteTitles(): { path: VaultPath; title: string; class: ContentClass }[] {
+      return s.noteTitles.all() as { path: VaultPath; title: string; class: ContentClass }[];
+    },
+    /** Paths of searchable notes whose full text matches an FTS expression. */
+    matchingNotes(expression: string): VaultPath[] {
+      return s.phrase.all(expression) as VaultPath[];
+    },
     allPaths(): VaultPath[] {
       return [...(s.notePaths.all() as VaultPath[]), ...(s.filePaths.all() as VaultPath[])];
     },

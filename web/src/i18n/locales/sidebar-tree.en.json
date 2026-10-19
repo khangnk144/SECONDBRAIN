@@ -1,0 +1,24 @@
+{
+  "newNote": "New note",
+  "renameLabel": "New name",
+  "urgent": "has an urgent deadline inside",
+  "inboxCount_one": "{{count}} note",
+  "inboxCount_other": "{{count}} notes",
+  "emptyVault": "No notes yet. Press New note or Alt+N to write your first one.",
+  "loadError": "The folder list could not be loaded.",
+  "retry": "Try again",
+  "menu": {
+    "label": "Actions for {{name}}",
+    "openInNewTab": "Open in new tab",
+    "rename": "Rename",
+    "moveTo": "Move to…",
+    "archive": "Move to Archive",
+    "alreadyArchived": "This note is already in the Archive.",
+    "folderAlreadyArchived": "This folder is already in the Archive.",
+    "trash": "Delete",
+    "reveal": "Show in Explorer",
+    "newNote": "New note",
+    "newFolder": "New folder",
+    "standardFolder": "This is a standard vault folder, so it can't be renamed, moved or deleted."
+  }
+}

@@ -8,7 +8,11 @@ const REV = '0'.repeat(64);
 const NOTE = q('0 Inbox/a.md');
 
 /** Every vault route of this milestone with a plausible request. */
-const ROUTES: { method: 'GET' | 'POST' | 'PUT' | 'DELETE'; url: string; payload?: unknown }[] = [
+const ROUTES: {
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  url: string;
+  payload?: unknown;
+}[] = [
   { method: 'GET', url: '/api/tree' },
   { method: 'GET', url: `/api/note?${NOTE}` },
   {
@@ -36,6 +40,27 @@ const ROUTES: { method: 'GET' | 'POST' | 'PUT' | 'DELETE'; url: string; payload?
   { method: 'POST', url: '/api/journal/01JAAAAAAAAAAAAAAAAAAAAAAA/undo' },
   { method: 'POST', url: '/api/journal/01JAAAAAAAAAAAAAAAAAAAAAAA/complete' },
   { method: 'POST', url: '/api/folder', payload: { path: 'Mới' } },
+  {
+    method: 'PATCH',
+    url: '/api/note/frontmatter',
+    payload: { path: '0 Inbox/a.md', expectedRevision: REV, set: { status: 'done' } },
+  },
+  { method: 'GET', url: `/api/note/mentions?${NOTE}` },
+  {
+    method: 'POST',
+    url: '/api/note/link-mention',
+    payload: {
+      path: '0 Inbox/a.md',
+      expectedRevision: REV,
+      start: 0,
+      end: 1,
+      target: '0 Inbox/b.md',
+    },
+  },
+  { method: 'POST', url: '/api/folder/rename', payload: { path: 'Mới', newPath: 'Mới 2' } },
+  { method: 'POST', url: '/api/folder/trash', payload: { path: 'Mới' } },
+  { method: 'POST', url: '/api/reveal', payload: { path: 'Mới' } },
+  { method: 'GET', url: '/api/link-targets' },
   { method: 'GET', url: '/api/search?q=giai%20tich' },
   { method: 'GET', url: '/api/today' },
   { method: 'GET', url: '/api/calendar?month=2026-10' },
@@ -55,7 +80,11 @@ const label = (route: (typeof ROUTES)[number]) => `${route.method} ${route.url.s
 describe('security on every vault route (SPEC §11)', () => {
   let t: VaultTestApp;
   beforeAll(async () => {
-    t = await createVaultTestApp(PORT, { listen: true });
+    // Reveal is refused before it runs anyway; the launcher is stubbed so nothing could open.
+    t = await createVaultTestApp(PORT, {
+      listen: true,
+      vaultRoutes: { reveal: { spawn: () => undefined } },
+    });
   });
   afterAll(async () => t?.close());
 

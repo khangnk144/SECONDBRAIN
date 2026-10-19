@@ -75,3 +75,47 @@ server/src/
 **Data flow:** REST mutation → VaultService (queue, revision check, journal) → `VaultChange` (origin app) → change router → index update → WS event. Outside edits: chokidar → `VaultChange` (origin external) → same router (echoes of app writes dropped only when the index already agrees). Rename/move with relink: the planner (inside the write queue) waits for pending index updates, plans edits from the index catalog + candidates, the journal applies them and the rename.
 
 **Files on disk:** `<vault>/.secondbrain/{vault.json, cache/index.sqlite, state/{events.jsonl, journal/, drafts/, ingest/, sample.json}, trash/, logs/app.log}`; global `<home>/.secondbrain/{settings.json, server.json, logs/server.log}`.
+
+## As built (after M2, 2026-10-19)
+
+```
+server/src/
+├── api/            + note-frontmatter-routes (PATCH /note/frontmatter), note-mention-routes (GET /note/mentions,
+│                   POST /note/link-mention), folder-routes (create/rename/trash), reveal-route, link-targets route;
+│                   rename/move accept dryRun; PUT /note conflictCopy; POST /note unique/content
+├── markdown/       + frontmatter-patch (YAML-aware line patches with verify step)
+├── mentions/       unlinked mentions scan (index candidates → exact scan outside code/links/HTML) and link-mention patch
+├── vault/          + previewRename/previewMove/previewRenameFolder, renameFolder/trashFolder (journal op kinds
+│                   folder-rename/folder-trash: one directory move), writeKeepingConflictCopy, patchWith
+└── index/          schema v3 (link context offsets for backlink highlights)
+
+web/src/
+├── editor/
+│   ├── schema/     Tiptap node/mark definitions only (wikilink atom, verbatimBlock atom, lists with `loose`)
+│   ├── markdown/   block-preserving converter: loadMarkdown → {doc, snapshot}; saveMarkdown(WithSnapshot) matches
+│   │               top-level nodes with eq(), keeps unchanged bytes, patches ticks as text, re-parses every changed
+│   │               region before accepting it; verbatim blocks for unsupported constructs; chunked remark parse
+│   ├── extensions/ input rules, task item view + toggle, wikilink view/follow, inline decorations (tags, date chips),
+│   │               paste, table keys, writing focus
+│   ├── popups/     slash menu (registry), [[ autocomplete, # tags, date picker, "Chọn đích…" menu, template insert
+│   └── markdown-editor.tsx   <MarkdownEditor> (props + handle: focus, replaceDoc, getDoc)
+├── features/
+│   ├── note/           note screen (title rename, save indicator, banners, source mode, editor host)
+│   ├── note-session/   one session per open note outside React: base text/revision, snapshot, serial queue for
+│   │                   save / property patch / rename / conflict actions, autosave 500 ms, retries, outside changes
+│   ├── drafts/         IndexedDB drafts {vaultId, path, baseRevision, text, ts} + "kept" copies from "Tải lại"
+│   ├── conflict/       three-version conflict screen (Tải lại / Giữ bản của tôi / So sánh with a line diff)
+│   ├── properties/     property bar: chips, typed editors, YAML parsed locally, edits via PATCH /note/frontmatter
+│   ├── sidebar/        WAI-ARIA tree (roving focus, context menu, inline rename, drag to move), Inbox badge
+│   ├── tabs/ toasts/ dialogs/ journal/ connection/   shell pieces (tab bar, toast host, modal primitives, banners)
+│   └── backlinks/ mentions/ outline/ tags/ search/   right panel sections, tags view, Ctrl+K palette
+├── lib/            typed api/*, ws client + event bus (resync on reconnect), per-vault storage, zustand stores
+│                   (vault, tree, tabs, panes, toasts, search UI, writing focus, link targets), shortcuts registry,
+│                   note-operations (dry run → confirm → journaled operation → 10 s undo toast)
+└── i18n/           vi.json/en.json core + locales/<area>.<lang>.json merged under <area>
+```
+
+**Save path:** editor transaction → session marks dirty → draft (≤ 300 ms) → autosave 500 ms after the last change:
+`saveMarkdownWithSnapshot(doc, snapshot)` → if equal to the base text nothing is written → `PUT /note {content,
+expectedRevision}` → VaultService (revision check, atomic write) → watcher/index → WS `note:changed` (the session
+ignores its own echo) → backlinks/tags/tree refresh. 409 or an outside change while dirty → conflict screen.

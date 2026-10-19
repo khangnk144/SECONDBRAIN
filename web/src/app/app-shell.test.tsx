@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { initI18n, i18n } from '../i18n';
+import { resetAppState } from '../lib/testing/reset-app-state';
 import { useUiPrefsStore } from '../lib/ui-prefs-store';
 import { DEFAULT_UI_PREFS } from '../lib/ui-prefs';
 import { appRoutes } from './routes';
@@ -15,6 +16,7 @@ function renderAt(path: string) {
 
 describe('app shell', () => {
   beforeEach(async () => {
+    await resetAppState();
     initI18n('vi');
     await i18n.changeLanguage('vi');
     useUiPrefsStore.getState().setPrefs({ ...DEFAULT_UI_PREFS, name: 'khangnie' });
@@ -23,7 +25,13 @@ describe('app shell', () => {
   it('shows the sidebar navigation in Vietnamese by default', () => {
     renderAt('/');
     const nav = screen.getByRole('navigation', { name: vi_.nav.label });
-    for (const label of [vi_.nav.today, vi_.nav.tasks, vi_.nav.calendar, vi_.nav.graph]) {
+    for (const label of [
+      vi_.nav.today,
+      vi_.nav.tasks,
+      vi_.nav.calendar,
+      vi_.nav.graph,
+      vi_.nav.tags,
+    ]) {
       expect(nav).toHaveTextContent(label);
     }
     expect(screen.getByRole('link', { name: vi_.nav.today })).toHaveAttribute(

@@ -5,7 +5,7 @@
  */
 import type Database from 'better-sqlite3';
 
-export const INDEX_SCHEMA_VERSION = '2';
+export const INDEX_SCHEMA_VERSION = '3';
 
 const SCHEMA_SQL = `
 CREATE TABLE notes(
@@ -19,11 +19,13 @@ CREATE INDEX notes_mtime ON notes(mtime);
 
 -- target_key: normalized last path segment of the target (".md" stripped). When a file with
 -- that name appears or disappears, exactly these links may resolve differently.
+-- context_start/context_end: where the link sits inside the context text (backlink highlight).
 CREATE TABLE links(
   from_id INTEGER NOT NULL, target_raw TEXT NOT NULL, to_id INTEGER, heading TEXT,
   line INTEGER NOT NULL, ambiguous INTEGER NOT NULL,
   kind TEXT NOT NULL, raw TEXT NOT NULL, alias TEXT, frontmatter_key TEXT,
-  target_key TEXT NOT NULL, to_path TEXT, context TEXT NOT NULL
+  target_key TEXT NOT NULL, to_path TEXT, context TEXT NOT NULL,
+  context_start INTEGER NOT NULL, context_end INTEGER NOT NULL
 );
 CREATE INDEX links_from ON links(from_id);
 CREATE INDEX links_to_path ON links(to_path);

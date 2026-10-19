@@ -1,7 +1,7 @@
 import fastifyWebsocket from '@fastify/websocket';
 import Fastify, { type FastifyInstance } from 'fastify';
 import { registerHealthRoute } from '../api/health-route.js';
-import { registerVaultRoutes } from '../api/register-vault-routes.js';
+import { registerVaultRoutes, type VaultRouteOptions } from '../api/register-vault-routes.js';
 import { registerSettingsRoute } from '../api/settings-route.js';
 import { registerShutdownRoute } from '../api/shutdown-route.js';
 import { errorCodeOf } from '../app-context/app-context-errors.js';
@@ -49,6 +49,8 @@ export interface BuildAppOptions {
    * shell, health, settings and shutdown exist.
    */
   context?: AppContext;
+  /** Vault route settings (e.g. the file-manager launcher used by reveal). */
+  vaultRoutes?: VaultRouteOptions;
 }
 
 /**
@@ -113,7 +115,7 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
     version,
     context ? { hub: context.hub, onConnect: (send) => context.greet(send) } : {},
   );
-  if (context) registerVaultRoutes(app, context);
+  if (context) registerVaultRoutes(app, context, options.vaultRoutes);
   if (options.requestShutdown) await registerShutdownRoute(app, options.requestShutdown);
 
   if (options.serveUi === false) {

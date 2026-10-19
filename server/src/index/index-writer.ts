@@ -48,8 +48,8 @@ export function createIndexWriter(db: Database.Database) {
     deleteFts: db.prepare('DELETE FROM notes_fts WHERE rowid = ?'),
     insertLink: db.prepare(
       `INSERT INTO links(from_id, target_raw, to_id, heading, line, ambiguous, kind, raw, alias,
-         frontmatter_key, target_key, to_path, context)
-       VALUES (?, ?, (SELECT id FROM notes WHERE path = ?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         frontmatter_key, target_key, to_path, context, context_start, context_end)
+       VALUES (?, ?, (SELECT id FROM notes WHERE path = ?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     ),
     insertTag: db.prepare('INSERT INTO tags(note_id, tag, tag_norm, tag_fold) VALUES (?, ?, ?, ?)'),
     insertTask: db.prepare(
@@ -114,6 +114,8 @@ export function createIndexWriter(db: Database.Database) {
           link.targetKey,
           toPath,
           link.context,
+          link.highlight[0],
+          link.highlight[1],
         );
       }
       for (const tag of record.tags) s.insertTag.run(id, tag.tag, tag.norm, foldForMatch(tag.tag));

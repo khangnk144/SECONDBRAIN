@@ -1,10 +1,10 @@
-import { CalendarBlank, Graph, ListChecks, Sun, type Icon } from '@phosphor-icons/react';
+import { CalendarBlank, Graph, ListChecks, Sun, Tag, type Icon } from '@phosphor-icons/react';
 import { NavLink } from 'react-router';
 import { useTranslation } from 'react-i18next';
 
 interface NavItem {
   to: string;
-  labelKey: 'nav.today' | 'nav.tasks' | 'nav.calendar' | 'nav.graph';
+  labelKey: 'nav.today' | 'nav.tasks' | 'nav.calendar' | 'nav.graph' | 'nav.tags';
   icon: Icon;
 }
 
@@ -13,6 +13,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/tasks', labelKey: 'nav.tasks', icon: ListChecks },
   { to: '/calendar', labelKey: 'nav.calendar', icon: CalendarBlank },
   { to: '/graph', labelKey: 'nav.graph', icon: Graph },
+  { to: '/tags', labelKey: 'nav.tags', icon: Tag },
 ];
 
 export function SidebarNav() {

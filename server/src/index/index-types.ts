@@ -5,6 +5,7 @@
  */
 import type { ContentClass, LinkCatalog } from '../markdown/markdown-types.js';
 import type { VaultPath } from '../vault/vault-types.js';
+import type { LinkTargets } from './link-target-list.js';
 
 export interface IndexedNote {
   path: VaultPath;
@@ -31,6 +32,8 @@ export interface BacklinkRef {
   line: number;
   /** The line containing the link, trimmed to ≤ 160 characters around the link. */
   context: string;
+  /** `[start, end)` of the link inside `context` (UTF-16 offsets). */
+  highlight: [number, number];
 }
 
 export interface OutlinkRef {
@@ -124,6 +127,13 @@ export interface IndexService {
   notesLinkingByTitleOrPath(paths: VaultPath[]): VaultPath[];
   /** Resolves once every index change queued so far (and any queued meanwhile) is applied. */
   settled(): Promise<void>;
+  /** Every note and other file a link can target (F4 autocomplete). */
+  linkTargets(): LinkTargets;
+  /**
+   * Searchable notes whose body text holds the words of `text` in sequence (normalized, FTS);
+   * candidates for unlinked mentions, sorted by path. May include extra notes, never misses one.
+   */
+  notesContainingPhrase(text: string): VaultPath[];
   search(query: SearchQuery): SearchResult[];
 
   /** Raw task rows for the deadline service (all classes; the service filters). */
@@ -175,6 +185,8 @@ export interface DeadlineItem {
   daysLeft: number;
   class: ContentClass;
 }
+
+export type { LinkTargetFile, LinkTargetNote, LinkTargets } from './link-target-list.js';
 
 // Shapes of the deadline service (Today, Calendar, Tasks), kept in their own file for size.
 export type {

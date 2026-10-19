@@ -1,5 +1,12 @@
+import { writeKeepingConflictCopy } from './conflict-copy-ops.js';
+import { previewRenameFolder, renameFolder, trashFolder } from './folder-ops.js';
 import { completeJournal, pendingJournal, undoJournal } from './journal-runner.js';
-import { moveFileToFolder, renameFile } from './rename-ops.js';
+import {
+  moveFileToFolder,
+  previewMoveToFolder,
+  previewRenameFile,
+  renameFile,
+} from './rename-ops.js';
 import { listTrash, purgeTrash, restoreTrashEntry, trashFiles } from './trash-ops.js';
 import { createUlidGenerator } from './ulid.js';
 import type { VaultCore, VaultWarning } from './vault-core.js';
@@ -9,6 +16,7 @@ import {
   listVault,
   readVaultBytes,
   readVaultNote,
+  resolveExistingEntry,
   resolveExistingFile,
   statVaultFile,
 } from './vault-read-ops.js';
@@ -17,6 +25,7 @@ import {
   createUniqueFile,
   createVaultFolder,
   patchFile,
+  patchFileWith,
   writeFile,
 } from './vault-write-ops.js';
 import { createWriteQueue } from './write-queue.js';
@@ -76,6 +85,7 @@ export function createVaultService(options: VaultServiceOptions): VaultService {
     read: (path) => open(() => readVaultNote(core, path)),
     readBytes: (path) => open(() => readVaultBytes(core, path)),
     resolveExisting: (path) => open(() => resolveExistingFile(core, path)),
+    resolveEntry: (path) => open(() => resolveExistingEntry(core, path)),
     create: (path, content) => createFile(core, path, content),
     createUnique: (path, content) => createUniqueFile(core, path, content),
     createFolder: (path) => createVaultFolder(core, path),
@@ -83,6 +93,14 @@ export function createVaultService(options: VaultServiceOptions): VaultService {
     patch: (path, patches, expectedRevision) => patchFile(core, path, patches, expectedRevision),
     rename: (path, newPath, opts) => renameFile(core, path, newPath, opts, 'rename'),
     move: (path, folder, opts) => open(() => moveFileToFolder(core, path, folder, opts)),
+    previewRename: (path, newPath, opts) => previewRenameFile(core, path, newPath, opts, 'rename'),
+    previewMove: (path, folder, opts) => open(() => previewMoveToFolder(core, path, folder, opts)),
+    patchWith: (path, expectedRevision, plan) => patchFileWith(core, path, expectedRevision, plan),
+    writeKeepingConflictCopy: (path, content, expectedRevision) =>
+      writeKeepingConflictCopy(core, path, content, expectedRevision),
+    renameFolder: (path, newPath, opts) => renameFolder(core, path, newPath, opts),
+    previewRenameFolder: (path, newPath, opts) => previewRenameFolder(core, path, newPath, opts),
+    trashFolder: (path) => trashFolder(core, path),
     trash: (paths, expectedRevisions, reason = 'user') =>
       trashFiles(core, paths, expectedRevisions, reason),
     restore: (trashId) => restoreTrashEntry(core, trashId),

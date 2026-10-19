@@ -1,7 +1,9 @@
 // Fails when vi.json and en.json differ in keys, {{placeholders}} or have empty strings.
+// Feature areas in web/src/i18n/locales/<area>.<lang>.json are merged under the key <area>
+// first (same rule as web/src/i18n/merge-locales.ts).
 // Plural variants (_zero/_one/_two/_few/_many/_other) are grouped: Vietnamese needs only `_other`.
 // Usage: tsx scripts/check-i18n-parity.ts
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { appRoot, isMainModule } from './lib/script-utils.js';
 
@@ -79,7 +81,36 @@ export function compareLocales(vi: Json, en: Json): string[] {
   return problems;
 }
 
-/** Reads `<root>/web/src/i18n/{vi,en}.json` and compares them. */
+const AREA_FILE = /^([a-z0-9-]+)\.(vi|en)\.json$/;
+
+/** Area files of `<dir>/locales`: `{ vi: {area: tree}, en: {area: tree} }`. */
+function readAreas(dir: string, problems: string[]): Record<'vi' | 'en', Record<string, Json>> {
+  const out: Record<'vi' | 'en', Record<string, Json>> = { vi: {}, en: {} };
+  let names: string[];
+  try {
+    names = readdirSync(path.join(dir, 'locales')).sort();
+  } catch {
+    return out;
+  }
+  for (const name of names) {
+    const match = AREA_FILE.exec(name);
+    if (!match) {
+      if (name.endsWith('.json'))
+        problems.push(`locales/${name}: name must be <area>.<vi|en>.json`);
+      continue;
+    }
+    const [, area, lang] = match as unknown as [string, string, 'vi' | 'en'];
+    out[lang][area] = JSON.parse(readFileSync(path.join(dir, 'locales', name), 'utf8')) as Json;
+  }
+  for (const area of new Set([...Object.keys(out.vi), ...Object.keys(out.en)])) {
+    for (const lang of ['vi', 'en'] as const) {
+      if (!(area in out[lang])) problems.push(`locales/${area}.${lang}.json: file not found`);
+    }
+  }
+  return out;
+}
+
+/** Reads `<root>/web/src/i18n/{vi,en}.json` plus the feature areas and compares them. */
 export function checkLocaleFiles(root = appRoot): string[] {
   const dir = path.join(root, 'web', 'src', 'i18n');
   const read = (name: string): Json | undefined => {
@@ -96,7 +127,19 @@ export function checkLocaleFiles(root = appRoot): string[] {
   const en = read('en.json');
   const missing = [vi === undefined && 'vi.json', en === undefined && 'en.json'].filter(Boolean);
   if (missing.length > 0) return missing.map((m) => `${m}: file not found in web/src/i18n`);
-  return compareLocales(vi as Json, en as Json);
+  const problems: string[] = [];
+  const areas = readAreas(dir, problems);
+  const merge = (core: Json, lang: 'vi' | 'en'): Json => {
+    const merged = { ...(core as Record<string, Json>) };
+    for (const [area, tree] of Object.entries(areas[lang])) {
+      if (area in merged) problems.push(`locales/${area}.${lang}.json: collides with a core key`);
+      else merged[area] = tree;
+    }
+    return merged;
+  };
+  const mergedVi = merge(vi as Json, 'vi');
+  const mergedEn = merge(en as Json, 'en');
+  return [...problems, ...compareLocales(mergedVi, mergedEn)];
 }
 
 if (isMainModule(import.meta.url)) {

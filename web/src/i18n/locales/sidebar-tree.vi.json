@@ -1,0 +1,24 @@
+{
+  "newNote": "Ghi chú mới",
+  "renameLabel": "Tên mới",
+  "urgent": "có deadline gấp bên trong",
+  "inboxCount_one": "{{count}} ghi chú",
+  "inboxCount_other": "{{count}} ghi chú",
+  "emptyVault": "Chưa có ghi chú nào. Bấm Ghi chú mới hoặc Alt+N để viết ghi chú đầu tiên.",
+  "loadError": "Chưa tải được danh sách thư mục.",
+  "retry": "Thử lại",
+  "menu": {
+    "label": "Thao tác với {{name}}",
+    "openInNewTab": "Mở trong thẻ mới",
+    "rename": "Đổi tên",
+    "moveTo": "Di chuyển tới…",
+    "archive": "Chuyển vào Archive",
+    "alreadyArchived": "Ghi chú này đã ở trong Archive.",
+    "folderAlreadyArchived": "Thư mục này đã ở trong Archive.",
+    "trash": "Xóa",
+    "reveal": "Hiện trong Explorer",
+    "newNote": "Ghi chú mới",
+    "newFolder": "Thư mục mới",
+    "standardFolder": "Đây là thư mục chuẩn của kho nên không đổi tên, chuyển hay xóa được."
+  }
+}

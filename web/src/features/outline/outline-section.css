@@ -1,0 +1,36 @@
+/* Outline: one row per heading, indented by level (16 px steps, like the tree). */
+.outline-list {
+  gap: 0;
+}
+
+.outline-list__item--h2 {
+  padding-left: var(--space-4);
+}
+
+.outline-list__item--h3 {
+  padding-left: var(--space-8);
+}
+
+.outline-link {
+  display: block;
+  width: 100%;
+  min-height: 28px;
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  border-radius: var(--radius-s);
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.outline-list__item--h1 .outline-link {
+  font-weight: 600;
+}
+
+.outline-link:hover {
+  background: var(--accent-soft);
+}

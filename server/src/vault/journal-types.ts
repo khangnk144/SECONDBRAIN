@@ -1,6 +1,13 @@
 import type { JournalOp, JournalStatus, TrashEntry, VaultPath } from './vault-types.js';
 
-export type JournalStepKind = 'write' | 'rename' | 'trash' | 'restore';
+export type JournalStepKind =
+  'write' | 'rename' | 'trash' | 'restore' | 'folder-rename' | 'folder-trash';
+
+/** A file inside a moved folder: path relative to the folder, revision when the step was planned. */
+export interface FolderFile {
+  path: string;
+  revision: string;
+}
 
 /**
  * One file change of a journaled operation. The file moves from a "from" place to a "to" place
@@ -9,7 +16,11 @@ export type JournalStepKind = 'write' | 'rename' | 'trash' | 'restore';
  * - rename: `path` → `newPath`; `viaTemp` names the interim entry of a case-only or NFC-only rename.
  * - trash: `path` → `trash/<id>/files/<path>`.
  * - restore: `trash/<id>/files/<path>` → `newPath` (the original path or a ` (restored)` variant).
+ * - folder-rename: the folder `path` → `newPath` as one directory move (`viaTemp` as for rename).
+ * - folder-trash: the folder `path` → `trash/<id>/files/<path>` as one directory move.
  * Moves keep the bytes, so `afterRevision` equals `expectedRevision` and no copies are stored.
+ * Folder steps carry a digest of their file list as revision and judge their state by where the
+ * folder is, never by rewriting anything inside it.
  */
 export interface JournalStep {
   kind: JournalStepKind;
@@ -23,8 +34,22 @@ export interface JournalStep {
   viaTemp?: string;
   /** Same-file renames only: the exact on-disk name before the rename (may be NFD). */
   fromName?: string;
+  /** Folder steps only: the files and subfolders (relative paths) the move carries. */
+  files?: FolderFile[];
+  folders?: string[];
   applied: boolean;
 }
+
+export const FOLDER_STEP_KINDS: ReadonlySet<JournalStepKind> = new Set([
+  'folder-rename',
+  'folder-trash',
+]);
+
+export const isFolderStep = (step: JournalStep): boolean => FOLDER_STEP_KINDS.has(step.kind);
+
+/** Steps whose "to" place is inside the operation's trash entry. */
+export const movesToTrash = (step: JournalStep): boolean =>
+  step.kind === 'trash' || step.kind === 'folder-trash';
 
 /** `state/journal/<id>.json` (SPEC §4.12). */
 export interface JournalEntry {

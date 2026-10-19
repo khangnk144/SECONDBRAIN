@@ -1,0 +1,7 @@
+{
+  "label": "Thẻ ghi chú đang mở",
+  "close": "Đóng thẻ {{title}}",
+  "closeHint": "Đóng thẻ (Alt+W)",
+  "limitReplaced": "Đã đóng thẻ “{{title}}” vì chỉ mở được tối đa {{max}} thẻ.",
+  "closedDeleted": "Ghi chú “{{title}}” đã bị xóa nên thẻ của nó đã đóng."
+}

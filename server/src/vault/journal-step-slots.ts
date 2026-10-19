@@ -1,6 +1,6 @@
 import { lstat, readdir } from 'node:fs/promises';
 import path from 'node:path';
-import type { JournalEntry, JournalStep } from './journal-types.js';
+import { movesToTrash, type JournalEntry, type JournalStep } from './journal-types.js';
 import { trashFileAbs } from './trash-store.js';
 import { resolvePath, type VaultCore } from './vault-core.js';
 import type { DiskLocation } from './vault-disk-names.js';
@@ -23,7 +23,7 @@ export type Overlay = Map<string, string | null>;
 export function slotKeys(step: JournalStep): { fromKey: string; toKey: string } {
   const fromKey = step.kind === 'restore' ? `t:${step.path}` : `v:${step.path}`;
   if (step.kind === 'write') return { fromKey, toKey: fromKey };
-  if (step.kind === 'trash') return { fromKey, toKey: `t:${step.path}` };
+  if (movesToTrash(step)) return { fromKey, toKey: `t:${step.path}` };
   return { fromKey, toKey: `v:${step.newPath}` };
 }
 
@@ -48,10 +48,9 @@ export async function stepSlots(
       ? trashSlot(core, entry, fromKey, step.path)
       : await vaultSlot(core, fromKey, step.path);
   if (step.kind === 'write') return { from, to: from };
-  const to =
-    step.kind === 'trash'
-      ? trashSlot(core, entry, toKey, step.path)
-      : await vaultSlot(core, toKey, step.newPath!);
+  const to = movesToTrash(step)
+    ? trashSlot(core, entry, toKey, step.path)
+    : await vaultSlot(core, toKey, step.newPath!);
   return { from, to };
 }
 

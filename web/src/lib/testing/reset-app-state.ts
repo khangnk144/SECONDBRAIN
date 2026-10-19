@@ -1,0 +1,49 @@
+/** Test helper: puts every app-wide store back to a clean state for vault `vaultId`. */
+import { resetNoteSessions } from '../../features/note-session/session-registry';
+import { vi } from 'vitest';
+import { initI18n, i18n } from '../../i18n';
+import { setAppNavigator, type Navigator } from '../app-navigation';
+import { resetDialogs } from '../dialogs/dialog-requests';
+import { buildLinkCatalog } from '../link-resolution';
+import { useLinkTargetsStore } from '../link-targets-store';
+import { usePanesStore } from '../panes-store';
+import { useSearchUi } from '../search-ui-store';
+import { resetShortcuts } from '../shortcuts/shortcut-registry';
+import { useTabsStore } from '../tabs-store';
+import { resetToasts } from '../toast-store';
+import { useTreeStore } from '../tree-store';
+import { useVaultStore } from '../vault-store';
+import { useWritingFocus } from '../writing-focus-store';
+import { useConnectionStore } from '../ws/connection-store';
+import { clearServerEventHandlers } from '../ws/server-event-bus';
+
+export async function resetAppState(vaultId: string | null = 'vault-a'): Promise<Navigator> {
+  initI18n('vi');
+  await i18n.changeLanguage('vi');
+  try {
+    localStorage.clear();
+  } catch {
+    // Some tests replace storage with one that throws.
+  }
+  resetNoteSessions();
+  resetToasts();
+  resetDialogs();
+  resetShortcuts();
+  clearServerEventHandlers();
+  useVaultStore.setState({ vaultId, ready: true });
+  useTreeStore.setState({ tree: null, status: 'idle', expanded: [] });
+  useTabsStore.setState({ tabs: [], activeId: null, hydrated: true, routeActive: false });
+  useLinkTargetsStore.setState({
+    titles: [],
+    files: [],
+    catalog: buildLinkCatalog([]),
+    status: 'idle',
+  });
+  usePanesStore.setState({ leftCollapsed: false, rightCollapsed: false });
+  useConnectionStore.setState({ state: 'connecting', closedSince: null });
+  useSearchUi.setState({ open: false, query: '' });
+  useWritingFocus.setState({ focused: false });
+  const navigate = vi.fn<Navigator>();
+  setAppNavigator(navigate);
+  return navigate;
+}

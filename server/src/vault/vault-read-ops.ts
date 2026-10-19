@@ -30,6 +30,8 @@ export async function listVault(core: VaultCore): Promise<VaultListing> {
       const vaultPath = (prefix ? `${prefix}/${name}` : name).normalize('NFC');
       const abs = path.join(dir, name);
       if (entry.isDirectory()) {
+        // A folder parked under its interim name mid-rename is reported once it lands.
+        if (isVaultTempFileName(name)) continue;
         folders.push(vaultPath);
         subfolders.push([abs, vaultPath]);
       } else if (entry.isFile() && !isVaultTempFileName(name)) {
@@ -104,4 +106,13 @@ export async function readVaultNote(core: VaultCore, input: VaultPath): Promise<
 
 export async function resolveExistingFile(core: VaultCore, input: VaultPath): Promise<string> {
   return (await resolveFile(core, input)).abs;
+}
+
+export async function resolveExistingEntry(
+  core: VaultCore,
+  input: VaultPath,
+): Promise<{ path: VaultPath; abs: string; kind: 'file' | 'dir' }> {
+  const location = await resolvePath(core, input, 'fast');
+  if (location.kind !== 'file' && location.kind !== 'dir') throw notFound(location.vaultPath);
+  return { path: location.vaultPath, abs: location.abs, kind: location.kind };
 }

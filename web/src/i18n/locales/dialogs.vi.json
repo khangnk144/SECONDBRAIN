@@ -1,0 +1,12 @@
+{
+  "cancel": "Hủy",
+  "rootFolder": "Thư mục gốc",
+  "filterFolders": "Lọc thư mục",
+  "noFolders": "Không có thư mục nào khớp.",
+  "template": {
+    "title": "Tạo ghi chú mới",
+    "hint": "Chọn một mẫu, hoặc bắt đầu với trang trống.",
+    "blank": "Trống",
+    "create": "Tạo ghi chú"
+  }
+}

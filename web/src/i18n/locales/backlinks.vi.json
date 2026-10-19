@@ -1,0 +1,25 @@
+{
+  "loading": "Đang tải…",
+  "loadError": "Không tải được thông tin liên kết của ghi chú này.",
+  "notFound": "Ghi chú này không còn trên đĩa.",
+  "retry": "Thử lại",
+  "linked": {
+    "title": "Liên kết đến đây",
+    "empty": "Chưa có ghi chú nào liên kết đến đây. Gõ [[{{title}}]] trong một ghi chú khác để nối với ghi chú này.",
+    "openLabel": "Mở {{title}} ở dòng {{line}}"
+  },
+  "mentions": {
+    "title": "Nhắc đến chưa liên kết",
+    "empty": "Không có ghi chú nào nhắc đến tên này mà chưa liên kết.",
+    "loadError": "Không tải được danh sách nhắc đến.",
+    "link": "Liên kết",
+    "linkLabel": "Liên kết lần nhắc trong {{title}}, dòng {{line}}",
+    "linkLabelNth": "Liên kết lần nhắc thứ {{nth}} trong {{title}}, dòng {{line}}",
+    "linked": "Đã liên kết trong {{title}}.",
+    "changed": "Ghi chú đã thay đổi, mình đã tải lại danh sách."
+  },
+  "outline": {
+    "title": "Mục lục",
+    "empty": "Chưa có tiêu đề nào. Gõ ## ở đầu dòng để thêm một mục."
+  }
+}

@@ -9,15 +9,13 @@ import {
   noteTitleFromPath,
 } from '../markdown/content-classes.js';
 import type { ContentClass, ParsedTask } from '../markdown/markdown-types.js';
+import { lineContext } from '../markdown/line-context.js';
 import { normalizeForIndex } from '../markdown/normalize-text.js';
 import { parseNote } from '../markdown/parse-note.js';
 import { isCalendarDate } from '../lib/local-date.js';
 import type { NoteRead, VaultPath } from '../vault/vault-types.js';
 import { countWords, htmlToText } from './html-text.js';
 import { linkTargetKey } from './link-targets.js';
-
-/** Backlink context budget: the line around the link, at most this many characters. */
-export const CONTEXT_LENGTH = 160;
 
 export interface LinkRecord {
   kind: 'wikilink' | 'embed' | 'markdown';
@@ -29,6 +27,8 @@ export interface LinkRecord {
   frontmatterKey: string | null;
   targetKey: string;
   context: string;
+  /** `[start, end)` of the link inside `context`. */
+  highlight: [number, number];
 }
 
 export interface NoteRecord {
@@ -71,23 +71,6 @@ export function titleForPath(path: VaultPath): string {
 export function folderOf(path: VaultPath): string {
   const slash = path.indexOf('/');
   return slash === -1 ? '' : path.slice(0, slash);
-}
-
-/** The line holding a link, cut to the budget around the link (with ellipses where cut). */
-export function linkContext(content: string, start: number, end: number): string {
-  const lineStart = content.lastIndexOf('\n', start - 1) + 1;
-  const newline = content.indexOf('\n', end);
-  const line = content
-    .slice(lineStart, newline === -1 ? content.length : newline)
-    .replace(/\r$/, '');
-  if (line.length <= CONTEXT_LENGTH) return line.trim();
-  const budget = CONTEXT_LENGTH - 2;
-  const linkStart = start - lineStart;
-  const linkLength = Math.min(end - start, budget);
-  let from = Math.max(0, linkStart - Math.floor((budget - linkLength) / 2));
-  const to = Math.min(line.length, from + budget);
-  from = Math.max(0, to - budget);
-  return `${from > 0 ? '…' : ''}${line.slice(from, to)}${to < line.length ? '…' : ''}`;
 }
 
 const stringOrNull = (value: unknown): string | null =>
@@ -154,6 +137,8 @@ export function buildNoteRecord(path: VaultPath, read: NoteRead): NoteRecord {
     wordCount: parsed.wordCount,
     plain: parsed.plainText,
     links: parsed.links.map((l) => ({
+      // Backlink context: the link's line (≤ 160 characters) and where the link sits in it.
+      ...lineContext(read.content, l.start, l.end),
       kind: l.kind,
       raw: l.raw,
       target: l.target,
@@ -162,7 +147,6 @@ export function buildNoteRecord(path: VaultPath, read: NoteRead): NoteRecord {
       line: l.line,
       frontmatterKey: l.frontmatterKey,
       targetKey: linkTargetKey(l.target),
-      context: linkContext(read.content, l.start, l.end),
     })),
     tags,
     tasks: parsed.tasks,

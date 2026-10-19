@@ -8,6 +8,18 @@
  * on-disk names (which may be NFD or differ in case on Windows).
  */
 
+import type { VaultEditingOperations } from './vault-operation-types.js';
+
+export type {
+  VaultEditingOperations,
+  ConflictCopyResult,
+  FolderRenameResult,
+  FolderTrashResult,
+  PatchedNote,
+  PatchPlanner,
+  RenamePreview,
+} from './vault-operation-types.js';
+
 export type VaultErrorCode =
   | 'NOT_FOUND'
   | 'EXISTS'
@@ -152,6 +164,8 @@ export interface RelinkPlanner {
     from: VaultPath;
     to: VaultPath;
   }): Promise<RelinkEdit[] | RelinkPlan>;
+  /** Same rules for files moving together (a folder rename). Without it nothing is relinked. */
+  planMoves?(moves: { from: VaultPath; to: VaultPath }[]): Promise<RelinkPlan>;
 }
 
 /** Planner result with the notes it deliberately left unchanged (see `MultiFileResult.skipped`). */
@@ -169,13 +183,16 @@ export interface TrashMeta {
   originalPaths: VaultPath[];
   reason: TrashReason;
   deletedAt: string;
+  /** A trashed folder and its subfolders (parents first): restore re-creates them, empty or not. */
+  folders?: VaultPath[];
 }
 
 export interface TrashEntry extends TrashMeta {
   id: string;
 }
 
-export type JournalOp = 'rename' | 'move' | 'trash' | 'restore' | 'reschedule';
+export type JournalOp =
+  'rename' | 'move' | 'trash' | 'restore' | 'reschedule' | 'folder-rename' | 'folder-trash';
 /** `undoing`: an undo was interrupted; still pending, and both "complete" and "undo" resume it. */
 export type JournalStatus = 'planned' | 'running' | 'done' | 'failed' | 'undone' | 'undoing';
 
@@ -210,7 +227,8 @@ export interface VaultStatePaths {
   sampleFile: string;
 }
 
-export interface VaultService {
+/** The vault service; the editor-era operations (previews, folders, …) are in VaultEditingOperations. */
+export interface VaultService extends VaultEditingOperations {
   /** Absolute real path of the vault root. */
   readonly root: string;
   /** Identity from `vault.json` (uuid). */

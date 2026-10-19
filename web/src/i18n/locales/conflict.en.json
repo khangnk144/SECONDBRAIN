@@ -1,0 +1,45 @@
+{
+  "title": "This note was just changed somewhere else",
+  "body": "You have unsaved changes, and the file on disk changed too. Choose which version to keep. Whatever you choose, nothing is lost.",
+  "titleDeleted": "This note was deleted somewhere else",
+  "bodyDeleted": "The file is no longer on disk, but what you were writing is kept.",
+  "actions": {
+    "reload": "Reload",
+    "keepMine": "Keep my version",
+    "compare": "Compare"
+  },
+  "hints": {
+    "reload": "Reload: open the version on disk; yours is set aside as a draft in the browser.",
+    "keepMine": "Keep my version: save yours; the version on disk goes to the trash.",
+    "reloadDeleted": "Reload: close your version (still set aside in the browser); the note stays deleted.",
+    "keepMineDeleted": "Keep my version: create the note again with your text."
+  },
+  "versions": {
+    "label": "Versions",
+    "base": "Original",
+    "disk": "On disk",
+    "mine": "Yours",
+    "baseUnknown": "The original is unknown: this draft was written on an older version.",
+    "diskDeleted": "The file was deleted from disk.",
+    "diskNotText": "The version on disk cannot be read as text (it is not UTF-8)."
+  },
+  "diff": {
+    "title": "Compare the version on disk with yours",
+    "summary": "{{added}} lines only in yours (+), {{removed}} lines only on disk (−).",
+    "noChanges": "Both versions are the same line by line (only line endings differ).",
+    "added": "Only in yours:",
+    "removed": "Only on disk:",
+    "folded_one": "{{count}} unchanged line",
+    "folded_other": "{{count}} unchanged lines"
+  },
+  "kept": {
+    "title": "Version set aside on reload",
+    "body": "This is your version, set aside when you chose Reload. You can restore it (the version on disk goes to the trash) or let it go.",
+    "restore": "Restore this version",
+    "discard": "Discard the set-aside version",
+    "keep": "Keep it",
+    "close": "Close",
+    "discardTitle": "Discard the set-aside version?",
+    "discardBody": "This version will be gone for good. The note stays as it is on disk."
+  }
+}

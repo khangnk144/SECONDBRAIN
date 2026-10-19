@@ -10,9 +10,18 @@ import type { TrashMeta } from './vault-types.js';
  */
 const REVISION = /^[0-9a-f]{64}$/;
 const COPY_REF = /^(before|after)\/\d+$/;
-const OPS = new Set(['rename', 'move', 'trash', 'restore', 'reschedule']);
+const OPS = new Set([
+  'rename',
+  'move',
+  'trash',
+  'restore',
+  'reschedule',
+  'folder-rename',
+  'folder-trash',
+]);
 const STATUSES = new Set(['planned', 'running', 'done', 'failed', 'undone', 'undoing']);
-const KINDS = new Set(['write', 'rename', 'trash', 'restore']);
+const KINDS = new Set(['write', 'rename', 'trash', 'restore', 'folder-rename', 'folder-trash']);
+const FOLDER_KINDS = new Set(['folder-rename', 'folder-trash']);
 const REASONS = new Set(['user', 'conflict', 'sample-data', 'restore-collision']);
 
 type Loose = Record<string, unknown>;
@@ -34,9 +43,30 @@ const isPlainName = (value: unknown): value is string =>
 const isRef = (value: unknown) =>
   value === null || (typeof value === 'string' && COPY_REF.test(value));
 
+const isFolderFile = (value: unknown) =>
+  isObject(value) &&
+  isStoredVaultPath(value.path) &&
+  typeof value.revision === 'string' &&
+  REVISION.test(value.revision);
+
+/** Folder steps list what they carry; other steps carry no such lists. */
+function hasValidFolderLists(step: Loose): boolean {
+  if (!FOLDER_KINDS.has(step.kind as string)) {
+    return step.files === undefined && step.folders === undefined;
+  }
+  return (
+    Array.isArray(step.files) &&
+    step.files.every(isFolderFile) &&
+    Array.isArray(step.folders) &&
+    step.folders.every(isStoredVaultPath) &&
+    step.before === null &&
+    step.after === null
+  );
+}
+
 function isValidStep(step: unknown): step is JournalStep {
   if (!isObject(step) || typeof step.kind !== 'string' || !KINDS.has(step.kind)) return false;
-  const needsNewPath = step.kind === 'rename' || step.kind === 'restore';
+  const needsNewPath = ['rename', 'restore', 'folder-rename'].includes(step.kind);
   const sameFile = step.viaTemp !== undefined || step.fromName !== undefined;
   return (
     isStoredVaultPath(step.path) &&
@@ -49,10 +79,11 @@ function isValidStep(step: unknown): step is JournalStep {
     isRef(step.after) &&
     (step.kind !== 'write' || (step.before !== null && step.after !== null)) &&
     (!sameFile ||
-      (step.kind === 'rename' &&
+      ((step.kind === 'rename' || step.kind === 'folder-rename') &&
         isPlainName(step.viaTemp) &&
         isVaultTempFileName(step.viaTemp) &&
         isPlainName(step.fromName))) &&
+    hasValidFolderLists(step) &&
     typeof step.applied === 'boolean'
   );
 }
@@ -67,13 +98,15 @@ export function isValidTrashMeta(meta: unknown): meta is TrashMeta {
     meta.originalPaths.every(isStoredVaultPath) &&
     typeof meta.reason === 'string' &&
     REASONS.has(meta.reason) &&
-    typeof meta.deletedAt === 'string'
+    typeof meta.deletedAt === 'string' &&
+    (meta.folders === undefined ||
+      (Array.isArray(meta.folders) && meta.folders.every(isStoredVaultPath)))
   );
 }
 
 export function isValidJournalEntry(value: unknown, id: string): value is JournalEntry {
   if (!isObject(value) || value.id !== id || !isUlid(id)) return false;
-  const needsTrash = value.op === 'trash' || value.op === 'restore';
+  const needsTrash = value.op === 'trash' || value.op === 'restore' || value.op === 'folder-trash';
   const trash = value.trash;
   return (
     typeof value.op === 'string' &&

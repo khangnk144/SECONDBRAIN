@@ -1,0 +1,198 @@
+/* Property bar (design.md screen 2: a soft row of labels under the title). Tokens only. */
+.property-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 var(--space-6);
+}
+
+.property-chip,
+.property-bar__add {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 28px;
+  border-radius: var(--radius-s);
+  font-size: 0.875rem;
+}
+
+.property-chip {
+  padding-right: var(--space-1);
+  border: 1px solid var(--line);
+  background: var(--paper);
+}
+
+.property-chip__main,
+.property-bar__add-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 28px;
+  padding: 0 var(--space-2);
+  border: 0;
+  border-radius: var(--radius-s);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.property-chip__main:disabled {
+  cursor: default;
+}
+
+.property-chip__label {
+  color: var(--ink-2);
+}
+
+.property-chip__remove,
+.property-tag__remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: transparent;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+
+.property-chip__remove:hover,
+.property-tag__remove:hover,
+.property-bar__add-button:hover {
+  color: var(--ink);
+}
+
+.property-bar__add-button {
+  color: var(--ink-2);
+}
+
+/* Tag pills (design.md §5): --accent on --accent-soft, 12.5 px, radius 6. */
+.property-tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 var(--space-2);
+  border: 0;
+  border-radius: var(--radius-s);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: max(12px, 0.78125rem);
+  cursor: pointer;
+}
+
+.property-tag--removable {
+  padding-right: 0;
+  cursor: default;
+}
+
+.property-tag--removable .property-tag__remove {
+  color: var(--accent);
+}
+
+.property-popover {
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  left: 0;
+  z-index: 5;
+  display: grid;
+  gap: var(--space-2);
+  width: max-content;
+  min-width: 240px;
+  max-width: min(360px, 80vw);
+  padding: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: var(--paper);
+}
+
+.property-form {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.property-form__label {
+  color: var(--ink-2);
+  font-size: 0.875rem;
+}
+
+.property-form__problem {
+  color: var(--urgent-text);
+  font-size: 0.875rem;
+}
+
+.property-choices,
+.property-tags-editor__list {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.property-tags-editor__list {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.property-tags-editor {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.property-choices__option {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 32px;
+  padding: 0 var(--space-2);
+  border: 0;
+  border-radius: var(--radius-s);
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.property-choices__option:hover,
+.property-choices__option[aria-pressed='true'] {
+  background: var(--accent-soft);
+}
+
+.property-bar--invalid {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--soon);
+  border-radius: var(--radius-m);
+}
+
+.property-bar__warning {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--soon-text);
+  font-size: 0.875rem;
+}
+
+.property-bar__raw {
+  margin: 0;
+  overflow-x: auto;
+  color: var(--ink-2);
+  font-size: 0.8125rem;
+  white-space: pre-wrap;
+}
+
+@media (pointer: coarse) {
+  .property-chip__remove,
+  .property-tag__remove {
+    width: 40px;
+    height: 40px;
+  }
+}

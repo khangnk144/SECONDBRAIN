@@ -14,7 +14,13 @@ import {
 } from './vault-errors.js';
 import { readFileState } from './vault-file-state.js';
 import { isVaultError } from './vault-types.js';
-import type { TextRangePatch, VaultPath, WriteResult } from './vault-types.js';
+import type {
+  PatchedNote,
+  PatchPlanner,
+  TextRangePatch,
+  VaultPath,
+  WriteResult,
+} from './vault-types.js';
 
 const MAX_UNIQUE_SUFFIX = 9999;
 
@@ -93,7 +99,7 @@ export function createVaultFolder(core: VaultCore, input: VaultPath): Promise<vo
  * Re-reads the file inside the queue and checks it can be rewritten: not a symlink, still at the
  * revision the client based its change on, and UTF-8 text (anything else would be re-encoded).
  */
-async function readAtRevision(
+export async function readAtRevision(
   core: VaultCore,
   input: VaultPath,
   expectedRevision: string,
@@ -112,7 +118,7 @@ async function readAtRevision(
   return { target, current: current.bytes };
 }
 
-async function replaceContent(
+export async function replaceContent(
   core: VaultCore,
   target: DiskLocation,
   current: Buffer,
@@ -154,5 +160,22 @@ export function patchFile(
     const { target, current } = await readAtRevision(core, input, expectedRevision);
     const next = applyTextPatches(decodeStrict(current)!, patches);
     return replaceContent(core, target, current, Buffer.from(next, 'utf8'));
+  });
+}
+
+/** Patches computed from the content at the revision; no patches = nothing written. */
+export function patchFileWith(
+  core: VaultCore,
+  input: VaultPath,
+  expectedRevision: string,
+  plan: PatchPlanner,
+): Promise<PatchedNote> {
+  return core.queue.run(async () => {
+    const { target, current } = await readAtRevision(core, input, expectedRevision);
+    const text = decodeStrict(current)!;
+    const patches = plan(text);
+    const next = patches.length === 0 ? text : applyTextPatches(text, patches);
+    const result = await replaceContent(core, target, current, Buffer.from(next, 'utf8'));
+    return { ...result, content: next };
   });
 }

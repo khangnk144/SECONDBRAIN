@@ -4,7 +4,7 @@ import type { BacklinkRef, OutlinkRef } from '../index/index-types.js';
 import { classifyPath, noteTitleFromPath } from '../markdown/content-classes.js';
 import type { ContentClass } from '../markdown/markdown-types.js';
 import { parseNote } from '../markdown/parse-note.js';
-import type { NoteRead, VaultPath } from '../vault/vault-types.js';
+import { VaultError, type NoteRead, type VaultPath } from '../vault/vault-types.js';
 import { newNoteContent, templateVariablesAt } from './new-note-content.js';
 import {
   guardNotePath,
@@ -74,7 +74,7 @@ export function registerNoteRoutes(app: FastifyInstance, context: AppContext): v
     },
   );
 
-  app.put<{ Body: { path: string; content: string; expectedRevision: string } }>(
+  app.put<{ Body: SaveBody }>(
     '/api/note',
     {
       schema: {
@@ -85,19 +85,26 @@ export function registerNoteRoutes(app: FastifyInstance, context: AppContext): v
             path: vaultPathSchema,
             content: { type: 'string' },
             expectedRevision: revisionSchema,
+            conflictCopy: { type: 'boolean' },
           },
         },
       },
     },
     async (request) => {
-      const { content, expectedRevision } = request.body;
-      const result = await vault.write(guardNotePath(request.body.path), content, expectedRevision);
+      const { content, expectedRevision, conflictCopy } = request.body;
+      const path = guardNotePath(request.body.path);
+      // "Giữ bản của tôi": the disk version shown by the conflict UI goes to the trash first.
+      const result = conflictCopy
+        ? await vault.writeKeepingConflictCopy(path, content, expectedRevision)
+        : await vault.write(path, content, expectedRevision);
       await context.settled();
-      return { revision: result.revision };
+      return 'trashId' in result
+        ? { revision: result.revision, trashId: result.trashId }
+        : { revision: result.revision };
     },
   );
 
-  app.post<{ Body: { path: string; template?: string; title?: string } }>(
+  app.post<{ Body: CreateBody }>(
     '/api/note',
     {
       schema: {
@@ -108,18 +115,43 @@ export function registerNoteRoutes(app: FastifyInstance, context: AppContext): v
             path: vaultPathSchema,
             template: vaultPathSchema,
             title: { type: 'string', maxLength: 1000 },
+            unique: { type: 'boolean' },
+            content: { type: 'string' },
           },
         },
       },
     },
     async (request, reply) => {
+      const { template, content: exact, unique = false } = request.body;
       const path = guardNotePath(request.body.path);
+      if (exact !== undefined && template !== undefined && template !== '') {
+        throw new VaultError('VALIDATION', 'Give either a template or the content, not both.', {
+          reason: 'content-and-template',
+        });
+      }
       const title = request.body.title ?? noteTitleFromPath(path);
-      const vars = templateVariablesAt(title, context.now());
-      const content = await newNoteContent(vault, request.body.template, vars);
-      const result = await vault.create(path, content);
+      const content =
+        exact ?? (await newNoteContent(vault, template, templateVariablesAt(title, context.now())));
+      const result = unique
+        ? await vault.createUnique(path, content)
+        : await vault.create(path, content);
       await context.settled();
       return reply.code(201).send({ path: result.path, revision: result.revision });
     },
   );
+}
+
+interface SaveBody {
+  path: string;
+  content: string;
+  expectedRevision: string;
+  conflictCopy?: boolean;
+}
+
+interface CreateBody {
+  path: string;
+  template?: string;
+  title?: string;
+  unique?: boolean;
+  content?: string;
 }

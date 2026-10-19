@@ -1,0 +1,83 @@
+{
+  "slash": {
+    "label": "Chèn khối",
+    "empty": "Không có lệnh nào khớp.",
+    "heading1": "Tiêu đề 1",
+    "heading2": "Tiêu đề 2",
+    "heading3": "Tiêu đề 3",
+    "taskList": "Danh sách việc",
+    "bulletList": "Danh sách chấm",
+    "orderedList": "Danh sách số",
+    "quote": "Trích dẫn",
+    "code": "Code",
+    "table": "Bảng",
+    "date": "Ngày",
+    "divider": "Đường kẻ",
+    "template": "Mẫu"
+  },
+  "templates": {
+    "label": "Chọn mẫu",
+    "loading": "Đang tải mẫu…",
+    "empty": "Chưa có mẫu nào trong thư mục Templates.",
+    "loadError": "Không tải được mẫu. Bấm Esc rồi thử lại.",
+    "noMatch": "Không có mẫu nào khớp."
+  },
+  "wikilink": {
+    "label": "Gợi ý ghi chú",
+    "create": "Tạo '{{text}}'",
+    "created": "Đã tạo {{title}} trong Inbox.",
+    "open": "Mở",
+    "openTitle": "Mở {{target}}. Ctrl+bấm để mở trong thẻ mới.",
+    "ghostTitle": "Chưa có ghi chú {{target}}. Bấm để tạo trong Inbox.",
+    "ambiguousTitle": "Có nhiều ghi chú tên {{target}}. Bấm để chọn đích.",
+    "chooseTarget": "Chọn đích…",
+    "chooseTargetMenu": "Chọn ghi chú đích cho {{target}}",
+    "embedTitle": "Nhúng {{target}}. Ảnh sẽ hiện ở bản sau.",
+    "fileMissing": "Chưa có file {{name}} trong vault.",
+    "fileLater": "Mở file đính kèm sẽ có ở bản sau."
+  },
+  "tag": {
+    "label": "Gợi ý thẻ",
+    "count_one": "{{count}} ghi chú",
+    "count_other": "{{count}} ghi chú",
+    "pillTitle": "Tìm ghi chú có thẻ {{tag}}. Ctrl+Enter khi con trỏ ở trong thẻ."
+  },
+  "date": {
+    "label": "Chọn ngày",
+    "hint": "Mũi tên để đổi ngày, Page Up hoặc Page Down để đổi tháng, Enter để chọn.",
+    "today": "Hôm nay",
+    "tomorrow": "Ngày mai",
+    "nextWeek": "Tuần sau",
+    "previousMonth": "Tháng trước",
+    "nextMonth": "Tháng sau",
+    "dueToday": "Hạn hôm nay",
+    "dueTomorrow": "Hạn ngày mai",
+    "daysLeft_one": "Còn {{count}} ngày",
+    "daysLeft_other": "Còn {{count}} ngày",
+    "overdue_one": "Quá hạn {{count}} ngày",
+    "overdue_other": "Quá hạn {{count}} ngày",
+    "invalid": "Ngày {{date}} không có thật, nên không được tính.",
+    "done": "Xong ngày {{date}}",
+    "inline": {
+      "today": "hôm nay",
+      "tomorrow": "ngày mai",
+      "daysLeft_one": "còn {{count}} ngày",
+      "daysLeft_other": "còn {{count}} ngày",
+      "overdue_one": "quá hạn {{count}} ngày",
+      "overdue_other": "quá hạn {{count}} ngày",
+      "invalid": "ngày không có thật"
+    }
+  },
+  "task": {
+    "checkboxLabel": "Xong việc: {{text}}",
+    "emptyTask": "việc chưa có tên"
+  },
+  "verbatim": {
+    "badge": "nguồn",
+    "tooltip": "Sửa đoạn này trong chế độ nguồn (Alt+S)",
+    "label": "Đoạn Markdown giữ nguyên, sửa trong chế độ nguồn (Alt+S)"
+  },
+  "paste": {
+    "imageLater": "Dán ảnh sẽ có ở bản sau"
+  }
+}

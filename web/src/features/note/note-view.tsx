@@ -1,0 +1,163 @@
+import { Code } from '@phosphor-icons/react';
+import { useEffect, useId, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import type { MarkdownEditorHandle } from '../../editor/markdown-editor';
+import { navigateTo, noteRoute } from '../../lib/app-navigation';
+import { confirmDialog } from '../../lib/dialogs/dialog-requests';
+import { i18n } from '../../i18n';
+import { useShortcut } from '../../lib/shortcuts/use-shortcut';
+import { noteTitleFromPath } from '../../lib/vault-paths';
+import { ConflictScreen } from '../conflict/conflict-screen';
+import type { NoteSession } from '../note-session/note-session';
+import type { SessionView } from '../note-session/note-session-types';
+import { PropertyBar } from '../properties/property-bar';
+import { NoteBanners } from './note-banners';
+import { NoteEditorHost } from './note-editor-host';
+import { NoteTitle } from './note-title';
+import { retitleFirstHeading } from './retitle-first-heading';
+import { SaveIndicator } from './save-indicator';
+import { SourceModeEditor } from './source-mode-editor';
+
+interface NoteViewProps {
+  session: NoteSession;
+  view: SessionView;
+  isNew: boolean;
+  line: number | null;
+  lineRequest: string;
+}
+
+/** Note screen layout (design.md screen 2): title and save state, banners, properties, body. */
+export function NoteView({ session, view, isNew, line, lineRequest }: NoteViewProps) {
+  const { t } = useTranslation();
+  const titleId = useId();
+  const editor = useRef<MarkdownEditorHandle | null>(null);
+  const sourceField = useRef<HTMLTextAreaElement>(null);
+  const inSource = view.source !== null;
+  const conflict = view.conflict;
+
+  const toggleSource = () => {
+    if (session.getView().conflict) return;
+    void session.toggleSourceMode();
+  };
+  useShortcut({
+    id: 'source-mode',
+    keys: 'Alt+S',
+    run: toggleSource,
+    allowInInputs: true,
+    labelKey: 'note.source.shortcut',
+  });
+
+  // A note created from a template (`&new=1`): its first naming also renames the heading the
+  // template filled with the default name.
+  const createdHere = useRef(isNew);
+  const rename = async (title: string) => {
+    const oldTitle = noteTitleFromPath(session.path());
+    const result = await session.rename(title);
+    const handle = editor.current;
+    if (result.ok && createdHere.current && handle && session.getView().source === null) {
+      createdHere.current = false;
+      const newTitle = noteTitleFromPath(result.path);
+      retitleFirstHeading(handle, oldTitle, newTitle);
+    }
+    return result;
+  };
+
+  // On a set-aside version, "Tải lại" lets it go for good: ask first.
+  const reloadOrDiscardKept = async () => {
+    const reviewing = session.getView().conflict?.keptId !== undefined;
+    if (reviewing && !(await confirmDiscardKept())) return;
+    await session.reloadFromDisk();
+  };
+
+  // Keep the caret with the mode the user switched to.
+  const wasInSource = useRef(inSource);
+  useEffect(() => {
+    if (wasInSource.current === inSource) return;
+    wasInSource.current = inSource;
+    if (inSource) sourceField.current?.focus();
+    else editor.current?.focus();
+  }, [inSource]);
+
+  return (
+    <article className="note-screen" aria-labelledby={titleId}>
+      <header className="note-screen__header">
+        <NoteTitle
+          id={titleId}
+          title={noteTitleFromPath(view.path)}
+          editable={conflict === null}
+          autoSelect={isNew}
+          // `new=1` is a one-time request: drop it so a reload does not select the title again.
+          onAutoSelected={() => navigateTo(noteRoute(view.path), { replace: true })}
+          onRename={rename}
+          // `{ block: 0 }` moves the caret synchronously, while the title still has focus;
+          // a deferred focus could land after the user already clicked into the body.
+          onEnter={() => editor.current?.focus({ block: 0 })}
+        />
+        <div className="note-screen__tools">
+          <button
+            type="button"
+            className="note-screen__source-toggle"
+            aria-pressed={inSource}
+            disabled={conflict !== null}
+            title={t('note.source.toggleWithKeys')}
+            onClick={toggleSource}
+          >
+            <Code size={18} aria-hidden="true" />
+            <span>{t('note.source.toggle')}</span>
+          </button>
+          <SaveIndicator status={view.status} onRetry={() => session.retry()} />
+        </div>
+      </header>
+      <NoteBanners
+        view={view}
+        onDiscardDraft={() => void session.discardDraft()}
+        onReviewKept={() => void session.reviewKept()}
+      />
+      {conflict ? (
+        <ConflictScreen
+          conflict={conflict}
+          busy={view.status === 'saving'}
+          onReload={() => void reloadOrDiscardKept()}
+          onKeepMine={() => void session.keepMine()}
+          onClose={() => void session.closeKeptReview()}
+        />
+      ) : null}
+      <div className="note-screen__body" hidden={conflict !== null}>
+        {inSource ? null : (
+          <PropertyBar
+            frontmatterRaw={view.frontmatterRaw}
+            disabled={view.readOnly}
+            onPatch={(change) => session.patchFrontmatter(change)}
+          />
+        )}
+        <div className="note-screen__editor" hidden={inSource}>
+          <NoteEditorHost
+            session={session}
+            view={view}
+            line={line}
+            lineRequest={lineRequest}
+            handleRef={editor}
+          />
+        </div>
+        {view.source ? (
+          <SourceModeEditor
+            ref={sourceField}
+            text={view.source.text}
+            readOnly={view.readOnly}
+            onChange={(text) => session.sourceChanged(text)}
+          />
+        ) : null}
+      </div>
+    </article>
+  );
+}
+
+function confirmDiscardKept(): Promise<boolean> {
+  return confirmDialog({
+    title: i18n.t('conflict.kept.discardTitle'),
+    body: i18n.t('conflict.kept.discardBody'),
+    confirmLabel: i18n.t('conflict.kept.discard'),
+    cancelLabel: i18n.t('conflict.kept.keep'),
+    danger: true,
+  });
+}

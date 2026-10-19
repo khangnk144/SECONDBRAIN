@@ -1,0 +1,7 @@
+{
+  "label": "Open note tabs",
+  "close": "Close tab {{title}}",
+  "closeHint": "Close tab (Alt+W)",
+  "limitReplaced": "Closed the tab “{{title}}” because at most {{max}} tabs can be open.",
+  "closedDeleted": "“{{title}}” was deleted, so its tab was closed."
+}

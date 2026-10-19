@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ApiError, createApiClient } from './api-client';
+import { ApiError, createApiClient, journalConflictCount, noteConflictDetails } from './api-client';
 
 function jsonResponse(status: number, body: unknown): Response {
   return new Response(JSON.stringify(body), {
@@ -45,5 +45,35 @@ describe('createApiClient', () => {
     await createApiClient({ token: null, fetchImpl }).get('/health');
     const [, init] = fetchImpl.mock.calls[0] as unknown as [string, RequestInit];
     expect((init.headers as Record<string, string>)['X-SB-Token']).toBeUndefined();
+  });
+
+  it('keeps the error details (CONFLICT carries the disk revision and content)', async () => {
+    const fetchImpl = vi.fn(async () =>
+      jsonResponse(409, {
+        error: {
+          code: 'CONFLICT',
+          message: 'changed',
+          details: { path: 'a.md', currentRevision: 'abc', currentContent: 'Đĩa' },
+        },
+      }),
+    );
+    const error = await createApiClient({ token: 't', fetchImpl })
+      .get('/note')
+      .catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(ApiError);
+    expect((error as ApiError).details).toMatchObject({ currentRevision: 'abc' });
+    expect(noteConflictDetails(error)).toEqual({ currentRevision: 'abc', currentContent: 'Đĩa' });
+  });
+
+  it('reads a deleted-on-disk conflict and journal conflicts', () => {
+    const deleted = new ApiError(409, 'CONFLICT', 'gone', { currentRevision: null });
+    expect(noteConflictDetails(deleted)).toEqual({ currentRevision: null });
+    const journal = new ApiError(409, 'CONFLICT', 'x', {
+      journalId: 'j',
+      conflicts: [{ path: 'a.md' }, { path: 'b.md' }],
+    });
+    expect(journalConflictCount(journal)).toBe(2);
+    expect(journalConflictCount(new ApiError(404, 'NOT_FOUND', 'x'))).toBeNull();
+    expect(noteConflictDetails(new Error('x'))).toBeNull();
   });
 });

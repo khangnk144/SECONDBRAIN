@@ -1,0 +1,54 @@
+{
+  "label": "Thuộc tính",
+  "dateFormat": "DD/MM/YYYY",
+  "labels": {
+    "type": "Loại",
+    "status": "Trạng thái",
+    "deadline": "Hạn chót",
+    "course": "Môn",
+    "tags": "Thẻ",
+    "created": "Ngày tạo"
+  },
+  "values": {
+    "status": {
+      "todo": "Cần làm",
+      "doing": "Đang làm",
+      "done": "Xong"
+    },
+    "type": {
+      "note": "Ghi chú",
+      "project": "Dự án",
+      "course": "Môn học",
+      "lecture": "Bài giảng",
+      "paper": "Bài báo",
+      "research": "Nghiên cứu",
+      "daily": "Nhật ký",
+      "book": "Sách",
+      "wiki": "Wiki"
+    }
+  },
+  "editTitle": "Sửa {{label}}",
+  "save": "Lưu",
+  "remove": "Xóa thuộc tính {{label}}",
+  "removed": "Đã xóa thuộc tính {{label}}.",
+  "undo": "Hoàn tác",
+  "searchTag": "Tìm ghi chú có thẻ #{{tag}}",
+  "pickNotePlaceholder": "Gõ tên ghi chú…",
+  "noNoteMatches": "Không có ghi chú nào khớp.",
+  "currentTags": "Thẻ hiện có",
+  "removeTag": "Bỏ thẻ #{{tag}}",
+  "addTagLabel": "Thêm thẻ",
+  "tagPlaceholder": "Ví dụ: đồ-án",
+  "addTag": "Thêm thẻ",
+  "tagSuggestions": "Thẻ gợi ý",
+  "listHint": "Ngăn cách bằng dấu phẩy",
+  "complexValue": "Giá trị này có nhiều tầng nên chỉ sửa được trong chế độ nguồn (Alt+S).",
+  "invalidYaml": "Phần thuộc tính (YAML) đang có lỗi nên chỉ xem được. Sửa trong chế độ nguồn (Alt+S), app không tự sửa.",
+  "addProperty": "Thêm thuộc tính",
+  "newKey": "Tên thuộc tính",
+  "newValue": "Giá trị",
+  "add": "Thêm",
+  "invalidKey": "Tên thuộc tính bắt đầu bằng chữ cái hoặc _, chỉ gồm chữ cái không dấu, số, - và _.",
+  "duplicateKey": "Ghi chú đã có thuộc tính này. Bấm vào nó để sửa.",
+  "matchingNotes": "Ghi chú khớp"
+}

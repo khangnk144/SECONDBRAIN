@@ -7,7 +7,8 @@ import {
   stepSlots,
   type Overlay,
 } from './journal-step-slots.js';
-import type { JournalEntry, JournalStep } from './journal-types.js';
+import { folderStepState, revisionThroughMovedFolder } from './journal-folder-steps.js';
+import { isFolderStep, type JournalEntry, type JournalStep } from './journal-types.js';
 import type { VaultCore } from './vault-core.js';
 import type { VaultPath } from './vault-types.js';
 
@@ -82,9 +83,13 @@ export async function stepState(
   overlay: Overlay,
   direction: Direction,
 ): Promise<StepState> {
+  if (isFolderStep(step)) return folderStepState(core, entry, step, overlay, direction);
   if (step.viaTemp) return sameFileRenameState(core, step, overlay, direction);
   const { from, to } = await stepSlots(core, entry, step);
-  const fromRevision = await revisionAt(from, overlay);
+  let fromRevision = await revisionAt(from, overlay);
+  if (fromRevision === null && direction === 'forward') {
+    fromRevision = (await revisionThroughMovedFolder(core, entry, step, overlay)) ?? null;
+  }
   if (step.kind === 'write') {
     if (fromRevision === step.afterRevision) return { state: 'after' };
     if (fromRevision === step.expectedRevision) return { state: 'before' };

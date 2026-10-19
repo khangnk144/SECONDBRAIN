@@ -1,0 +1,142 @@
+/* Task date chips, verbatim blocks and tables of the writing surface. Colours: tokens only. */
+
+/* Task dates: a dot coloured by urgency, text in the text-safe status colour. */
+.date-chip {
+  white-space: nowrap;
+}
+
+.date-chip::before {
+  content: '';
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: var(--space-1);
+  border-radius: 50%;
+  vertical-align: 0;
+}
+
+.date-chip--urgent {
+  color: var(--urgent-text);
+}
+.date-chip--urgent::before {
+  background: var(--urgent);
+}
+.date-chip--soon {
+  color: var(--soon-text);
+}
+.date-chip--soon::before {
+  background: var(--soon);
+}
+.date-chip--ok {
+  color: var(--ok-text);
+}
+.date-chip--ok::before {
+  background: var(--ok);
+}
+.date-chip--done {
+  color: var(--ink-2);
+}
+.date-chip--done::before {
+  background: var(--done);
+}
+
+.date-chip__when {
+  margin-left: var(--space-1);
+  font-size: 0.78125rem;
+  white-space: nowrap;
+  user-select: none;
+}
+.date-chip__when--urgent,
+.date-chip__when--invalid {
+  color: var(--urgent-text);
+}
+.date-chip__when--soon {
+  color: var(--soon-text);
+}
+.date-chip__when--ok {
+  color: var(--ok-text);
+}
+
+.date-chip--invalid {
+  color: var(--urgent-text);
+  text-decoration: underline wavy var(--urgent);
+}
+.date-chip--invalid::before {
+  display: none;
+}
+.date-chip--invalid::after {
+  content: '!';
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-left: var(--space-1);
+  border-radius: 50%;
+  background: var(--urgent);
+  color: var(--on-accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* Verbatim blocks: raw Markdown, read-only, with a quiet "nguồn" badge. */
+.verbatim-block {
+  position: relative;
+  padding: var(--space-2) var(--space-12) var(--space-2) var(--space-3);
+  border-left: 2px dashed var(--line);
+}
+
+.markdown-editor__content .verbatim-block__source {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.verbatim-block__badge {
+  position: absolute;
+  top: var(--space-2);
+  right: 0;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  color: var(--ink-2);
+  font-size: 0.78125rem;
+  line-height: 1.6;
+  cursor: help;
+}
+
+.verbatim-block.is-selected {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Tables (GFM) */
+.markdown-editor__content table {
+  border-collapse: collapse;
+  margin: var(--space-3) 0 0;
+}
+
+.markdown-editor__content th,
+.markdown-editor__content td {
+  min-width: 4rem;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--line);
+  vertical-align: top;
+}
+
+.markdown-editor__content th {
+  background: var(--paper);
+  font-weight: 600;
+  text-align: left;
+}
+
+.markdown-editor__content .selectedCell {
+  background: var(--accent-soft);
+}

@@ -1,0 +1,20 @@
+{
+  "region": "Thao tác chưa hoàn tất",
+  "pending": "Một thao tác {{op}} chưa hoàn tất ({{done}}/{{total}} file).",
+  "pendingGeneric": "Một thao tác chưa hoàn tất ({{done}}/{{total}} file).",
+  "ops": {
+    "rename": "đổi tên",
+    "move": "di chuyển",
+    "trash": "xóa",
+    "restore": "khôi phục",
+    "reschedule": "dời ngày"
+  },
+  "complete": "Hoàn tất",
+  "undo": "Hoàn tác",
+  "completed": "Đã hoàn tất thao tác.",
+  "completeConflict_one": "Không hoàn tất được vì {{count}} ghi chú đã được sửa sau đó.",
+  "completeConflict_other": "Không hoàn tất được vì {{count}} ghi chú đã được sửa sau đó.",
+  "completeConflictNamed": "Không hoàn tất được vì ghi chú “{{title}}” đã được sửa sau đó.",
+  "completeConflictNamedMany_one": "Không hoàn tất được vì “{{title}}” và {{count}} ghi chú khác đã được sửa sau đó.",
+  "completeConflictNamedMany_other": "Không hoàn tất được vì “{{title}}” và {{count}} ghi chú khác đã được sửa sau đó."
+}

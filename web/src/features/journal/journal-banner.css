@@ -1,0 +1,46 @@
+.journal-banner {
+  margin-bottom: var(--space-4);
+}
+
+.journal-banner ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.journal-banner__entry {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: var(--blush);
+  color: var(--ink);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.journal-banner__message {
+  flex: 1;
+  min-width: 12rem;
+}
+
+.journal-banner__button {
+  min-height: 28px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.journal-banner__button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

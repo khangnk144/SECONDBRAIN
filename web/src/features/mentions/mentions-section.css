@@ -1,0 +1,19 @@
+/* A mention: the clickable line, then its "Liên kết" button under it, aligned right. */
+.mention-item {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-1);
+}
+
+.mention-item__link {
+  align-self: flex-end;
+  min-height: 28px;
+  padding: 0 var(--space-3);
+  font-size: max(12px, 0.78125rem);
+}
+
+.mention-item__link[aria-disabled='true'] {
+  opacity: 0.5;
+  cursor: default;
+}

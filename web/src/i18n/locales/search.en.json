@@ -1,0 +1,17 @@
+{
+  "dialogLabel": "Search notes",
+  "inputLabel": "Search notes",
+  "placeholder": "Search titles or text, for example tag:project",
+  "resultsLabel": "Search results",
+  "recentLabel": "Recent notes",
+  "searching": "Searching…",
+  "error": "Search isn't available right now. Check the server and try again.",
+  "noResults": "No note matches '{{query}}'.",
+  "noRecent": "No notes yet. Type a name to create your first note.",
+  "create": "Create '{{query}}'",
+  "resultCount_one": "{{count}} result",
+  "resultCount_other": "{{count}} results",
+  "hintOpen": "open",
+  "hintNewTab": "open in a new tab",
+  "hintClose": "close"
+}

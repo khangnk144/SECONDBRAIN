@@ -1,0 +1,12 @@
+{
+  "title": "Tags",
+  "intro": "Click a tag to see every note that has it.",
+  "listLabel": "Tag list",
+  "loading": "Loading tags…",
+  "loadError": "Couldn't load the tags.",
+  "retry": "Try again",
+  "empty": "No tags yet. Type # in a note to add one, for example #course/calculus.",
+  "itemLabel_one": "Tag {{tag}}, {{count}} note",
+  "itemLabel_other": "Tag {{tag}}, {{count}} notes",
+  "groupLabel": "Tag group {{tag}}"
+}

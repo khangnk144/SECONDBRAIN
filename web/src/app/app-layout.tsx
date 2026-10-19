@@ -1,9 +1,20 @@
 import type { MouseEvent } from 'react';
 import { Outlet, useMatches } from 'react-router';
 import { useTranslation } from 'react-i18next';
+import { ConnectionBanner } from '../features/connection/connection-banner';
+import { DialogHost } from '../features/dialogs/dialog-host';
+import { JournalBanner } from '../features/journal/journal-banner';
+import { SearchPalette } from '../features/search/search-palette';
+import { ToastHost } from '../features/toasts/toast-host';
+import { usePanesStore } from '../lib/panes-store';
+import { useAppShortcuts } from '../lib/shortcuts/use-app-shortcuts';
+import { useWritingFocus } from '../lib/writing-focus-store';
 import { LeftSidebar } from './left-sidebar';
+import { MainToolbar } from './main-toolbar';
 import { RightPanel } from './right-panel';
-import type { AppRouteHandle } from './routes';
+import { mergedRouteHandle } from './route-handle';
+import { useFocusRecovery } from './use-focus-recovery';
+import { useTabsRouteSync } from './use-tabs-route-sync';
 import '../styles/app-layout.css';
 
 /**
@@ -15,26 +26,47 @@ function skipToMainContent(event: MouseEvent<HTMLAnchorElement>) {
   document.getElementById('main-content')?.focus();
 }
 
-/** Three-pane frame: left sidebar, main content, optional right panel. */
+/** Three-pane frame: left sidebar, main content, optional right panel; both sides collapsible. */
 export function AppLayout() {
   const { t } = useTranslation();
-  const matches = useMatches();
-  const showRightPanel = matches.some(
-    (match) => (match.handle as AppRouteHandle | undefined)?.rightPanel === true,
-  );
+  const handle = mergedRouteHandle(useMatches());
+  const leftCollapsed = usePanesStore((state) => state.leftCollapsed);
+  const rightCollapsed = usePanesStore((state) => state.rightCollapsed);
+  const writing = useWritingFocus((state) => state.focused);
+  useAppShortcuts();
+  useTabsRouteSync();
+  useFocusRecovery(leftCollapsed, rightCollapsed);
+
+  const routeHasPanel = handle.rightPanel === true;
+  const showRightPanel = routeHasPanel && !rightCollapsed;
+  const Panel = handle.panel;
+  const classes = ['app-shell'];
+  if (showRightPanel) classes.push('app-shell--with-panel');
+  if (leftCollapsed) classes.push('app-shell--left-collapsed');
+  if (writing) classes.push('app-shell--writing');
 
   return (
-    <div className={showRightPanel ? 'app-shell app-shell--with-panel' : 'app-shell'}>
+    <div
+      className={classes.join(' ')}
+      // Writing focus ends as soon as the mouse moves (design.md §4).
+      onMouseMove={writing ? () => useWritingFocus.getState().setFocused(false) : undefined}
+    >
       <a className="skip-link" href="#main-content" onClick={skipToMainContent}>
         {t('app.skipToContent')}
       </a>
-      <LeftSidebar />
+      {leftCollapsed ? null : <LeftSidebar />}
       <main id="main-content" className="app-main" tabIndex={-1}>
+        <ConnectionBanner />
+        <JournalBanner />
+        <MainToolbar showTabs={handle.tabs === true} routeHasPanel={routeHasPanel} />
         <div className="app-main__inner">
           <Outlet />
         </div>
       </main>
-      {showRightPanel ? <RightPanel /> : null}
+      {showRightPanel ? <RightPanel>{Panel ? <Panel /> : null}</RightPanel> : null}
+      <ToastHost />
+      <DialogHost />
+      <SearchPalette />
     </div>
   );
 }

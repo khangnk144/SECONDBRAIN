@@ -1,0 +1,12 @@
+{
+  "cancel": "Cancel",
+  "rootFolder": "Vault root",
+  "filterFolders": "Filter folders",
+  "noFolders": "No folder matches.",
+  "template": {
+    "title": "Create a new note",
+    "hint": "Pick a template, or start with a blank page.",
+    "blank": "Blank",
+    "create": "Create note"
+  }
+}

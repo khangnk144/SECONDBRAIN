@@ -2,11 +2,17 @@ import i18next, { type i18n as I18n } from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import en from './en.json';
 import vi from './vi.json';
+import { groupAreaFiles, mergeLocale, type LocaleTree } from './merge-locales';
 import type { Language } from '../lib/ui-prefs';
 
+// Feature areas: `locales/<area>.<lang>.json`, merged under `<area>` (see merge-locales.ts).
+const areaFiles = groupAreaFiles(
+  import.meta.glob<LocaleTree>('./locales/*.json', { eager: true, import: 'default' }),
+);
+
 export const resources = {
-  vi: { translation: vi },
-  en: { translation: en },
+  vi: { translation: mergeLocale(vi, areaFiles.vi) },
+  en: { translation: mergeLocale(en, areaFiles.en) },
 } as const;
 
 /**

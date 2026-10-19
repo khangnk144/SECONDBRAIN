@@ -1,0 +1,137 @@
+/* Modal dialogs: centered card on a dimmed, blurred backdrop (design.md §6: blur only on overlays). */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 12vh var(--space-4) var(--space-4);
+  backdrop-filter: blur(4px);
+  animation: modal-fade 150ms var(--ease);
+}
+
+/* Dims the page with the background token (no raw colors outside tokens.css). */
+.modal-backdrop::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+  opacity: 0.7;
+}
+
+.modal {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: min(480px, 100%);
+  max-height: 76vh;
+  overflow-y: auto;
+  padding: var(--space-6);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-l);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.modal:focus {
+  outline: none;
+}
+
+.modal form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.modal__title {
+  font-size: 1.0625rem;
+  line-height: 1.4;
+}
+
+.modal__body,
+.modal__hint {
+  color: var(--ink-2);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.modal__label {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.modal__error {
+  color: var(--urgent-text);
+  font-size: 0.875rem;
+}
+
+.modal__items-label {
+  margin-bottom: var(--space-1);
+  font-size: max(12px, 0.78125rem);
+  font-weight: 500;
+  color: var(--ink-2);
+}
+
+.modal__items {
+  max-height: 200px;
+  overflow-y: auto;
+  margin: 0;
+  padding: var(--space-2) var(--space-3) var(--space-2) var(--space-6);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.picker-list {
+  max-height: 300px;
+  overflow-y: auto;
+  margin: 0;
+  padding: var(--space-1);
+  list-style: none;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  font-size: 0.875rem;
+}
+
+.picker-list:focus-visible {
+  outline-offset: 2px;
+}
+
+.picker-list__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 32px;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-s);
+  cursor: pointer;
+}
+
+.picker-list__item.is-active {
+  background: var(--accent-soft);
+}
+
+.picker-list__item[aria-disabled='true'] {
+  color: var(--ink-2);
+  cursor: default;
+}
+
+@keyframes modal-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

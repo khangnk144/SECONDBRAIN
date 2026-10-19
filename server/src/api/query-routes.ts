@@ -59,6 +59,12 @@ export function registerQueryRoutes(app: FastifyInstance, context: AppContext): 
     return { tags: index.tags() };
   });
 
+  // `[[` autocomplete and ghost/ambiguous rendering (F4): every note and file a link can target.
+  app.get('/api/link-targets', async (_request, reply) => {
+    noStore(reply);
+    return index.linkTargets();
+  });
+
   app.get('/api/today', async (_request, reply) => {
     noStore(reply);
     return deadlines.today();

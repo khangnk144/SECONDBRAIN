@@ -1,0 +1,12 @@
+{
+  "title": "Thẻ",
+  "intro": "Bấm vào một thẻ để xem mọi ghi chú có thẻ đó.",
+  "listLabel": "Danh sách thẻ",
+  "loading": "Đang tải thẻ…",
+  "loadError": "Không tải được danh sách thẻ.",
+  "retry": "Thử lại",
+  "empty": "Chưa có thẻ nào. Gõ # trong một ghi chú để gắn thẻ, ví dụ #môn/giải-tích.",
+  "itemLabel_one": "Thẻ {{tag}}, {{count}} ghi chú",
+  "itemLabel_other": "Thẻ {{tag}}, {{count}} ghi chú",
+  "groupLabel": "Nhóm thẻ {{tag}}"
+}

@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next';
+import { SidebarFolders } from '../features/sidebar/sidebar-folders';
+import { SidebarNewNoteButton } from '../features/sidebar/sidebar-new-note-button';
 import { SidebarSearch } from './sidebar-search';
 import { SidebarNav } from './sidebar-nav';
-import { SidebarFolders } from './sidebar-folders';
 import '../styles/sidebar.css';
 
 export function LeftSidebar() {
@@ -11,6 +12,7 @@ export function LeftSidebar() {
       <SidebarSearch />
       <SidebarNav />
       <SidebarFolders />
+      <SidebarNewNoteButton />
     </aside>
   );
 }

@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import en from './en.json';
-import vi from './vi.json';
+import { resources } from './index';
 
 function keys(value: unknown, prefix = ''): string[] {
   if (value === null || typeof value !== 'object') return [prefix];
@@ -10,7 +9,7 @@ function keys(value: unknown, prefix = ''): string[] {
 }
 
 describe('translation files', () => {
-  it('have the same keys in Vietnamese and English', () => {
-    expect(keys(en).sort()).toEqual(keys(vi).sort());
+  it('have the same keys in Vietnamese and English (core and feature areas merged)', () => {
+    expect(keys(resources.en.translation).sort()).toEqual(keys(resources.vi.translation).sort());
   });
 });

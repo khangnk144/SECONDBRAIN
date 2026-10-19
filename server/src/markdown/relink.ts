@@ -54,13 +54,23 @@ export async function planRelinkEdits(input: RelinkInput): Promise<RelinkEdit[]>
 
 export async function planRelink(input: RelinkInput): Promise<RelinkPlan> {
   const { from, to } = input.op;
-  const after = postOperationCatalog(input.catalog, from, to);
+  return planRelinkMoves({ ...input, moves: [{ from, to }] });
+}
+
+/** Several files moving at once (a folder rename): the same rules for every moved file. */
+export interface RelinkMovesInput extends Omit<RelinkInput, 'op'> {
+  moves: { from: VaultPath; to: VaultPath }[];
+}
+
+export async function planRelinkMoves(input: RelinkMovesInput): Promise<RelinkPlan> {
+  const moved = new Map(input.moves.map((move) => [move.from, move.to]));
+  const after = postOperationCatalog(input.catalog, moved);
   const plan: RelinkPlan = { edits: [], unresolvable: [] };
   for (const path of new Set(input.candidates)) {
     const note = await readIfPresent(input.readNote, path);
     if (!note) continue;
     const parsed = parseNote(note.content);
-    const pathAfter = path === from ? to : path;
+    const pathAfter = moved.get(path) ?? path;
     const context: RewriteContext = {
       after,
       pathAfter,
@@ -70,10 +80,11 @@ export async function planRelink(input: RelinkInput): Promise<RelinkPlan> {
     let links: ParsedLink[] = parsed.links;
     // Descending order: an edit never moves the links still to be processed.
     for (const link of [...parsed.links].reverse()) {
-      const intended = intendedTarget(link, input.catalog, after, path, pathAfter, from, to);
-      if (intended === null) continue;
-      const rewrite = targetOptions(link, intended, from, to)
-        .map((target) => rewriteLinkTarget(content, links, link, target, intended, context))
+      const target = intendedTarget(link, input.catalog, after, path, pathAfter, moved);
+      if (target === null) continue;
+      const { intended, movedFrom } = target;
+      const rewrite = targetOptions(link, intended, movedFrom)
+        .map((text) => rewriteLinkTarget(content, links, link, text, intended, context))
         .find((result) => result !== null);
       if (!rewrite) {
         plan.unresolvable.push({ path, raw: link.raw, line: link.line, intended });
@@ -89,34 +100,37 @@ export async function planRelink(input: RelinkInput): Promise<RelinkPlan> {
   return plan;
 }
 
-/** Where the link must point after the operation, or null when it needs no rewrite. */
+/**
+ * Where the link must point after the operation (and the moved file's old path when it pointed
+ * at a moved file), or null when it needs no rewrite.
+ */
 function intendedTarget(
   link: ParsedLink,
   before: LinkCatalog,
   after: LinkCatalog,
   path: VaultPath,
   pathAfter: VaultPath,
-  from: VaultPath,
-  to: VaultPath,
-): VaultPath | null {
+  moved: ReadonlyMap<VaultPath, VaultPath>,
+): { intended: VaultPath; movedFrom: VaultPath | null } | null {
   if (link.kind === 'markdown' || link.target === '') return null;
   const previous = resolveLink(before, link, path);
   if (previous.status !== 'resolved') return null;
-  const intended = previous.path === from ? to : previous.path;
+  const movedTo = moved.get(previous.path);
+  const intended = movedTo ?? previous.path;
   const next = resolveLink(after, link, pathAfter);
-  return next.status === 'resolved' && next.path === intended ? null : intended;
+  if (next.status === 'resolved' && next.path === intended) return null;
+  return { intended, movedFrom: movedTo === undefined ? null : previous.path };
 }
 
-/** Candidate targets, best first: the moved note by title then path; any other note by path. */
+/** Candidate targets, best first: a moved file by title then path; any other file by path. */
 function targetOptions(
   link: ParsedLink,
   intended: VaultPath,
-  from: VaultPath,
-  to: VaultPath,
+  movedFrom: VaultPath | null,
 ): string[] {
   const path = pathTarget(link.target, intended);
-  if (intended !== to || from === to || link.target.includes('/')) return [path];
-  return [titleTarget(link.target, to), path];
+  if (movedFrom === null || movedFrom === intended || link.target.includes('/')) return [path];
+  return [titleTarget(link.target, intended), path];
 }
 
 /** New title form, keeping a written `.md` suffix; non-note files keep their extension. */
@@ -141,9 +155,12 @@ function shiftLinks(links: readonly ParsedLink[], link: ParsedLink, text: string
   });
 }
 
-function postOperationCatalog(catalog: LinkCatalog, from: VaultPath, to: VaultPath): LinkCatalog {
-  const paths = [...catalog.notePaths, ...catalog.filePaths].filter((p) => p !== from);
-  paths.push(to);
+function postOperationCatalog(
+  catalog: LinkCatalog,
+  moved: ReadonlyMap<VaultPath, VaultPath>,
+): LinkCatalog {
+  const paths = [...catalog.notePaths, ...catalog.filePaths].filter((p) => !moved.has(p));
+  paths.push(...moved.values());
   return buildLinkCatalog(paths);
 }
 

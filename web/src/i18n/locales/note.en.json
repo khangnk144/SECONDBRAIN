@@ -1,0 +1,60 @@
+{
+  "missingPath": "No note is selected. Open one from the left pane.",
+  "loading": "Opening the note…",
+  "notFound": "This note was not found. It may have been renamed or deleted.",
+  "loadFailed": "The note could not be opened because the server is not reachable. It will try again once connected.",
+  "editorLabel": "Content of the note {{title}}",
+  "title": {
+    "label": "Note title (also the file name)"
+  },
+  "save": {
+    "saving": "Saving…",
+    "saved": "Saved",
+    "draft": "Draft",
+    "error": "Not saved",
+    "conflict": "Conflict",
+    "retry": "Try again"
+  },
+  "saveErrors": {
+    "offline": "The server is not reachable. Your draft is kept in the browser and will be saved once connected.",
+    "disk-full": "Could not save because the disk is full. Free some space, then click Try again.",
+    "locked": "Could not save because the file is open or locked somewhere else. Close it there, then click Try again.",
+    "write-failed": "Could not write the file. Your draft is kept; check the disk, then click Try again.",
+    "other": "The note was not saved yet. Your draft is kept; click Try again."
+  },
+  "banners": {
+    "draftRestored": "Restored an unsaved draft.",
+    "discardDraft": "Discard draft",
+    "keepDraft": "Keep draft",
+    "discardTitle": "Discard the restored draft?",
+    "discardBody": "The note goes back to exactly what was on disk when you opened it. What the draft holds will be lost.",
+    "dismiss": "Hide notice",
+    "notUtf8": "This note is not UTF-8, so it is read-only.",
+    "wiki": "AI maintains this page.",
+    "control": "This document tells the AI how to work with your vault. Edit it with care.",
+    "template": "This is a template. New notes made from it start with this content.",
+    "kept_one": "{{count}} version was set aside on reload.",
+    "kept_other": "{{count}} versions were set aside on reload.",
+    "reviewKept": "View"
+  },
+  "source": {
+    "toggle": "Source",
+    "toggleWithKeys": "Source mode (Alt+S)",
+    "shortcut": "Turn source mode on or off",
+    "label": "Markdown of the note (source mode)"
+  },
+  "notices": {
+    "reloaded": "Reloaded the version on disk. Yours is set aside as a draft in the browser.",
+    "keptMine": "Kept your version. The version on disk went to the trash.",
+    "keepAsideFailed": "Your version could not be set aside, so nothing was reloaded. Try again, or choose Keep my version.",
+    "diskChangedAgain": "The file on disk just changed again. Look at the versions again, then choose.",
+    "patch": {
+      "invalid-yaml": "The properties have a YAML error. Fix it in source mode (Alt+S) first.",
+      "duplicate-key": "The properties contain a repeated name. Fix it in source mode (Alt+S) first.",
+      "not-mapping": "The properties are not in name: value form. Fix them in source mode (Alt+S).",
+      "invalid-key": "A property name starts with a letter or _ and holds only plain letters, digits, - and _.",
+      "unsupported-value": "This value cannot be saved from the property bar. Edit it in source mode (Alt+S)."
+    },
+    "keptDiscarded": "Discarded the set-aside version."
+  }
+}

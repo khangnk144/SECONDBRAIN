@@ -1,0 +1,126 @@
+/* Right panel of a note: stacked collapsible sections (design.md screen 2). Tokens only. */
+.note-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.note-panel__error {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  color: var(--ink-2);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.note-panel__retry {
+  min-height: 28px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.panel-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.panel-section__heading {
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.panel-section__toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 32px;
+  padding: 0 var(--space-1);
+  border: 0;
+  border-radius: var(--radius-s);
+  background: transparent;
+  color: var(--ink-2);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.panel-section__toggle:hover {
+  color: var(--ink);
+}
+
+.panel-section__title {
+  flex: 1 1 auto;
+}
+
+.panel-section__count {
+  font-size: max(12px, 0.78125rem);
+  font-weight: 500;
+}
+
+.panel-section__note {
+  padding: 0 var(--space-1);
+  color: var(--ink-2);
+  font-size: max(12px, 0.78125rem);
+  line-height: 1.5;
+}
+
+.panel-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A row that opens a note: title on top, the context line below it. */
+.panel-link {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  width: 100%;
+  padding: var(--space-2);
+  border: 0;
+  border-radius: var(--radius-s);
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.panel-link:hover {
+  background: var(--paper);
+}
+
+.panel-link__title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.panel-link__context {
+  color: var(--ink-2);
+  font-size: max(12px, 0.78125rem);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .panel-link,
+  .panel-section__toggle {
+    transition:
+      background-color 150ms var(--ease),
+      color 150ms var(--ease);
+  }
+}

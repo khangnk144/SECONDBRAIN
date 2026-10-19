@@ -1,0 +1,25 @@
+{
+  "loading": "Loading…",
+  "loadError": "Couldn't load the links of this note.",
+  "notFound": "This note is no longer on disk.",
+  "retry": "Try again",
+  "linked": {
+    "title": "Linked here",
+    "empty": "No note links here yet. Type [[{{title}}]] in another note to connect it.",
+    "openLabel": "Open {{title}} at line {{line}}"
+  },
+  "mentions": {
+    "title": "Unlinked mentions",
+    "empty": "No note mentions this name without a link.",
+    "loadError": "Couldn't load the mentions.",
+    "link": "Link",
+    "linkLabel": "Link the mention in {{title}}, line {{line}}",
+    "linkLabelNth": "Link mention {{nth}} in {{title}}, line {{line}}",
+    "linked": "Linked in {{title}}.",
+    "changed": "The note has changed, so I reloaded the list."
+  },
+  "outline": {
+    "title": "Outline",
+    "empty": "No headings yet. Type ## at the start of a line to add one."
+  }
+}

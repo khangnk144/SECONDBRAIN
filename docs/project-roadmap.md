@@ -6,7 +6,7 @@ Milestones and Definition of Done are defined in `../../SPEC.md` §12. This file
 |---|---|---|---|---|---|
 | M0 | Scaffold: Node 24, workspaces, TS, lint (+ i18n AST rule, no-raw-color), vitest, Playwright, tokens.css (2 themes × 3 palettes) + contrast script, fonts bundled, security middleware, launcher scripts, gen-vault | Done | 2026-10-18 | 2026-10-18 | `MILESTONE-0.md` |
 | M1 | Vault service (atomic, revisions, trash, journal, path guard), templates, CLAUDE.md skeleton, indexer + FTS (đ-aware normalization), deadline-items service, events.jsonl, watcher, WS, opt-in sample data | Done | 2026-10-18 | 2026-10-19 | `MILESTONE-1.md` |
-| M2 | Editor spike (preservation contract) first; then sidebar, editor + source mode, wikilinks + relink, backlinks, tags, properties, tabs, autosave/drafts/undo, conflict UI | Not started | | | |
+| M2 | Editor spike (preservation contract) first; then sidebar, editor + source mode, wikilinks + relink, backlinks, tags, properties, tabs, autosave/drafts/undo, conflict UI | Done | 2026-10-19 | 2026-10-19 | `MILESTONE-2.md` |
 | M3 | Tasks, Today + 14-day strip (overflow rules), calendar, search palette, capture, daily, graph basic (+ keyboard panel), shortcuts | Not started | | | |
 | M4 | Server reminders + Windows toast, settings (backup export/restore, vault switch, run-at-login), i18n complete, attachments + PDF viewer, git history, launcher + PWA checklist → **v1.0** | Not started | | | |
 | M5 | Phase 2: graph advanced, MOC, weekly review, scheduled backup, mobile polish, `.exe` + tray, PDF text search, Telegram/email → v1.1 | Not started | | | |
@@ -18,3 +18,4 @@ Status values: Not started · In progress · Done · Blocked (reason).
 - 2026-10-18: SPEC v1.1 (after external review `../gopy.md`), design.md, ClaudeKit setup completed. Next: M0.
 - 2026-10-18: M0 done (218 tests, lint, e2e green; independent review findings fixed). Pending owner checks on Windows: launcher double-click, reference machine RAM/disk. Next: M1.
 - 2026-10-19: M1 done (834 tests, lint, typecheck, e2e green; two independent reviews, all confirmed findings fixed). Next: M2 – start with the editor spike (F3.1/F3.2 on the corpus) before the rest.
+- 2026-10-19: M2 done (editor spike passed first; 2,671 tests, lint, typecheck, 30/30 e2e incl. S3a; two independent reviews, all confirmed findings fixed). Pending owner check on Windows: write/link/rename flow, Reveal in Explorer. Next: M3.

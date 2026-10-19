@@ -8,3 +8,6 @@
 *.woff binary
 *.woff2 binary
 *.pdf binary
+
+# Markdown round-trip corpus: bytes must stay exactly as stored (CRLF, BOM, NFD, trailing spaces)
+web/src/editor/markdown/__fixtures__/** -text

@@ -7,13 +7,13 @@
     "today": "Today",
     "tasks": "Tasks",
     "calendar": "Calendar",
-    "graph": "Brain map"
+    "graph": "Brain map",
+    "tags": "Tags"
   },
   "sidebar": {
     "label": "Left pane",
     "searchLabel": "Search notes and commands",
     "searchPlaceholder": "Search…",
-    "searchSoon": "Search arrives in a later version",
     "foldersHeading": "Folders",
     "foldersEmpty": "No notes yet. Your folders will show up here."
   },
@@ -50,5 +50,21 @@
       "body": "The link may be out of date.",
       "back": "Back to Today"
     }
+  },
+  "panes": {
+    "hideLeft": "Collapse left pane",
+    "showLeft": "Open left pane",
+    "hideRight": "Collapse right pane",
+    "showRight": "Open right pane",
+    "withShortcut": "{{label}} ({{keys}})"
+  },
+  "shortcuts": {
+    "toggleLeftPane": "Collapse or open the left pane",
+    "toggleRightPane": "Collapse or open the right pane",
+    "newNote": "New note",
+    "closeTab": "Close the current tab",
+    "previousTab": "Previous tab",
+    "nextTab": "Next tab",
+    "search": "Search notes and commands"
   }
 }

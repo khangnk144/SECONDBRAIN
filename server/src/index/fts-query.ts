@@ -45,3 +45,12 @@ export function ftsMatchExpression(terms: readonly string[], column?: 'title_nor
   const body = terms.map((term) => `"${term.replaceAll('"', '""')}"*`).join(' AND ');
   return column ? `${column} : (${body})` : body;
 }
+
+/**
+ * `body_norm : "giai tich 1"`: the words of `text`, in order and adjacent, in a note's body
+ * (candidates for unlinked mentions of a title). Duplicate words are kept: order matters here.
+ */
+export function phraseMatchExpression(text: string): string | null {
+  const words = (normalizeForIndex(text).match(WORD) ?? []).filter((w) => HAS_BASE_CHAR.test(w));
+  return words.length === 0 ? null : `body_norm : "${words.join(' ')}"`;
+}

@@ -1,0 +1,5 @@
+/* Matched terms and highlighted links: soft accent background, text keeps its own color. */
+.text-highlight {
+  background: var(--accent-soft);
+  color: var(--ink);
+}

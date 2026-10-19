@@ -23,6 +23,7 @@ export async function writeTrashMeta(core: VaultCore, entry: TrashEntry): Promis
     originalPaths: entry.originalPaths,
     reason: entry.reason,
     deletedAt: entry.deletedAt,
+    ...(entry.folders ? { folders: entry.folders } : {}),
   };
   await writeStateJson(core.paths, path.join(trashEntryDir(core, entry.id), 'meta.json'), meta);
 }
@@ -32,8 +33,8 @@ export async function readTrashEntry(core: VaultCore, id: string): Promise<Trash
   if (typeof id !== 'string' || !isUlid(id)) return null;
   const meta = await readStateJson(path.join(trashEntryDir(core, id), 'meta.json'));
   if (!isValidTrashMeta(meta)) return null;
-  const { opId, originalPaths, reason, deletedAt } = meta;
-  return { id, opId, originalPaths, reason, deletedAt };
+  const { opId, originalPaths, reason, deletedAt, folders } = meta;
+  return { id, opId, originalPaths, reason, deletedAt, ...(folders ? { folders } : {}) };
 }
 
 /** Newest first; entries that cannot be read are left out. */

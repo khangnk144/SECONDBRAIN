@@ -7,13 +7,13 @@
     "today": "Hôm nay",
     "tasks": "Việc cần làm",
     "calendar": "Lịch",
-    "graph": "Bản đồ não"
+    "graph": "Bản đồ não",
+    "tags": "Thẻ"
   },
   "sidebar": {
     "label": "Ngăn bên trái",
     "searchLabel": "Tìm ghi chú và lệnh",
     "searchPlaceholder": "Tìm…",
-    "searchSoon": "Tìm kiếm sẽ có ở bản sau",
     "foldersHeading": "Thư mục",
     "foldersEmpty": "Chưa có ghi chú nào. Thư mục của bạn sẽ hiện ở đây."
   },
@@ -50,5 +50,21 @@
       "body": "Có thể đường dẫn đã cũ.",
       "back": "Về trang Hôm nay"
     }
+  },
+  "panes": {
+    "hideLeft": "Thu gọn ngăn trái",
+    "showLeft": "Mở ngăn trái",
+    "hideRight": "Thu gọn ngăn phải",
+    "showRight": "Mở ngăn phải",
+    "withShortcut": "{{label}} ({{keys}})"
+  },
+  "shortcuts": {
+    "toggleLeftPane": "Thu gọn hoặc mở ngăn trái",
+    "toggleRightPane": "Thu gọn hoặc mở ngăn phải",
+    "newNote": "Ghi chú mới",
+    "closeTab": "Đóng thẻ đang mở",
+    "previousTab": "Thẻ trước",
+    "nextTab": "Thẻ sau",
+    "search": "Tìm ghi chú và lệnh"
   }
 }

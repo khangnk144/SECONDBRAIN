@@ -1,0 +1,45 @@
+{
+  "title": "Ghi chú này vừa được sửa ở chỗ khác",
+  "body": "Bạn có thay đổi chưa lưu, và file trên đĩa cũng đã đổi. Hãy chọn giữ bản nào. Dù chọn gì, không bản nào bị mất.",
+  "titleDeleted": "Ghi chú này đã bị xóa ở chỗ khác",
+  "bodyDeleted": "File trên đĩa không còn nữa, nhưng bản bạn đang viết vẫn được giữ.",
+  "actions": {
+    "reload": "Tải lại",
+    "keepMine": "Giữ bản của tôi",
+    "compare": "So sánh"
+  },
+  "hints": {
+    "reload": "Tải lại: mở bản trên đĩa; bản của bạn được cất vào bản nháp trong trình duyệt.",
+    "keepMine": "Giữ bản của tôi: lưu bản của bạn; bản trên đĩa được chuyển vào thùng rác.",
+    "reloadDeleted": "Tải lại: đóng bản của bạn (vẫn được cất trong trình duyệt), ghi chú không còn trên đĩa.",
+    "keepMineDeleted": "Giữ bản của tôi: tạo lại ghi chú với nội dung của bạn."
+  },
+  "versions": {
+    "label": "Các phiên bản",
+    "base": "Bản gốc",
+    "disk": "Bản trên đĩa",
+    "mine": "Bản của bạn",
+    "baseUnknown": "Không còn biết bản gốc: bản nháp này được viết trên một phiên bản cũ hơn.",
+    "diskDeleted": "File đã bị xóa khỏi đĩa.",
+    "diskNotText": "Bản trên đĩa không đọc được dạng chữ (không phải UTF-8)."
+  },
+  "diff": {
+    "title": "So sánh bản trên đĩa với bản của bạn",
+    "summary": "{{added}} dòng chỉ có ở bản của bạn (+), {{removed}} dòng chỉ có trên đĩa (−).",
+    "noChanges": "Hai bản giống nhau từng dòng (chỉ khác kiểu xuống dòng).",
+    "added": "Chỉ có ở bản của bạn:",
+    "removed": "Chỉ có trên đĩa:",
+    "folded_one": "{{count}} dòng giống nhau",
+    "folded_other": "{{count}} dòng giống nhau"
+  },
+  "kept": {
+    "title": "Bản đã cất khi tải lại",
+    "body": "Đây là bản của bạn được cất lại lúc bạn chọn Tải lại. Bạn có thể khôi phục nó (bản trên đĩa sẽ vào thùng rác) hoặc bỏ nó đi.",
+    "restore": "Khôi phục bản này",
+    "discard": "Bỏ bản đã cất",
+    "keep": "Giữ lại",
+    "close": "Đóng",
+    "discardTitle": "Bỏ bản đã cất?",
+    "discardBody": "Bản này sẽ mất hẳn. Ghi chú vẫn giữ nguyên như trên đĩa."
+  }
+}

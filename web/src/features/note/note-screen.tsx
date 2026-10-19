@@ -1,0 +1,63 @@
+import { useEffect } from 'react';
+import { useLocation, useSearchParams } from 'react-router';
+import { useTranslation } from 'react-i18next';
+import { navigateTo, noteRoute } from '../../lib/app-navigation';
+import { noteTitleFromPath } from '../../lib/vault-paths';
+import { useNoteSession } from '../note-session/use-note-session';
+import { NoteView } from './note-view';
+import './note-screen.css';
+
+/**
+ * `#/note?path=<encoded>` (`&new=1` after creation selects the title, `&line=N` scrolls to that
+ * file line). The note's session lives outside React; this screen shows it.
+ */
+export function NoteScreen() {
+  const { t } = useTranslation();
+  const [params] = useSearchParams();
+  const location = useLocation();
+  const path = params.get('path');
+  const { session, view, moved } = useNoteSession(path);
+  const movedTo = moved ? view?.path : undefined;
+
+  // Renamed while open and the address still names the old path: follow the note.
+  useEffect(() => {
+    if (movedTo) navigateTo(noteRoute(movedTo), { replace: true });
+  }, [movedTo]);
+
+  if (!path) return <p className="note-screen__message">{t('note.missingPath')}</p>;
+  const current = session && view ? { session, view } : null;
+  if (current?.view.loadProblem) {
+    return (
+      <article className="note-screen" aria-labelledby="note-missing-title">
+        <h1 id="note-missing-title" className="text-display note-screen__static-title">
+          {noteTitleFromPath(path)}
+        </h1>
+        <p className="note-screen__message" role="alert">
+          {t(current.view.loadProblem === 'not-found' ? 'note.notFound' : 'note.loadFailed')}
+        </p>
+      </article>
+    );
+  }
+  if (!current || current.view.status === 'loading' || !current.view.doc) {
+    return (
+      <article className="note-screen" aria-busy="true" aria-labelledby="note-loading-title">
+        <h1 id="note-loading-title" className="text-display note-screen__static-title">
+          {noteTitleFromPath(path)}
+        </h1>
+        <p className="note-screen__message" role="status">
+          {t('note.loading')}
+        </p>
+      </article>
+    );
+  }
+  return (
+    <NoteView
+      key={current.session.id}
+      session={current.session}
+      view={current.view}
+      isNew={params.get('new') === '1'}
+      line={Number(params.get('line')) || null}
+      lineRequest={location.key}
+    />
+  );
+}

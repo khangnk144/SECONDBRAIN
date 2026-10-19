@@ -1,0 +1,20 @@
+{
+  "region": "Unfinished operations",
+  "pending": "A {{op}} did not finish ({{done}}/{{total}} files).",
+  "pendingGeneric": "An operation did not finish ({{done}}/{{total}} files).",
+  "ops": {
+    "rename": "rename",
+    "move": "move",
+    "trash": "delete",
+    "restore": "restore",
+    "reschedule": "reschedule"
+  },
+  "complete": "Finish",
+  "undo": "Undo",
+  "completed": "The operation is finished.",
+  "completeConflict_one": "Couldn't finish because {{count}} note was edited since.",
+  "completeConflict_other": "Couldn't finish because {{count}} notes were edited since.",
+  "completeConflictNamed": "Couldn't finish because “{{title}}” was edited since.",
+  "completeConflictNamedMany_one": "Couldn't finish because “{{title}}” and {{count}} other note were edited since.",
+  "completeConflictNamedMany_other": "Couldn't finish because “{{title}}” and {{count}} other notes were edited since."
+}

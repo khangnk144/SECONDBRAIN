@@ -18,8 +18,10 @@ import type { PendingJournalEntry } from './vault-types.js';
 const appliedCount = (entry: JournalEntry) => entry.steps.filter((step) => step.applied).length;
 
 /** The trash entry's meta.json exists before the first file moves into it. */
+const fillsTrash = (entry: JournalEntry) => entry.op === 'trash' || entry.op === 'folder-trash';
+
 async function beforeForward(core: VaultCore, entry: JournalEntry): Promise<void> {
-  if (entry.op === 'trash' && entry.trash && !(await readTrashEntry(core, entry.trash.id))) {
+  if (fillsTrash(entry) && entry.trash && !(await readTrashEntry(core, entry.trash.id))) {
     await writeTrashMeta(core, entry.trash);
   }
 }
@@ -30,7 +32,7 @@ async function afterForward(core: VaultCore, entry: JournalEntry): Promise<void>
 
 async function afterUndo(core: VaultCore, entry: JournalEntry): Promise<void> {
   if (!entry.trash) return;
-  if (entry.op === 'trash') await removeTrashEntryIfEmpty(core, entry.trash.id);
+  if (fillsTrash(entry)) await removeTrashEntryIfEmpty(core, entry.trash.id);
   if (entry.op === 'restore') await writeTrashMeta(core, entry.trash);
 }
 

@@ -8,7 +8,8 @@ import {
   stepSlots,
   type Slot,
 } from './journal-step-slots.js';
-import type { JournalEntry, JournalStep } from './journal-types.js';
+import { applyFolderStep, revertFolderStep } from './journal-folder-steps.js';
+import { isFolderStep, type JournalEntry, type JournalStep } from './journal-types.js';
 import { assertNotSymlink, type VaultCore } from './vault-core.js';
 import { ensureFolders, moveVaultFile, writeVaultFile } from './vault-disk-io.js';
 import { alreadyExists, conflict } from './vault-errors.js';
@@ -40,6 +41,9 @@ function changeFor(step: JournalStep, direction: 'forward' | 'reverse'): VaultCh
       return forward
         ? { kind: 'created', path: step.newPath!, revision, origin }
         : { kind: 'deleted', path: step.newPath!, origin };
+    default:
+      // Folder steps report one change per file themselves.
+      throw new Error(`No single change for a ${step.kind} step`);
   }
 }
 
@@ -85,6 +89,7 @@ export async function applyStep(
   entry: JournalEntry,
   step: JournalStep,
 ): Promise<void> {
+  if (isFolderStep(step)) return applyFolderStep(core, entry, step);
   if (step.viaTemp) {
     await moveSameFile(core, step, true);
   } else {
@@ -106,6 +111,7 @@ export async function revertStep(
   entry: JournalEntry,
   step: JournalStep,
 ): Promise<void> {
+  if (isFolderStep(step)) return revertFolderStep(core, entry, step);
   if (step.viaTemp) {
     await moveSameFile(core, step, false);
   } else {

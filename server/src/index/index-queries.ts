@@ -11,7 +11,9 @@ import { createIndexReader, type IndexReader } from './index-reader.js';
 import type { SearchQuery, SearchResult } from './index-types.js';
 import { createIndexWriter, type IndexWriter } from './index-writer.js';
 import { notesLinkingByKeys } from './link-reresolve.js';
+import { buildLinkTargets, type LinkTargets } from './link-target-list.js';
 import { PathCatalog, pathTargetKey } from './link-targets.js';
+import { phraseMatchExpression } from './fts-query.js';
 import { runSearch } from './search-service.js';
 
 export interface LiveIndex {
@@ -46,6 +48,12 @@ export abstract class IndexQueries {
   notesLinkingByTitleOrPath = (paths: VaultPath[]) =>
     notesLinkingByKeys(this.current.db, paths.map(pathTargetKey)).sort();
   allTasks = () => this.current.reader.allTasks();
+  linkTargets = (): LinkTargets =>
+    buildLinkTargets(this.current.reader.noteTitles(), this.catalog.get());
+  notesContainingPhrase = (text: string): VaultPath[] => {
+    const expression = phraseMatchExpression(text);
+    return expression === null ? [] : this.current.reader.matchingNotes(expression);
+  };
   deadlineRows = () => this.current.reader.deadlineRows();
 
   search(query: SearchQuery): SearchResult[] {

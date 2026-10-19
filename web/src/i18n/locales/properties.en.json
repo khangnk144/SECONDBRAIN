@@ -1,0 +1,54 @@
+{
+  "label": "Properties",
+  "dateFormat": "MMM D, YYYY",
+  "labels": {
+    "type": "Type",
+    "status": "Status",
+    "deadline": "Deadline",
+    "course": "Course",
+    "tags": "Tags",
+    "created": "Created"
+  },
+  "values": {
+    "status": {
+      "todo": "To do",
+      "doing": "Doing",
+      "done": "Done"
+    },
+    "type": {
+      "note": "Note",
+      "project": "Project",
+      "course": "Course",
+      "lecture": "Lecture",
+      "paper": "Paper",
+      "research": "Research",
+      "daily": "Daily note",
+      "book": "Book",
+      "wiki": "Wiki"
+    }
+  },
+  "editTitle": "Edit {{label}}",
+  "save": "Save",
+  "remove": "Remove property {{label}}",
+  "removed": "Removed property {{label}}.",
+  "undo": "Undo",
+  "searchTag": "Find notes tagged #{{tag}}",
+  "pickNotePlaceholder": "Type a note name…",
+  "noNoteMatches": "No note matches.",
+  "currentTags": "Current tags",
+  "removeTag": "Remove tag #{{tag}}",
+  "addTagLabel": "Add a tag",
+  "tagPlaceholder": "For example: project",
+  "addTag": "Add tag",
+  "tagSuggestions": "Suggested tags",
+  "listHint": "Separate with commas",
+  "complexValue": "This value has several levels, so you can edit it in source mode (Alt+S).",
+  "invalidYaml": "The properties (YAML) have an error, so they are read-only. Fix them in source mode (Alt+S); the app never changes them on its own.",
+  "addProperty": "Add property",
+  "newKey": "Property name",
+  "newValue": "Value",
+  "add": "Add",
+  "invalidKey": "A property name starts with a letter or _ and holds only plain letters, digits, - and _.",
+  "duplicateKey": "This note already has that property. Click it to edit.",
+  "matchingNotes": "Matching notes"
+}

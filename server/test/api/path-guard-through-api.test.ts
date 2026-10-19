@@ -5,6 +5,8 @@ import { DOWNLOAD_CSP, SVG_CSP } from '../../src/api/files-route.js';
 import { createVaultTestApp, q, type VaultTestApp } from './vault-test-app.js';
 
 const PORT = 4791;
+// Reveal never launches anything in these tests.
+const NO_SPAWN = { reveal: { spawn: () => undefined } };
 const REV = '0'.repeat(64);
 
 /** Each case of SPEC §5 "Path guard" (after the HTTP layer decoded the request once). */
@@ -38,9 +40,10 @@ describe('path guard through the API (F1.5)', () => {
   let t: VaultTestApp;
   let revision: string;
   beforeAll(async () => {
-    t = await createVaultTestApp(PORT);
+    t = await createVaultTestApp(PORT, { vaultRoutes: NO_SPAWN });
     const created = await t.call('POST', '/api/note', { path: '0 Inbox/a.md' });
     revision = created.json().revision;
+    await t.call('POST', '/api/folder', { path: '1 Projects/Thư mục' });
     // A folder and a file outside the vault, reachable only through links inside it.
     const outside = path.join(t.home, 'outside');
     mkdirSync(outside);
@@ -75,6 +78,34 @@ describe('path guard through the API (F1.5)', () => {
     },
   );
 
+  it.each(BAD_PATHS)(
+    '%s → 400 INVALID_PATH for properties, mentions, folder operations and reveal',
+    async (_l, bad) => {
+      const rev = { expectedRevision: revision };
+      for (const [method, url, payload] of [
+        ['PATCH', '/api/note/frontmatter', { path: bad, ...rev, set: { a: 1 } }],
+        ['GET', `/api/note/mentions?${q(bad)}`, undefined],
+        [
+          'POST',
+          '/api/note/link-mention',
+          { path: bad, ...rev, start: 0, end: 1, target: '0 Inbox/a.md' },
+        ],
+        [
+          'POST',
+          '/api/note/link-mention',
+          { path: '0 Inbox/a.md', ...rev, start: 0, end: 1, target: bad },
+        ],
+        ['POST', '/api/folder/rename', { path: bad, newPath: '1 Projects/x' }],
+        ['POST', '/api/folder/rename', { path: '1 Projects/Thư mục', newPath: bad }],
+        ['POST', '/api/folder/trash', { path: bad }],
+        ['POST', '/api/reveal', { path: bad }],
+        ['POST', '/api/note/rename', { path: '0 Inbox/a.md', newPath: bad, ...rev, dryRun: true }],
+      ] as const) {
+        await expectInvalidPath(await t.call(method, url, payload));
+      }
+    },
+  );
+
   it('decodes the query only once: %2e%2e is rejected, %252e%252e is a literal name', async () => {
     await expectInvalidPath(await t.call('GET', '/api/note?path=%2e%2e%2Fsecret.md'));
     const literal = await t.call('GET', '/api/note?path=%252e%252e%2Fsecret.md');
@@ -89,6 +120,27 @@ describe('path guard through the API (F1.5)', () => {
     );
     await expectInvalidPath(await t.call('POST', '/api/note', { path: 'linked folder/new.md' }));
     await expectInvalidPath(await t.call('GET', `/api/files?${q('linked folder/secret.md')}`));
+    await expectInvalidPath(
+      await t.call('PATCH', '/api/note/frontmatter', {
+        path: 'link.md',
+        expectedRevision: REV,
+        set: { a: 1 },
+      }),
+    );
+    await expectInvalidPath(await t.call('POST', '/api/reveal', { path: 'linked folder' }));
+    await expectInvalidPath(await t.call('POST', '/api/folder/trash', { path: 'linked folder' }));
+    await expectInvalidPath(
+      await t.call('POST', '/api/folder/rename', {
+        path: 'linked folder',
+        newPath: '1 Projects/x',
+      }),
+    );
+    await expectInvalidPath(
+      await t.call('POST', '/api/folder/rename', {
+        path: '1 Projects/Thư mục',
+        newPath: 'linked folder/x',
+      }),
+    );
   });
 
   it('never serves vault.json or the global settings file', async () => {

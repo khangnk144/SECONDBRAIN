@@ -10,6 +10,7 @@ interface RenameBody {
   newPath: string;
   expectedRevision: string;
   relink?: boolean;
+  dryRun?: boolean;
 }
 
 interface MoveBody {
@@ -17,6 +18,7 @@ interface MoveBody {
   folder: string;
   expectedRevision: string;
   relink?: boolean;
+  dryRun?: boolean;
 }
 
 interface TrashBody {
@@ -29,10 +31,14 @@ function guardFolder(input: string): VaultPath {
   return input === '' ? '' : guardVaultPath(input);
 }
 
+/** `dryRun: true` answers what would happen (same checks and planner) and changes nothing. */
+const dryRunSchema = { type: 'boolean', default: false } as const;
+
 /**
  * Rename, move and trash: multi-file, journaled operations (SPEC §4.12). Each answer is sent
  * after the index reflects the change, and the journal state is re-broadcast because a failed
- * operation may leave an entry the UI must offer to finish or undo.
+ * operation may leave an entry the UI must offer to finish or undo. Rename and move also answer
+ * dry runs, used by the confirm dialog to list the notes whose links would change (F4).
  */
 export function registerNoteOperationRoutes(app: FastifyInstance, context: AppContext): void {
   const { vault } = context;
@@ -54,6 +60,7 @@ export function registerNoteOperationRoutes(app: FastifyInstance, context: AppCo
             newPath: vaultPathSchema,
             expectedRevision: revisionSchema,
             relink: { type: 'boolean', default: true },
+            dryRun: dryRunSchema,
           },
         },
       },
@@ -67,7 +74,8 @@ export function registerNoteOperationRoutes(app: FastifyInstance, context: AppCo
           newPath,
         });
       }
-      const { expectedRevision, relink = true } = request.body;
+      const { expectedRevision, relink = true, dryRun = false } = request.body;
+      if (dryRun) return vault.previewRename(path, newPath, { expectedRevision, relink });
       try {
         return await vault.rename(path, newPath, { expectedRevision, relink });
       } finally {
@@ -88,6 +96,7 @@ export function registerNoteOperationRoutes(app: FastifyInstance, context: AppCo
             folder: vaultPathSchema,
             expectedRevision: revisionSchema,
             relink: { type: 'boolean', default: true },
+            dryRun: dryRunSchema,
           },
         },
       },
@@ -95,7 +104,8 @@ export function registerNoteOperationRoutes(app: FastifyInstance, context: AppCo
     async (request) => {
       const path = guardVaultPath(request.body.path);
       const folder = guardFolder(request.body.folder);
-      const { expectedRevision, relink = true } = request.body;
+      const { expectedRevision, relink = true, dryRun = false } = request.body;
+      if (dryRun) return vault.previewMove(path, folder, { expectedRevision, relink });
       try {
         return await vault.move(path, folder, { expectedRevision, relink });
       } finally {
@@ -134,21 +144,6 @@ export function registerNoteOperationRoutes(app: FastifyInstance, context: AppCo
       } finally {
         await afterOperation();
       }
-    },
-  );
-
-  app.post<{ Body: { path: string } }>(
-    '/api/folder',
-    {
-      schema: {
-        body: { type: 'object', required: ['path'], properties: { path: vaultPathSchema } },
-      },
-    },
-    async (request, reply) => {
-      const path = guardVaultPath(request.body.path);
-      await vault.createFolder(path);
-      await context.settled();
-      return reply.code(201).send({ path });
     },
   );
 }

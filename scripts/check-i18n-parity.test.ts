@@ -53,4 +53,23 @@ describe('i18n parity', () => {
     writeFileSync(path.join(root, 'web/src/i18n/en.json'), JSON.stringify({ a: 'One' }));
     expect(checkLocaleFiles(root)).toEqual([]);
   });
+
+  it('merges feature area files under their area key and checks them too', () => {
+    const root = mkdtempSync(path.join(tmpdir(), 'sb i18n areas '));
+    const dir = path.join(root, 'web/src/i18n');
+    mkdirSync(path.join(dir, 'locales'), { recursive: true });
+    writeFileSync(path.join(dir, 'vi.json'), JSON.stringify({ a: 'Một' }));
+    writeFileSync(path.join(dir, 'en.json'), JSON.stringify({ a: 'One' }));
+    writeFileSync(path.join(dir, 'locales/editor.vi.json'), JSON.stringify({ save: 'Lưu' }));
+    writeFileSync(path.join(dir, 'locales/editor.en.json'), JSON.stringify({ save: 'Save' }));
+    expect(checkLocaleFiles(root)).toEqual([]);
+    writeFileSync(path.join(dir, 'locales/editor.en.json'), JSON.stringify({ saved: 'Saved' }));
+    expect(checkLocaleFiles(root)).toEqual(
+      expect.arrayContaining(['en.json: missing "editor.save"', 'vi.json: missing "editor.saved"']),
+    );
+    writeFileSync(path.join(dir, 'locales/a.vi.json'), JSON.stringify({ x: 'y' }));
+    const problems = checkLocaleFiles(root);
+    expect(problems).toContain('locales/a.en.json: file not found');
+    expect(problems).toContain('locales/a.vi.json: collides with a core key');
+  });
 });

@@ -6,6 +6,7 @@ import type { JournalEntry, JournalStep } from './journal-types.js';
 import { listTrashEntries, readTrashEntry, trashEntryDir, trashFileAbs } from './trash-store.js';
 import { createFailureTally } from './housekeeping-tally.js';
 import { assertNotSymlink, resolveFile, resolvePath, type VaultCore } from './vault-core.js';
+import { ensureFolders } from './vault-disk-io.js';
 import { conflict, notFound, validation } from './vault-errors.js';
 import { readFileState } from './vault-file-state.js';
 import { withNameSuffix } from './vault-write-ops.js';
@@ -114,6 +115,17 @@ async function freeRestorePath(
   throw validation('No free name to restore to', { path: original });
 }
 
+/**
+ * The folders a folder trash removed, re-created where they were (an existing folder of the same
+ * name is simply reused). Creating an empty folder changes no data, so it needs no journal step.
+ */
+async function recreateFolders(core: VaultCore, folders: readonly VaultPath[]): Promise<void> {
+  for (const folder of folders) {
+    const location = await resolvePath(core, guardVaultPath(folder), 'real');
+    if (location.kind === null) await ensureFolders(core, location, true);
+  }
+}
+
 export function restoreTrashEntry(
   core: VaultCore,
   trashId: string,
@@ -132,8 +144,10 @@ export function restoreTrashEntry(
       step.newPath = await freeRestorePath(core, vaultPath, taken);
       steps.push(step);
     }
-    if (steps.length === 0)
+    if (steps.length === 0 && !trash.folders?.length) {
       throw new VaultError('NOT_FOUND', 'The trash entry is empty', { trashId });
+    }
+    await recreateFolders(core, trash.folders ?? []);
     const id = core.newId();
     await startEntry(core, 'restore', id, steps, trash);
     return {

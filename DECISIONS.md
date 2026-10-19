@@ -154,3 +154,84 @@ Decision:
 - Index: links to paths that vanished during a rebuild are re-resolved after the build and in the post-swap queue; reconcile repairs dangling resolved links; a failed open after the swap restores `index.sqlite.previous`; Windows side-file deletes retry. Server tests run with `TZ=Asia/Ho_Chi_Minh` by default (override with `TZ=…`).
 Why: The owner's files must never be silently changed, re-encoded or lost, and a rename must never change what an unrelated link points to.
 Spec sections affected: §4.4, §4.9, §4.10, §4.14, §5 Path guard/Reliability, F4 (stricter, additive).
+
+## 2026-10-19 M2: work order around the editor spike
+Context: SPEC §12 asks for the editor spike (F3.1/F3.2 on the corpus) before the rest of M2.
+Decision: The spike ran first for everything that depends on the converter (editor UI, note session, source mode). Work that does not touch the converter – server routes, the web data layer, sidebar tree, tabs, toasts, dialogs, right panel, tags view and search palette – ran in parallel with it. Translations are split into feature files (`web/src/i18n/locales/<area>.<lang>.json`, merged under `<area>`; the parity script checks the merged trees) so parallel tracks never edit the same JSON.
+Why: The spike's risk is the preservation contract; the parallel parts would be built the same way whatever the converter outcome.
+Spec sections affected: §12 (ordering only), F19 (file layout of translations).
+
+## 2026-10-19 M2: server additions
+Context: M2 screens need routes SPEC §9 lists only in outline, or not at all.
+Decision:
+- `PATCH /note/frontmatter` is a YAML-aware text patch (only the edited keys' lines change; new keys before the closing fence; a new block at the top when there is none). Writable values: scalars and flat lists; key names start with a letter or `_`; one value style (dates plain, strings plain or double-quoted, `"[[X]]"` always quoted, lists in flow style); a value already set writes nothing; after patching, the YAML must parse and every key and the body must read back as intended. Refusals carry `details.reason` (`invalid-yaml`, `duplicate-key`, `not-mapping`, `invalid-key`, `unsupported-value`, `patch-verify`).
+- Rename/move/folder-rename accept `dryRun: true` (same planner and checks, nothing changes) so the confirm dialog can list affected notes before anything moves.
+- Unlinked mentions: `GET /note/mentions` + `POST /note/link-mention` (whole-word, NFC- and case-insensitive, outside code/HTML tags/links/URLs/front matter; writes `[[Title]]`, `[[Title|original]]` when the case differs, or `[[path/Title|original]]` when the title is not unique; titles containing `[ ] | # ^` cannot be linked).
+- Folders: `POST /folder/rename` (also moves under another parent; relinks path-form links and embeds, pins links whose ambiguity would change) and `POST /folder/trash` (one trash entry keeping the structure, empty folders included via `meta.json` `folders`). Both are one journaled directory-move step; standard folders of SPEC §3 and their fixed subfolders are refused with `FORBIDDEN`. File revisions inside a moved folder are not re-checked on undo (moving it back loses nothing); relinked notes are.
+- `POST /reveal` opens the OS file manager for a file or folder (never through a shell). `PUT /note` with `conflictCopy: true` stores the current disk version as a trash entry (`reason: conflict`) before writing ("Giữ bản của tôi"); no journal entry (a crash leaves at worst an extra conflict copy). `POST /note` accepts `unique: true` and exact `content`. `GET /link-targets` lists linkable notes (templates included with `unique: false`) and other files for autocomplete and link rendering. Backlinks carry the link's `highlight` offsets; index schema version 3 (automatic rebuild on the first start).
+Why: Every change stays revision-checked, journaled or trash-backed, and the UI can show consequences before acting.
+Spec sections affected: §4.10, §4.11, §4.12, §4.14, F2, F4, F5, F7, §9 (additive).
+
+## 2026-10-19 M2: web shell behaviour
+Context: SPEC F2/F22/F23 leave interaction details open.
+Decision:
+- Tabs: one tab per note (opening a note that already has a tab activates it); closing the active tab activates its right neighbour, else the left one; a 21st tab replaces the least recently active one with a toast; `Alt+W`, `Alt+[`, `Alt+]` act while a note is on screen.
+- Shortcuts: one registry; ignored in plain form fields unless a shortcut allows it, active in the editor, suspended while an overlay is open.
+- Sidebar tree shows folders and notes only (attachments arrive with the M4 "Tài liệu" view). Deleting a folder that contains notes asks first; deleting a note only shows the undo toast. "Thư mục mới" also offers undo (trashes the folder only while it is still empty). On first run `0 Inbox` and `1 Projects` start expanded. Leaving the inline rename field commits a valid name (like Explorer). Names are trimmed and NFC-normalized; names starting with "." or longer than 200 characters are refused before any request.
+- Pane toggles (`Alt+1`/`Alt+2` and buttons) sit in a toolbar row above the screen, with the tab bar between them on the note route. The connection banner shows above the main content on every screen (F10.6's placement inside Today comes with M3).
+Why: Predictable, browser-like behaviour with every shortcut also reachable by a button or menu.
+Spec sections affected: F2, F22, F23 (interpretations).
+
+## 2026-10-19 M2 editor spike: Tiptap + block-preserving converter holds
+Context: SPEC §13 names the converter the riskiest item; M2 starts with a spike against the §4.9 corpus (F3.1/F3.2).
+Decision: Keep Tiptap 3. `web/src/editor/schema` defines the node/mark types (StarterKit/TableKit unpacked; code combines with other marks; lists carry `loose`; table cells hold one paragraph; `wikilink` inline atom; `verbatimBlock` atom allowed only at document level). `web/src/editor/markdown` parses with remark + GFM (in verified chunks, because micromark slows down sharply as one parse holds more lists and quotes), maps each top-level block to an editor node only when the mapping is exact (otherwise a verbatim block written back from its original bytes), and saves by matching nodes with `eq()`: unchanged blocks byte for byte, changed lists/quotes item by item (a tick is a text patch: `[ ]`↔`[x]` plus the ` ✅ date` token), everything else in the canonical style; each changed region is re-parsed and compared before it is accepted, falling back to less preservation and finally to canonical text reported as `exact: false` (never dropped).
+Why: Identity, local edits, one-line ticks and canonical re-parse equality hold on a 57-file corpus × LF/CRLF/BOM/NFD, 520 seeded supported documents and 800 adversarial documents (1,309 tests); no case dropped content. Tiptap hosts verbatim blocks as plain atom nodes, so the ProseMirror-only fallback is not needed.
+Limits accepted for M2: loading a 2 MB note takes ~5 s on the 2-vCPU build container (parser-bound; saves ~25 ms; a one-block edit in a 5,000-block note ~5 ms) – the note screen shows a loading state, and a worker or a fast path is revisited only if real notes need it. Verbatim (source mode only): headings 4–6, HTML (blocks, inline, comments), math, footnotes, reference-style links and definitions, `:::` containers, Obsidian callouts, code fences with more than a language, lists mixing tasks and plain items, ordered task lists, ragged tables, wikilinks inside link text/alt text/across emphasis. Empty paragraphs and trailing hard breaks have no Markdown form and are not saved. Canonical-style exceptions: `***` for a rule where `---` would turn into front matter or a setext heading, autolinks only when they parse back, adjacent new lists switch marker.
+Spec sections affected: §4.9, F3 (implementation).
+
+## 2026-10-19 M2: right panel, tags view and search palette
+Context: SPEC F5/F6/F8 describe behaviour; the palette's full AC set (filters, commands, performance) belongs to M3.
+Decision:
+- Right panel order follows design.md screen 2: Mục lục, Liên kết đến đây, Nhắc đến chưa liên kết (collapsed and fetched only when opened). It reflects the last saved text (refreshed ~200 ms after any vault event), not unsaved typing. Links open the note at `&line=N`, a 1-based file line that counts the front matter (same as the server's backlink lines). A successful "Liên kết" shows a 4 s confirmation toast.
+- Tags view nests by `/`; a parent nobody tagged directly is a group without a count (clicking it still searches `tag:<parent>`).
+- Search palette (M2 subset): empty query lists the open tabs by last activation, then the server's recently modified notes, up to 8 (a per-vault "recently opened" history comes with M3); "Tạo '<q>'" appears only when `<q>` is a valid note name (not for filter queries); rows show the full parent folder path; the result list is a tagged union so M3's `>` command mode adds a kind without a rewrite.
+- Tests: the web Vitest project runs with `fsModuleCache: false`, because the persistent module cache keys the translation index on its own content and would hide new `locales/*.json` files from `import.meta.glob`.
+Why: Matches the design order and keeps M3's palette work additive.
+Spec sections affected: F5, F6, F8 (M2 subset).
+
+## 2026-10-19 M2: editor behaviour
+Context: SPEC F3/F4/F6 describe the writing surface; several details were open.
+Decision:
+- The Tiptap editor runs on the converter's own schema instance (swapped in before creation; an extension that changed the node or mark set would throw), so saves keep node identity. History depth 200. StarterKit's trailing node is off (a click below a final non-text block adds a line instead).
+- Extra input rules: `- [ ] `/`- [x] ` turns a fresh one-item bullet list into a task list (inside a longer bullet list the text stays, since mixed lists are verbatim); a fully typed `[[…]]`/`![[…]]` becomes a link node. Mod+Enter ticks the task at the caret. Enter/Shift+Enter in a table cell move to the cell below (a row is added when needed).
+- Slash menu items come from one registry ("Ảnh" arrives with attachments in M4); inside lists or table cells only the items that fit there are offered. "Bảng" inserts a header row plus two rows, two columns.
+- `[[` popup: fuzzy, diacritic-insensitive, top 8 with folders, templates left out; "Tạo '<text>'" inserts the link and creates `0 Inbox/<text>.md` in the background with a "Mở" toast. A path-form ghost link is not created on click (SPEC §4.4 creates title-form ghosts only); links to non-note files show a toast until the M4 viewer exists.
+- Tag pills open search on click or Ctrl/⌘+Enter (plain Enter stays a new line); a lone `#` at a line start shows no list until a letter follows. `@words` filters the date quick choices. Popups open only when their trigger is freshly typed.
+- Whitespace Markdown cannot hold (at paragraph/heading/cell edges, after a hard break, at the inner edge of a bold/italic/strike run) is dropped or moved outside the run when an edited block is written, instead of being encoded as `&#x20;`; spaces before a `\` hard break stay. A literal `[` in an edited paragraph is written as `\[` (Markdown-correct, renders the same).
+Why: Typing feels natural while every save stays representable and re-reads exactly as shown.
+Spec sections affected: F3, F4, F6 (interpretations).
+
+## 2026-10-19 M2: note session and conflict details
+Context: SPEC §4.10/§5 fix the contract (revisions, drafts, save states, three-version conflict); behaviour details were open.
+Decision:
+- The save indicator shows "Bản nháp" for unsaved changes (also while a draft is being written) and nothing right after opening; "Đã lưu" appears only after the server confirmed a save. Drafts are written at most every 300 ms (throttled, so typing never goes more than 300 ms without a draft); hiding or closing the page writes drafts and saves at once. Retries back off 1/2/4/8/15/30 s; a WebSocket resync retries at once; validation-type errors wait for "Thử lại".
+- A restored draft autosaves like normal typing; "Bỏ bản nháp" asks first and writes the original disk text back if the draft was already saved. A conflict where mine equals the disk resolves by itself. "Tải lại" first sets mine aside in a separate IndexedDB store (a screen to browse those copies comes later). A property patch that meets a 409 with no local edits reloads silently with a toast. A non-UTF-8 note that has a draft opens the conflict screen instead of dropping the draft. A tab whose note was deleted elsewhere stays open while it has unsaved text, so the conflict screen can re-create the note.
+- Source mode keeps each untouched line's own line ending and hides the property bar. Removing a property offers a 10 s undo. Status/type values are shown localized; the file keeps the English values. The course picker writes the path form when the title is not unique.
+- Large notes are parsed on the main thread (see the editor spike limits).
+Why: Never lose typed text, never write when nothing changed, and always tell the truth about what is on disk.
+Spec sections affected: §4.10, §5 Data safety, F3, F7, F20 (interpretations).
+
+## 2026-10-19 M2 review round: rules added while fixing confirmed findings
+Context: Two independent reviews (data safety; UI/spec/accessibility in a real browser) found defects whose fixes needed rules SPEC does not spell out.
+Decision:
+- **Converter.** Unchanged blocks are matched by node identity first, then by `eq()` classes with a linear-space diff (Myers within a budget, patience anchors beyond), so edits far apart never rewrite the blocks between them. Two neighbouring lists that would merge after a deletion get a marker no neighbour uses (`-*+`, `.)`), patched one character per top-level item; verbatim lists are never re-marked. The save check covers the text after the last block. A tick's `✅` token goes at the end of the item's first source line (soft or hard break). After a save that had no exact Markdown form, the editor reloads the saved text so it shows what is on disk.
+- **Front matter patches** keep a comment at the end of the edited key's line and never take comment lines that follow a value (they belong to nobody).
+- **Link-mention** writes the alias separator as `\|` inside GFM table rows.
+- **Drafts** are keyed per window (vault + path + window id); a window removes only its own draft; opening a note restores the newest draft from any window. Source-mode switches and title renames run in the note's operation queue; a rename adopts the note as relink left it (typing done meanwhile is merged line by line, overlapping lines open the conflict screen). Versions set aside by "Tải lại" are reachable from a banner ("Xem": review, restore through keep-mine, or discard).
+- **A new note's template heading** (`# <default name>`) takes the title when the note is named the first time, as an undoable editor edit (`MarkdownEditorHandle.edit`).
+- **Focus** never falls to `<body>`: after a route change it goes to the note editor, else the active tab, else the main region; after a toast action it returns where it was; collapsing a pane that held focus moves it to the main region. Toast countdowns freeze while a modal is open. Undo conflicts name the note(s) that changed.
+- **Accessibility**: due dates show their relative text next to the chip (not only colour or a tooltip); Tab/Shift+Tab nest and lift list items (elsewhere Tab leaves the editor, no trap); the status/type list opens on the current value with arrow keys; tree rows read name first, then the hint; folder and note context menus offer every F2 action ("Chuyển vào Archive" for non-standard folders, "Ghi chú mới"/"Thư mục mới" in the note's folder); "Ghi chú mới" stays pinned at the bottom of the left pane.
+- **Search palette** offers "Tạo '<q>'" whenever no result already has exactly that title.
+- **E2E tests** trash the notes they created (`afterEach`), wait until the caret really sits in the editor before Ctrl+End, and simulate an unreachable server inside the page (a closing tab's last save would otherwise bypass Playwright's network emulation).
+Why: Never change bytes nobody edited, never lose typed text, and keep every action reachable by keyboard with the result announced.
+Spec sections affected: §4.9, §4.10, §4.12, §5, F2, F3, F5, F7, F8, F20 (interpretations, additive).

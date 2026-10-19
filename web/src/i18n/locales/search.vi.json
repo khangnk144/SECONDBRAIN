@@ -1,0 +1,17 @@
+{
+  "dialogLabel": "Tìm ghi chú",
+  "inputLabel": "Tìm ghi chú",
+  "placeholder": "Tìm theo tên hoặc nội dung, ví dụ tag:đồ-án",
+  "resultsLabel": "Kết quả tìm kiếm",
+  "recentLabel": "Ghi chú gần đây",
+  "searching": "Đang tìm…",
+  "error": "Không tìm được lúc này. Kiểm tra máy chủ rồi thử lại.",
+  "noResults": "Không có ghi chú nào khớp '{{query}}'.",
+  "noRecent": "Chưa có ghi chú nào. Gõ tên để tạo ghi chú đầu tiên.",
+  "create": "Tạo '{{query}}'",
+  "resultCount_one": "{{count}} kết quả",
+  "resultCount_other": "{{count}} kết quả",
+  "hintOpen": "mở",
+  "hintNewTab": "mở trong thẻ mới",
+  "hintClose": "đóng"
+}

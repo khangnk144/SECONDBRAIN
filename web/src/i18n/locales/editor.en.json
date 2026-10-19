@@ -1,0 +1,83 @@
+{
+  "slash": {
+    "label": "Insert block",
+    "empty": "No matching commands.",
+    "heading1": "Heading 1",
+    "heading2": "Heading 2",
+    "heading3": "Heading 3",
+    "taskList": "Task list",
+    "bulletList": "Bullet list",
+    "orderedList": "Numbered list",
+    "quote": "Quote",
+    "code": "Code",
+    "table": "Table",
+    "date": "Date",
+    "divider": "Divider",
+    "template": "Template"
+  },
+  "templates": {
+    "label": "Choose a template",
+    "loading": "Loading templates…",
+    "empty": "There are no templates in the Templates folder yet.",
+    "loadError": "Couldn't load templates. Press Esc and try again.",
+    "noMatch": "No matching templates."
+  },
+  "wikilink": {
+    "label": "Note suggestions",
+    "create": "Create '{{text}}'",
+    "created": "Created {{title}} in Inbox.",
+    "open": "Open",
+    "openTitle": "Open {{target}}. Ctrl+click opens it in a new tab.",
+    "ghostTitle": "There's no note {{target}} yet. Click to create it in Inbox.",
+    "ambiguousTitle": "Several notes are called {{target}}. Click to choose one.",
+    "chooseTarget": "Choose target…",
+    "chooseTargetMenu": "Choose the note {{target}} links to",
+    "embedTitle": "Embeds {{target}}. Images will show in a later version.",
+    "fileMissing": "There's no file {{name}} in the vault yet.",
+    "fileLater": "Opening attachments comes in a later version."
+  },
+  "tag": {
+    "label": "Tag suggestions",
+    "count_one": "{{count}} note",
+    "count_other": "{{count}} notes",
+    "pillTitle": "Search notes tagged {{tag}}. Ctrl+Enter with the caret inside the tag."
+  },
+  "date": {
+    "label": "Choose a date",
+    "hint": "Arrow keys change the day, Page Up or Page Down the month, Enter picks it.",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "nextWeek": "Next week",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "dueToday": "Due today",
+    "dueTomorrow": "Due tomorrow",
+    "daysLeft_one": "{{count}} day left",
+    "daysLeft_other": "{{count}} days left",
+    "overdue_one": "{{count}} day overdue",
+    "overdue_other": "{{count}} days overdue",
+    "invalid": "{{date}} isn't a real date, so it isn't counted.",
+    "done": "Done on {{date}}",
+    "inline": {
+      "today": "today",
+      "tomorrow": "tomorrow",
+      "daysLeft_one": "{{count}} day left",
+      "daysLeft_other": "{{count}} days left",
+      "overdue_one": "{{count}} day overdue",
+      "overdue_other": "{{count}} days overdue",
+      "invalid": "not a real date"
+    }
+  },
+  "task": {
+    "checkboxLabel": "Done: {{text}}",
+    "emptyTask": "untitled task"
+  },
+  "verbatim": {
+    "badge": "source",
+    "tooltip": "Edit this part in source mode (Alt+S)",
+    "label": "Markdown kept as written, edit it in source mode (Alt+S)"
+  },
+  "paste": {
+    "imageLater": "Pasting images comes in a later version"
+  }
+}

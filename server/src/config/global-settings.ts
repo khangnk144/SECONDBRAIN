@@ -2,6 +2,14 @@ import { copyFile, readFile } from 'node:fs/promises';
 import { atomicWriteFile } from '../fs/atomic-write-file.js';
 import { generateSessionToken, isWellFormedToken } from '../security/session-token.js';
 import { DEFAULT_PORT } from './cli-args.js';
+import {
+  normalizeAi,
+  normalizeReminders,
+  normalizeSystem,
+  type AiSettings,
+  type ReminderSettings,
+  type SystemSettings,
+} from './settings-sections.js';
 
 export type UiLanguage = 'vi' | 'en';
 export type UiTheme = 'dark' | 'light' | 'system';
@@ -23,6 +31,9 @@ export interface GlobalSettings {
   sessionToken: string;
   vaultPath: string | null;
   ui: UiSettings;
+  reminders: ReminderSettings;
+  system: SystemSettings;
+  ai: AiSettings;
   [extra: string]: unknown;
 }
 
@@ -38,6 +49,16 @@ const LANGUAGES: readonly UiLanguage[] = ['vi', 'en'];
 const THEMES: readonly UiTheme[] = ['dark', 'light', 'system'];
 const PALETTES: readonly UiPalette[] = ['dau-tam', 'hoa-dao', 'oai-huong'];
 const FONT_SIZES: readonly UiFontSize[] = [14, 16, 18];
+
+/** The values each UI setting accepts (the PUT /settings schema uses the same lists). */
+export const UI_CHOICES = {
+  language: LANGUAGES,
+  theme: THEMES,
+  palette: PALETTES,
+  fontSize: FONT_SIZES,
+} as const;
+/** Longest greeting name, in code points. */
+export const UI_NAME_MAX = 80;
 
 function pick<T>(allowed: readonly T[], value: unknown, fallback: T): T {
   return allowed.includes(value as T) ? (value as T) : fallback;
@@ -70,6 +91,9 @@ export function normalizeSettings(raw: Record<string, unknown>): GlobalSettings 
     sessionToken: isWellFormedToken(raw.sessionToken) ? raw.sessionToken : generateSessionToken(),
     vaultPath: typeof raw.vaultPath === 'string' && raw.vaultPath !== '' ? raw.vaultPath : null,
     ui: normalizeUi(raw.ui),
+    reminders: normalizeReminders(raw.reminders),
+    system: normalizeSystem(raw.system),
+    ai: normalizeAi(raw.ai),
   };
 }
 
@@ -81,7 +105,7 @@ export interface LoadSettingsResult {
 }
 
 export async function saveGlobalSettings(file: string, settings: GlobalSettings): Promise<void> {
-  // Owner-only on POSIX: the file holds the session token (and API keys from Phase 3).
+  // Owner-only on POSIX: the file holds the session token and the AI API keys.
   await atomicWriteFile(file, `${JSON.stringify(settings, null, 2)}\n`, { mode: 0o600 });
 }
 

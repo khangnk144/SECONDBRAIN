@@ -8,6 +8,7 @@ import { listShortcuts, registerShortcut } from '../../lib/shortcuts/shortcut-re
 import { useAppShortcuts } from '../../lib/shortcuts/use-app-shortcuts';
 import { resetAppState } from '../../lib/testing/reset-app-state';
 import { GRAPH_VIEW_KEYS } from '../graph/use-graph-view-keys';
+import { PDF_VIEWER_KEYS } from '../viewer/pdf-viewer-keys';
 import { comboParts } from './key-chips';
 import { LOCAL_KEYS } from './local-keys';
 import { CALENDAR_GRID_KEYS, EDITOR_CONTEXT_KEYS, TODAY_STRIP_KEYS } from './screen-keys';
@@ -134,6 +135,15 @@ describe('shortcut sheet (F22.2)', () => {
       within(sheet()).getByRole('region', { name: 'Trên Bản đồ não' }),
     ).getAllByRole('listitem')[1];
     expect([...(zoomIn?.querySelectorAll('kbd') ?? [])].map((k) => k.textContent)).toEqual(['+']);
+    // The PDF viewer's keys come from the list its key handler is tested against.
+    expect(rowsOf('Trong trình xem PDF')).toEqual([
+      'Sang trang trước hoặc trang sauPageUp hoặc PageDown',
+      'Về trang đầu hoặc trang cuốiHome hoặc End',
+      'Phóng toCtrl+=',
+      'Thu nhỏCtrl+-',
+      'Xem đúng cỡ (100%)Ctrl+0',
+    ]);
+    expect(PDF_VIEWER_KEYS).toHaveLength(5);
     expect(rowsOf('Ở các phần khác')).toEqual(rows(LOCAL_KEYS));
     expect(rowsOf('Ở các phần khác')).toContain('Đổi tên mục đang chọn trong cây thư mụcF2');
     expect(rowsOf('Ở các phần khác')).toContain(
@@ -185,6 +195,7 @@ describe('shortcut sheet (F22.2)', () => {
       'today',
       'calendar',
       'graph',
+      'viewer',
     ]);
   });
 });

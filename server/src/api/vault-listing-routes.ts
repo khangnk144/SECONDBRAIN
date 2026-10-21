@@ -11,12 +11,11 @@ const collator = new Intl.Collator('vi', { numeric: true, sensitivity: 'base' })
 
 /** Sidebar tree and template list: both read from disk so they are never behind the files. */
 export function registerVaultListingRoutes(app: FastifyInstance, context: AppContext): void {
-  const { vault, deadlines } = context;
   const bundled = new Set(TEMPLATE_PATHS.map(key));
 
   app.get('/api/tree', async (_request, reply) => {
-    const listing = await vault.list();
-    const urgent = deadlines
+    const listing = await context.vault.list();
+    const urgent = context.deadlines
       .items()
       .filter((item) => item.urgency === 'urgent' && !item.done)
       .map((item) => item.path);
@@ -25,7 +24,7 @@ export function registerVaultListingRoutes(app: FastifyInstance, context: AppCon
   });
 
   app.get('/api/templates', async (_request, reply) => {
-    const { files } = await vault.list();
+    const { files } = await context.vault.list();
     const templates = files
       .filter((file) => isNotePath(file.path) && classifyPath(file.path) === 'template')
       .map((file) => ({
@@ -41,7 +40,7 @@ export function registerVaultListingRoutes(app: FastifyInstance, context: AppCon
 
   // "Khôi phục mẫu gốc": re-creates missing bundled templates only, never overwrites (F14.1).
   app.post('/api/templates/restore', async () => {
-    const restored = await restoreMissingTemplates(vault);
+    const restored = await restoreMissingTemplates(context.vault);
     await context.settled();
     return { restored };
   });

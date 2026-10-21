@@ -8,10 +8,12 @@ import { CANCELLED, type OperationResult } from './operation-result';
 import { useTabsStore } from './tabs-store';
 import { INBOX_FOLDER, parentFolder } from './vault-paths';
 
-/** Folder of the note on screen, else `0 Inbox`. */
+/** Folder of the note on screen, else `0 Inbox` (also while a PDF is on screen). */
 export function folderForNewNote(): VaultPath {
   const { routeActive, tabs, activeId } = useTabsStore.getState();
-  const active = routeActive ? tabs.find((tab) => tab.id === activeId) : undefined;
+  const active = routeActive
+    ? tabs.find((tab) => tab.id === activeId && tab.kind !== 'file')
+    : undefined;
   return active ? parentFolder(active.path) : INBOX_FOLDER;
 }
 

@@ -1,14 +1,15 @@
 /**
- * Keys one screen or the editor handles itself, grouped by where they work. The brain map
- * exports its list (`GRAPH_VIEW_KEYS`); the other components keep their keys inside their key
- * handlers, so their lists are declared here, each next to the name of the component it must
- * follow.
+ * Keys one screen or the editor handles itself, grouped by where they work. The brain map and the
+ * PDF viewer export their lists (`GRAPH_VIEW_KEYS`, `PDF_VIEWER_KEYS`); the other components keep
+ * their keys inside their key handlers, so their lists are declared here, each next to the name
+ * of the component it must follow.
  */
 import { GRAPH_VIEW_KEYS, type GraphViewKeyAction } from '../graph/use-graph-view-keys';
+import { PDF_VIEWER_KEYS } from '../viewer/pdf-viewer-keys';
 import type { LocalKeyRow } from './local-keys';
 
 export interface ScreenKeyGroup {
-  id: 'today' | 'calendar' | 'graph';
+  id: 'today' | 'calendar' | 'graph' | 'viewer';
   titleKey: string;
   rows: readonly LocalKeyRow[];
 }
@@ -65,5 +66,15 @@ export const SCREEN_KEY_GROUPS: readonly ScreenKeyGroup[] = [
     id: 'graph',
     titleKey: 'shortcut-sheet.groups.graph',
     rows: GRAPH_VIEW_KEYS.map(({ keys, action }) => row(GRAPH_LABELS[action], [keys])),
+  },
+  {
+    // Only while focus is inside the viewer (`features/viewer/pdf-document-view.tsx`).
+    id: 'viewer',
+    titleKey: 'shortcut-sheet.groups.viewer',
+    rows: PDF_VIEWER_KEYS.map(({ id, keys }) => ({
+      id: `viewer-${id}`,
+      keys,
+      labelKey: `shortcut-sheet.viewer.${id}`,
+    })),
   },
 ];

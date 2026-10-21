@@ -108,3 +108,22 @@ CSS). `FormattingKeys` binds every registry key in the editor and always takes t
 default such as view-source on `Ctrl+U`); `Alt+S` stays in the app shortcut registry. Commands are
 disabled on a verbatim block, in a code block (except paragraph/code block), for block commands in a
 table cell, and in source mode (except undo/redo/source).
+
+## Attachments (`attachments/`)
+Files dropped or pasted into the editor (`extensions/attachment-drop-paste.ts`, before the Markdown
+paste), dropped on the note screen outside the text, picked with "/ Ảnh", or dropped into source
+mode go through one flow (`attachment-uploads.ts`): one slot per file in the order given, images
+upload at once, documents after one "Lưu vào" choice (`document-target-store.ts`, remembered per
+vault; `DocumentTargetChooserHost` is mounted by the note screen), one file after another
+(`uploadAttachment` in `lib/api/attachments-api.ts`). In the editor each slot is a widget
+decoration (`upload-placeholders.ts`, never saved) whose position follows edits; the returned link
+becomes a `wikilink` node (`attachment-link-insert.ts`: alone on an empty line or between blocks
+as its own paragraph, inline with a separating space otherwise) in its own undo step. No converter
+rule changed: an inserted link is an ordinary edit of the block it lands in.
+
+Rendering never writes (P1). `![[x.png]]` and `![alt](path)` resolve through the link targets
+(`embed-display.ts`; Markdown images relative to the note, then from the vault root) and show
+through `lib/vault-file-blob.ts` (token-fetched object URLs, refreshed on `note:changed`/
+`note:created`, revoked when unused) as `<img>` only – SVG too. Web images are never fetched; a
+missing file is a placeholder naming it. Other embedded files are cards (`file-card-view.ts`);
+`[[x.pdf]]` and any non-note target open through `openVaultFile`.

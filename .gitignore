@@ -53,3 +53,11 @@ worktrees/
 # delivery bundles
 .transfer/
 .vitest/
+
+# AI agent kit and working notes: kept on the owner's machine, never published
+/.claude/
+/.codex/
+/plans/
+/CLAUDE.md
+/AGENTS.md
+/.repomixignore

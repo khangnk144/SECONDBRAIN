@@ -13,7 +13,8 @@
     "table": "Bảng",
     "date": "Ngày",
     "divider": "Đường kẻ",
-    "template": "Mẫu"
+    "template": "Mẫu",
+    "image": "Ảnh"
   },
   "templates": {
     "label": "Chọn mẫu",
@@ -32,9 +33,8 @@
     "ambiguousTitle": "Có nhiều ghi chú tên {{target}}. Bấm để chọn đích.",
     "chooseTarget": "Chọn đích…",
     "chooseTargetMenu": "Chọn ghi chú đích cho {{target}}",
-    "embedTitle": "Nhúng {{target}}. Ảnh sẽ hiện ở bản sau.",
-    "fileMissing": "Chưa có file {{name}} trong vault.",
-    "fileLater": "Mở file đính kèm sẽ có ở bản sau."
+    "embedTitle": "Nhúng {{target}}.",
+    "fileMissing": "Không tìm thấy tệp {{name}} trong kho. Có thể tệp đã bị đổi tên hoặc xóa; hãy sửa liên kết, hoặc thêm lại tệp vào kho."
   },
   "tag": {
     "label": "Gợi ý thẻ",
@@ -78,7 +78,7 @@
     "label": "Đoạn Markdown giữ nguyên, sửa trong chế độ nguồn (Alt+S)"
   },
   "paste": {
-    "imageLater": "Dán ảnh sẽ có ở bản sau"
+    "htmlImagesDropped": "Ảnh trong nội dung dán từ web không được giữ lại. Lưu ảnh về máy rồi kéo vào ghi chú."
   },
   "toolbar": {
     "label": "Định dạng",

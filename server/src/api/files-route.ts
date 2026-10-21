@@ -4,7 +4,7 @@ import nodePath from 'node:path';
 import type { FastifyInstance } from 'fastify';
 import type { AppContext } from '../app-context/create-app-context.js';
 import { guardVaultPath } from '../security/path-guard.js';
-import { pathQuerySchema, type PathQuery } from './vault-route-schemas.js';
+import { vaultPathSchema } from './vault-route-schemas.js';
 
 /** Raster images render inline in the app (SPEC §4.8). */
 const INLINE_IMAGE_TYPES: Readonly<Record<string, string>> = {
@@ -33,16 +33,35 @@ function attachmentDisposition(name: string): string {
 /**
  * Response headers for a vault file name (SPEC §5 Security): images inline with their type, SVG only
  * as a sandboxed image, everything else (HTML, Markdown, PDF, …) as a download that is never
- * sniffed or rendered in the app origin. Never cached: the file may change on disk at any time.
+ * sniffed or rendered in the app origin. `download` also sends images as a download (the
+ * "Tải về" button). Never cached: the file may change on disk at any time.
  */
-export function fileServingHeaders(name: string): Record<string, string> {
+export function fileServingHeaders(
+  name: string,
+  options: { download?: boolean } = {},
+): Record<string, string> {
   const dot = name.lastIndexOf('.');
   const extension = dot > 0 ? name.slice(dot + 1).toLowerCase() : '';
   const common = { 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' };
   const image = INLINE_IMAGE_TYPES[extension];
-  if (image) return { ...common, 'content-type': image, 'content-security-policy': DOWNLOAD_CSP };
+  const disposition: Record<string, string> = options.download
+    ? { 'content-disposition': attachmentDisposition(name) }
+    : {};
+  if (image) {
+    return {
+      ...common,
+      'content-type': image,
+      'content-security-policy': DOWNLOAD_CSP,
+      ...disposition,
+    };
+  }
   if (extension === 'svg') {
-    return { ...common, 'content-type': 'image/svg+xml', 'content-security-policy': SVG_CSP };
+    return {
+      ...common,
+      'content-type': 'image/svg+xml',
+      'content-security-policy': SVG_CSP,
+      ...disposition,
+    };
   }
   return {
     ...common,
@@ -52,17 +71,27 @@ export function fileServingHeaders(name: string): Record<string, string> {
   };
 }
 
-/** GET /api/files?path= – streams a vault file through the path guard (never `.secondbrain/`). */
+const filesQuerySchema = {
+  type: 'object',
+  required: ['path'],
+  properties: { path: vaultPathSchema, download: { type: 'string', enum: ['0', '1'] } },
+} as const;
+
+/**
+ * GET /api/files?path=[&download=1] – streams a vault file through the path guard (never
+ * `.secondbrain/`); `download=1` forces `content-disposition: attachment` for every type.
+ */
 export function registerFilesRoute(app: FastifyInstance, context: AppContext): void {
-  app.get<{ Querystring: PathQuery }>(
+  app.get<{ Querystring: { path: string; download?: '0' | '1' } }>(
     '/api/files',
-    { schema: { querystring: pathQuerySchema } },
+    { schema: { querystring: filesQuerySchema } },
     async (request, reply) => {
       const path = guardVaultPath(request.query.path);
       // Type and download name come from the file actually served, never from the requested
       // spelling (other case, NFC form or Windows short name of the same file, or a link).
       const real = await realpath(await context.vault.resolveExisting(path));
-      reply.headers(fileServingHeaders(nodePath.basename(real)));
+      const download = request.query.download === '1';
+      reply.headers(fileServingHeaders(nodePath.basename(real), { download }));
       return reply.send(createReadStream(real));
     },
   );

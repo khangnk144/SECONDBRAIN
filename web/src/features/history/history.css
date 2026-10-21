@@ -1,0 +1,147 @@
+/* Version history dialog: versions on the left, what a restore would change on the right. */
+.modal-backdrop:has(.history-dialog) {
+  padding-top: 6vh;
+}
+
+.modal.history-dialog {
+  width: min(960px, 100%);
+  max-height: 88vh;
+  overflow: hidden;
+}
+
+.history-dialog__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.history-dialog__header h2 {
+  font-size: 1.0625rem;
+  line-height: 1.4;
+}
+
+.history-dialog__note {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  color: var(--ink-2);
+  font-size: 0.875rem;
+}
+
+.history-dialog__error {
+  color: var(--urgent-text);
+  font-size: 0.875rem;
+}
+
+.history-dialog__columns {
+  display: grid;
+  grid-template-columns: minmax(200px, 260px) minmax(0, 1fr);
+  gap: var(--space-4);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 68vh;
+  margin: 0;
+  padding: 2px;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.history-list__item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  min-height: 32px;
+  padding: var(--space-2);
+  border: 0;
+  border-radius: var(--radius-s);
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.history-list__item:hover {
+  background: var(--bg);
+}
+
+.history-list__item[aria-current='true'] {
+  background: var(--accent-soft);
+}
+
+.history-list__title {
+  font-size: 0.875rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.history-list__detail {
+  color: var(--ink-2);
+  font-size: max(12px, 0.78125rem);
+  line-height: 1.4;
+}
+
+/* --ink-2 on --accent-soft is below 4.5:1: the selected version's details use --ink. */
+.history-list__item[aria-current='true'] .history-list__detail {
+  color: var(--ink);
+}
+
+.history-version {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  max-height: 68vh;
+  overflow-y: auto;
+}
+
+.history-version__title {
+  font-size: 0.9375rem;
+}
+
+.history-diff .conflict-diff__rows {
+  max-height: 48vh;
+}
+
+.history-version__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.history-version__confirm {
+  flex-basis: 100%;
+  font-size: 0.875rem;
+}
+
+.history-section__all {
+  align-self: flex-start;
+  min-height: 32px;
+  margin-left: var(--space-2);
+}
+
+@media (max-width: 699px) {
+  .history-dialog__columns {
+    grid-template-columns: minmax(0, 1fr);
+    overflow-y: auto;
+  }
+
+  .history-list {
+    max-height: 30vh;
+  }
+
+  .history-version {
+    max-height: none;
+    overflow: visible;
+  }
+}

@@ -100,6 +100,29 @@ const ROUTES: {
   { method: 'GET', url: '/api/daily/neighbors?date=2026-10-20' },
   { method: 'GET', url: '/api/graph' },
   { method: 'GET', url: `/api/graph/local?${NOTE}&depth=2` },
+  { method: 'POST', url: '/api/attachments', payload: { target: 'auto' } },
+  { method: 'GET', url: '/api/resources' },
+  { method: 'POST', url: '/api/files/open-external', payload: { path: 'Templates/Note.md' } },
+  { method: 'GET', url: '/api/history/status' },
+  { method: 'GET', url: `/api/history?${NOTE}` },
+  { method: 'GET', url: `/api/history/version?${NOTE}&commit=abcdef1` },
+  {
+    method: 'POST',
+    url: '/api/history/restore',
+    payload: { path: '0 Inbox/a.md', commit: 'abcdef1', expectedRevision: REV },
+  },
+  { method: 'GET', url: '/api/reminders' },
+  {
+    method: 'POST',
+    url: '/api/reminders/dismiss',
+    payload: { keys: ['x|note:a.md|2026-10-24|3'] },
+  },
+  { method: 'GET', url: '/api/settings' },
+  { method: 'PUT', url: '/api/settings', payload: { ui: { theme: 'light' } } },
+  { method: 'POST', url: '/api/vault/switch', payload: { path: null } },
+  { method: 'POST', url: '/api/backup/export' },
+  { method: 'POST', url: '/api/backup/restore' },
+  { method: 'POST', url: '/api/logs/reveal' },
 ];
 
 const label = (route: (typeof ROUTES)[number]) => `${route.method} ${route.url.split('?')[0]}`;

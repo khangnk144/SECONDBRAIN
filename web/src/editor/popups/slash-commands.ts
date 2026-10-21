@@ -3,6 +3,7 @@ import {
   CalendarBlank,
   Code,
   FileText,
+  ImageIcon,
   ListBullets,
   ListChecks,
   ListNumbers,
@@ -15,6 +16,8 @@ import {
   type Icon,
 } from '@phosphor-icons/react';
 import { foldText } from '../../lib/fold-text';
+import { uploadIntoEditor } from '../attachments/editor-attachment-upload';
+import { pickImageFiles } from '../attachments/pick-image-files';
 
 export interface SlashCommand {
   id: string;
@@ -50,10 +53,7 @@ function blockCommand(
   };
 }
 
-/**
- * The slash menu, generated from this registry: only features that exist are listed (images
- * join when attachments do).
- */
+/** The slash menu, generated from this registry: only features that exist are listed. */
 export const SLASH_COMMANDS: readonly SlashCommand[] = [
   blockCommand('heading1', 'heading1', TextHOne, 'h1 heading title tieu de', (c) =>
     c.setHeading({ level: 1 }),
@@ -78,6 +78,21 @@ export const SLASH_COMMANDS: readonly SlashCommand[] = [
   blockCommand('table', 'table', Table, 'table bang', (c) =>
     c.insertTable({ rows: 3, cols: 2, withHeaderRow: true }),
   ),
+  {
+    id: 'image',
+    labelKey: 'image',
+    icon: ImageIcon,
+    keywords: 'image picture photo screenshot anh hinh',
+    can: (editor) => editor.isEditable,
+    // Picks image files, then uploads them like a drop at the caret (F15.1).
+    run: (editor, range) => {
+      editor.chain().focus().deleteRange(range).run();
+      void pickImageFiles().then((files) => {
+        if (files.length === 0 || editor.isDestroyed) return;
+        void uploadIntoEditor(editor.view, files, editor.state.selection.from);
+      });
+    },
+  },
   {
     id: 'date',
     labelKey: 'date',

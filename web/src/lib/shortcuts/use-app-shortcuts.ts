@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { GRAPH_ROUTE, navigateTo } from '../app-navigation';
+import { GRAPH_ROUTE, navigateTo, SETTINGS_ROUTE } from '../app-navigation';
 import { useCaptureUi } from '../capture-ui-store';
 import { openDailyNote } from '../daily-flow';
 import { startNewNote } from '../new-note-flow';
@@ -11,8 +11,7 @@ import { installShortcutListener, registerShortcut } from './shortcut-registry';
 
 /**
  * App-wide shortcuts (SPEC F22). `Alt+S` and the formatting keys belong to the editor; `Esc` to
- * each overlay; `Alt+,` (settings) arrives with the settings screen. While an overlay is open the
- * registry is suspended, so none of these fire there.
+ * each overlay. While an overlay is open the registry is suspended, so none of these fire there.
  */
 export const APP_SHORTCUTS = [
   {
@@ -52,6 +51,12 @@ export const APP_SHORTCUTS = [
     keys: 'Alt+G',
     labelKey: 'shortcuts.graph',
     run: () => navigateTo(GRAPH_ROUTE),
+  },
+  {
+    id: 'settings',
+    keys: 'Alt+,',
+    labelKey: 'shortcuts.settings',
+    run: () => navigateTo(SETTINGS_ROUTE),
   },
   {
     id: 'close-tab',

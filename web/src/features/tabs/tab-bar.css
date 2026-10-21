@@ -44,6 +44,12 @@
   cursor: pointer;
 }
 
+.tab__icon {
+  flex: 0 0 auto;
+  margin-right: var(--space-1);
+  vertical-align: -3px;
+}
+
 .tab__close {
   display: inline-flex;
   flex: 0 0 auto;

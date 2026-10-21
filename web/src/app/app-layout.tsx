@@ -1,13 +1,15 @@
 import { useEffect, type MouseEvent } from 'react';
-import { Outlet, useMatches } from 'react-router';
+import { Outlet, useLocation, useMatches } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { CaptureOverlay } from '../features/capture/capture-overlay';
 import { ConnectionBanner } from '../features/connection/connection-banner';
 import { DialogHost } from '../features/dialogs/dialog-host';
+import { HistoryDialogHost } from '../features/history/history-dialog-host';
 import { JournalBanner } from '../features/journal/journal-banner';
 import { SearchPalette } from '../features/search/search-palette';
 import { ShortcutSheet } from '../features/shortcut-sheet/shortcut-sheet';
 import { ToastHost } from '../features/toasts/toast-host';
+import { SETTINGS_ROUTE } from '../lib/app-navigation';
 import { useEffectivePanes, usePanesStore } from '../lib/panes-store';
 import { useAppShortcuts } from '../lib/shortcuts/use-app-shortcuts';
 import { useWritingFocus } from '../lib/writing-focus-store';
@@ -28,9 +30,20 @@ function skipToMainContent(event: MouseEvent<HTMLAnchorElement>) {
   document.getElementById('main-content')?.focus();
 }
 
+/**
+ * Key of the routed screen: it changes with the language, so screens that keep translated text
+ * outside React (editor decorations, canvas labels) are built again in the new language when it
+ * changes from elsewhere (another window, SPEC F19.2). Settings, where she switches the language,
+ * re-renders in place instead, so the control she used keeps focus.
+ */
+function useScreenKey(language: string): string {
+  return useLocation().pathname === SETTINGS_ROUTE ? 'settings' : language;
+}
+
 /** Three-pane frame: left sidebar, main content, optional right panel; both sides collapsible. */
 export function AppLayout() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const screenKey = useScreenKey(i18n.language);
   const handle = mergedRouteHandle(useMatches());
   const immersive = handle.immersive === true;
   const { leftCollapsed, rightCollapsed } = useEffectivePanes(immersive);
@@ -68,13 +81,14 @@ export function AppLayout() {
           leftCollapsed={leftCollapsed}
           rightCollapsed={rightCollapsed}
         />
-        <div className="app-main__inner">
+        <div key={screenKey} className="app-main__inner">
           <Outlet />
         </div>
       </main>
       {showRightPanel ? <RightPanel>{Panel ? <Panel /> : null}</RightPanel> : null}
       <ToastHost />
       <DialogHost />
+      <HistoryDialogHost />
       <SearchPalette />
       <CaptureOverlay />
       <ShortcutSheet />

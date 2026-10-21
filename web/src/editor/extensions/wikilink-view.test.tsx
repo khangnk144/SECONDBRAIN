@@ -67,7 +67,8 @@ describe('wikilink rendering and clicks (F4.2, F4.5)', () => {
     expect(ambiguous).toHaveAttribute('data-status', 'ambiguous');
     expect(ambiguous!.querySelector('button')).toHaveAccessibleName('Chọn đích…');
     expect(embed).toHaveAttribute('data-embed');
-    expect(embed!.querySelector('svg')).toBeTruthy();
+    // An embedded image file is shown, not linked (its rendering is covered with the attachments).
+    expect(embed).toHaveAttribute('data-display', 'image');
   });
 
   it('re-renders when the link targets change', () => {

@@ -8,11 +8,9 @@ import { journalIdParams } from './vault-route-schemas.js';
  * calls undo within its 10 s window. Journal ids are ULIDs, never paths.
  */
 export function registerJournalRoutes(app: FastifyInstance, context: AppContext): void {
-  const { vault } = context;
-
   app.get('/api/journal/pending', async (_request, reply) => {
     reply.header('cache-control', 'no-store');
-    return { entries: await vault.pendingJournal() };
+    return { entries: await context.vault.pendingJournal() };
   });
 
   for (const action of ['undo', 'complete'] as const) {
@@ -21,8 +19,8 @@ export function registerJournalRoutes(app: FastifyInstance, context: AppContext)
       { schema: { params: journalIdParams } },
       async (request) => {
         try {
-          if (action === 'undo') await vault.undoJournal(request.params.id);
-          else await vault.completeJournal(request.params.id);
+          if (action === 'undo') await context.vault.undoJournal(request.params.id);
+          else await context.vault.completeJournal(request.params.id);
         } finally {
           await context.settled();
           await context.refreshPendingJournal();

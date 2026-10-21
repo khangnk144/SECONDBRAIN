@@ -10,6 +10,11 @@ import { TasksScreen } from '../features/tasks/tasks-screen';
 import { CalendarScreen } from '../features/calendar/calendar-screen';
 import { CalendarDayPanel } from '../features/calendar/calendar-day-panel';
 import { GraphScreen } from '../features/graph/graph-screen';
+import { SettingsScreen } from '../features/settings/settings-screen';
+import { RemindersScreen } from '../features/reminders/reminders-screen';
+import { FileViewerScreen } from '../features/viewer/file-viewer-screen';
+import { FileReferencesPanel } from '../features/viewer/file-references-panel';
+import { ResourcesScreen } from '../features/resources/resources-screen';
 
 /**
  * Route handle read by the layout:
@@ -33,6 +38,7 @@ const todayHandle: AppRouteHandle = { inlineConnectionBanner: true };
 const noteHandle: AppRouteHandle = { rightPanel: true, tabs: true, panel: NotePanel };
 const calendarHandle: AppRouteHandle = { rightPanel: true, panel: CalendarDayPanel };
 const graphHandle: AppRouteHandle = { immersive: true };
+const fileHandle: AppRouteHandle = { rightPanel: true, tabs: true, panel: FileReferencesPanel };
 
 export const appRoutes: RouteObject[] = [
   {
@@ -47,6 +53,11 @@ export const appRoutes: RouteObject[] = [
       // caret of a template's `{{cursor}}`, `&line=N` to show a line).
       { path: 'note', element: <NoteScreen />, handle: noteHandle },
       { path: 'tags', element: <TagsScreen /> },
+      { path: 'settings', element: <SettingsScreen /> },
+      { path: 'reminders', element: <RemindersScreen /> },
+      // `#/file?path=<encoded vault path>`: the viewer tab of a vault file (PDF).
+      { path: 'file', element: <FileViewerScreen />, handle: fileHandle },
+      { path: 'resources', element: <ResourcesScreen /> },
       { path: '*', element: <NotFoundScreen /> },
     ],
   },

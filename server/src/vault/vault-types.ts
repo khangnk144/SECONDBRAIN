@@ -177,7 +177,9 @@ export interface RelinkPlan {
   unresolvable?: UnresolvableRelink[];
 }
 
-export type TrashReason = 'user' | 'conflict' | 'sample-data' | 'restore-collision';
+/** `history-restore`: the text a version restore replaced, when it could not be committed first. */
+export type TrashReason =
+  'user' | 'conflict' | 'sample-data' | 'restore-collision' | 'history-restore';
 
 /** `vault/.secondbrain/trash/<id>/meta.json` (SPEC §4.11). */
 export interface TrashMeta {
@@ -289,6 +291,12 @@ export interface VaultService extends VaultEditingOperations {
   /** Reverts a done or interrupted operation using its saved `before` copies (revision-checked). */
   undoJournal(id: string): Promise<void>;
 
+  /**
+   * Runs `task` alone on the write queue: no mutation of this vault (save, rename, move, trash…)
+   * starts until it has finished, while reads go on. For work that needs the files to hold still,
+   * such as building a backup. `task` must not call a mutation itself (it would wait forever).
+   */
+  exclusive<T>(task: () => Promise<T>): Promise<T>;
   onChange(listener: (change: VaultChange) => void): () => void;
   setRelinkPlanner(planner: RelinkPlanner | null): void;
   /** Waits for queued writes to finish; later calls fail. */

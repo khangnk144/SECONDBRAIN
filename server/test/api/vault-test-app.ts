@@ -1,15 +1,15 @@
 import { mkdirSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import type { FastifyInstance, InjectOptions, LightMyRequestResponse } from 'fastify';
-import {
-  createAppContext,
-  type AppContext,
-  type AppContextOptions,
-} from '../../src/app-context/create-app-context.js';
+import type { AppContext, AppContextOptions } from '../../src/app-context/create-app-context.js';
+import { openVaultHost, type VaultHost } from '../../src/app-context/vault-host.js';
+import type { VaultPlugin } from '../../src/app-context/vault-plugins.js';
 import type { VaultRouteOptions } from '../../src/api/register-vault-routes.js';
-import type { GlobalSettings } from '../../src/config/global-settings.js';
+import { saveGlobalSettings, type GlobalSettings } from '../../src/config/global-settings.js';
+import { createSettingsStore } from '../../src/config/settings-store.js';
 import { buildApp } from '../../src/http/build-app.js';
 import { createSilentLogger, type AppLogger } from '../../src/logging/rotating-file-logger.js';
+import type { RunAtLoginService } from '../../src/system/run-at-login.js';
 import { authHeaders, makeSettings, makeTempDir, removeDir } from '../helpers/test-environment.js';
 
 export interface VaultTestApp {
@@ -18,7 +18,9 @@ export interface VaultTestApp {
   port: number;
   /** The live settings object the app reads (tests may change `ui.language`). */
   settings: GlobalSettings;
+  /** The routes' context: always the vault that is open now (see the vault host). */
   context: AppContext;
+  host: VaultHost;
   app: FastifyInstance;
   /** Authenticated request with the canonical Origin (what the UI sends). */
   call(
@@ -31,9 +33,9 @@ export interface VaultTestApp {
 }
 
 /**
- * A real app context (vault, index, watcher) on a temp home whose name has spaces and
+ * A real vault host (vault, index, watcher, plugins) on a temp home whose name has spaces and
  * Vietnamese letters, plus an API-only Fastify app. `listen: true` binds 127.0.0.1:<port>
- * for WebSocket clients.
+ * for WebSocket clients. `vaultRoot` is the vault open at creation.
  */
 export async function createVaultTestApp(
   port: number,
@@ -45,6 +47,15 @@ export async function createVaultTestApp(
     home?: string;
     logger?: AppLogger;
     vaultRoutes?: VaultRouteOptions;
+    /** Started for every vault the host opens. */
+    plugins?: VaultPlugin[];
+    /** Saves settings changes to `<home>/.secondbrain/settings.json` (default: memory only). */
+    persistSettings?: boolean;
+    runAtLogin?: RunAtLoginService;
+    platform?: NodeJS.Platform;
+    drainTimeoutMs?: number;
+    /** Adds test-only routes before the app is ready. */
+    beforeReady?: (app: FastifyInstance) => void | Promise<void>;
   } = {},
 ): Promise<VaultTestApp> {
   const home = options.home ?? makeTempDir('sb vault home Ghi chú');
@@ -53,25 +64,40 @@ export async function createVaultTestApp(
     options.seed(path.join(home, 'vault'));
   }
   const settings = makeSettings({ port });
-  const context = await createAppContext({
+  const settingsFile = path.join(home, '.secondbrain', 'settings.json');
+  const store = createSettingsStore(
+    () => settings,
+    options.persistSettings ? (next) => saveGlobalSettings(settingsFile, next) : async () => {},
+  );
+  const host = await openVaultHost({
     home,
-    settings,
+    settings: store,
     logger: options.logger ?? createSilentLogger(),
-    now: options.now,
-    watcher: options.watcher ?? { stabilityMs: 100 },
-    faults: options.faults,
+    port,
+    plugins: options.plugins,
+    drainTimeoutMs: options.drainTimeoutMs,
+    contextOptions: {
+      now: options.now,
+      watcher: options.watcher ?? { stabilityMs: 100 },
+      faults: options.faults,
+    },
   });
+  const { context } = host;
   const app = await buildApp({
     getSettings: () => settings,
+    settingsStore: store,
     port,
     mode: 'production',
     webDir: path.join(home, 'app', 'web'),
     webDistDir: path.join(home, 'app', 'web', 'dist'),
     serveUi: false,
-    context,
+    host,
     logger: options.logger,
     vaultRoutes: options.vaultRoutes,
+    runAtLogin: options.runAtLogin,
+    platform: options.platform,
   });
+  await options.beforeReady?.(app);
   if (options.listen) await app.listen({ host: '127.0.0.1', port });
   else await app.ready();
   return {
@@ -80,6 +106,7 @@ export async function createVaultTestApp(
     port,
     settings,
     context,
+    host,
     app,
     call: (method, url, payload) =>
       app.inject({
@@ -90,7 +117,7 @@ export async function createVaultTestApp(
       }),
     async close() {
       await app.close();
-      await context.close();
+      await host.close();
       if (!options.home) removeDir(home);
     },
   };

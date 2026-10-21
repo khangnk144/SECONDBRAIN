@@ -1,6 +1,7 @@
 import {
   Archive,
   ArrowSquareOut,
+  ClockCounterClockwise,
   FolderOpen,
   FolderPlus,
   FolderSimple,
@@ -11,6 +12,7 @@ import {
 import type { TFunction } from 'i18next';
 import { ARCHIVE_FOLDER, isInsideFolder, parentFolder } from '../../lib/vault-paths';
 import type { PopupMenuItem } from '../dialogs/popup-menu';
+import { openHistoryDialog } from '../history/open-history-dialog';
 import {
   archiveRow,
   moveRow,
@@ -25,7 +27,7 @@ import type { TreeRow } from './tree-model';
 /**
  * Context-menu entries of a tree row in the order of SPEC F2: New note, New folder, Rename,
  * Move to…, Move to Archive, Delete, Reveal in Explorer. Notes add "Open in new tab" first and
- * create new items in their own folder.
+ * "Version history" last, and create new items in their own folder.
  */
 export function treeMenuItems(
   row: TreeRow,
@@ -106,6 +108,12 @@ export function treeMenuItems(
       label: t('sidebar-tree.menu.openInNewTab'),
       icon: ArrowSquareOut,
       onSelect: () => openNoteRow(row.path, true),
+    });
+    items.push({
+      id: 'history',
+      label: t('history.menu'),
+      icon: ClockCounterClockwise,
+      onSelect: () => openHistoryDialog(row.path),
     });
   }
   return items;

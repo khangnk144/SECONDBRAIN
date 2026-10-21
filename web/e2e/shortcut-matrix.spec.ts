@@ -126,6 +126,11 @@ test('every app shortcut fires on its screen (F22.1, browser tab)', async ({ pag
     await page.keyboard.press(keysOf('graph'));
     await expect(page).toHaveURL(/#\/graph/);
   });
+  await run('settings', async () => {
+    await page.keyboard.press(keysOf('settings'));
+    await expect(page).toHaveURL(/#\/settings$/);
+    await expect(page.getByRole('heading', { level: 1, name: 'Cài đặt' })).toBeVisible();
+  });
   await run('daily-note', async () => {
     await page.keyboard.press(keysOf('daily-note'));
     await expect(page).toHaveURL(new RegExp(`path=Daily%2F${today}\\.md`));
@@ -215,7 +220,9 @@ test('Ctrl+/ lists exactly the registered app shortcuts (F22.2)', async ({ page 
   await page.goto('/');
   await appReady(page);
   await page.keyboard.press('Control+/');
-  expect(await sheetRows()).toEqual(APP_KEYS.map((s) => s.keys).sort());
+  const appRows = await sheetRows();
+  expect(appRows).toEqual(APP_KEYS.map((s) => s.keys).sort());
+  expect(appRows).toContain('Alt+,');
 
   // On a note, the note screen's Alt+S is registered too and listed once.
   await page.goto(noteUrl(noteA));

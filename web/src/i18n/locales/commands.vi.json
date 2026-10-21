@@ -17,5 +17,13 @@
   "rebuildIndex": "Xây lại chỉ mục",
   "rebuildStarted": "Đang xây lại chỉ mục. Bạn vẫn tìm kiếm được trong lúc chờ.",
   "rebuildRunning": "Chỉ mục đang được xây lại rồi. Đợi một chút nhé.",
-  "rebuildDone": "Đã xây lại chỉ mục."
+  "rebuildDone": "Đã xây lại chỉ mục.",
+  "openSettings": "Mở cài đặt",
+  "openReminders": "Mở nhắc nhở",
+  "openResources": "Mở tài liệu",
+  "exportBackup": "Xuất bản sao lưu",
+  "exportBackupBusy": "Đang chuẩn bị bản sao lưu…",
+  "toggleTheme": "Đổi giao diện sáng/tối",
+  "quitApp": "Thoát Second Brain",
+  "noteHistory": "Xem lịch sử phiên bản"
 }

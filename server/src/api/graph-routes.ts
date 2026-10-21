@@ -12,11 +12,9 @@ import { vaultPathSchema } from './vault-route-schemas.js';
  * doc, an unlinked raw source) has an empty local graph; an unknown path is 404.
  */
 export function registerGraphRoutes(app: FastifyInstance, context: AppContext): void {
-  const { index } = context;
-
   app.get('/api/graph', async (_request, reply) => {
     reply.header('cache-control', 'no-store');
-    return buildGraph(index.graphRows());
+    return buildGraph(context.index.graphRows());
   });
 
   app.get<{ Querystring: { path: string; depth: 1 | 2 } }>(
@@ -35,9 +33,9 @@ export function registerGraphRoutes(app: FastifyInstance, context: AppContext): 
     },
     async (request, reply) => {
       const path = guardVaultPath(request.query.path);
-      const graph = buildGraph(index.graphRows());
+      const graph = buildGraph(context.index.graphRows());
       const drawn = graph.nodes.some((n) => n.id === path);
-      if (!drawn && index.getNote(path) === null) throw notFound(path);
+      if (!drawn && context.index.getNote(path) === null) throw notFound(path);
       reply.header('cache-control', 'no-store');
       return localGraph(graph, path, request.query.depth);
     },

@@ -1,0 +1,231 @@
+/* "Cài đặt": one left-aligned column, H2 per section, no cards (design.md §4, §5). Tokens only. */
+.settings-screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  max-width: 720px;
+  padding-bottom: var(--space-12);
+}
+
+.settings-screen__note {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  color: var(--ink-2);
+}
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--line);
+}
+
+.settings-section__intro,
+.settings-section__link {
+  max-width: var(--measure);
+  color: var(--ink-2);
+}
+
+.settings-section__intro {
+  margin-top: calc(-1 * var(--space-3));
+}
+
+.settings-section a,
+.settings-section__link a {
+  color: var(--accent);
+}
+
+/* A link on its own line is a target, not text: at least 24 px tall (SPEC §5). */
+.settings-section__link a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+}
+
+.settings-field,
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.settings-field__label {
+  padding: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.settings-field__control {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+.settings-field__value {
+  font-size: 0.875rem;
+  color: var(--ink);
+}
+
+.settings-field__hint {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  max-width: var(--measure);
+  font-size: 0.875rem;
+  color: var(--ink-2);
+}
+
+.settings-field__notice {
+  color: var(--soon-text);
+}
+
+.settings-path {
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+
+.settings-input--name,
+.settings-input--model,
+.settings-input--key {
+  max-width: 22rem;
+}
+
+.settings-input--path {
+  flex: 1 1 18rem;
+  max-width: 32rem;
+}
+
+.settings-input--time,
+.settings-input--port {
+  width: 9rem;
+}
+
+.settings-select {
+  width: auto;
+  min-width: 14rem;
+  max-width: 22rem;
+}
+
+.settings-file-name {
+  min-width: 0;
+  font-size: 0.875rem;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.settings-file-name--none {
+  color: var(--ink-2);
+}
+
+.settings-choice input:focus-visible,
+.settings-switch input:focus-visible,
+.settings-section a:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Radio and checkbox groups: real inputs, each label at least 32 px tall. */
+.settings-choices {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.settings-choices__options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+}
+
+.settings-choice,
+.settings-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 32px;
+  font-size: 0.875rem;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.settings-choice input,
+.settings-switch input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.settings-switch input:disabled,
+.settings-switch input:disabled + span {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.settings-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.settings-swatch {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.settings-status {
+  font-size: 0.875rem;
+  color: var(--ok-text);
+}
+
+.settings-status--block {
+  max-width: var(--measure);
+}
+
+/* An empty live region stays in place (so it is announced when it fills) without adding a gap. */
+.settings-status--block:empty {
+  margin-top: calc(-1 * var(--space-2));
+}
+
+.settings-status--error {
+  max-width: var(--measure);
+  color: var(--urgent-text);
+}
+
+.settings-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  max-width: 22rem;
+}
+
+.settings-progress__bar {
+  width: 100%;
+  height: 8px;
+  accent-color: var(--accent);
+}
+
+@media (pointer: coarse) {
+  .settings-choice,
+  .settings-switch {
+    min-height: 40px;
+  }
+}

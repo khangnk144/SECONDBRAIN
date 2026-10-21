@@ -25,7 +25,11 @@
   },
   "diff": {
     "title": "Compare the version on disk with yours",
-    "summary": "{{added}} lines only in yours (+), {{removed}} lines only on disk (−).",
+    "summary": "{{added}}, {{removed}}.",
+    "summaryAdded_one": "{{count}} line only in yours (+)",
+    "summaryAdded_other": "{{count}} lines only in yours (+)",
+    "summaryRemoved_one": "{{count}} line only on disk (−)",
+    "summaryRemoved_other": "{{count}} lines only on disk (−)",
     "noChanges": "Both versions are the same line by line (only line endings differ).",
     "added": "Only in yours:",
     "removed": "Only on disk:",

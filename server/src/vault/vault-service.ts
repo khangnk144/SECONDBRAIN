@@ -99,8 +99,8 @@ export function createVaultService(options: VaultServiceOptions): VaultService {
     patchWith: (path, expectedRevision, plan) => patchFileWith(core, path, expectedRevision, plan),
     rewriteJournaled: (path, expectedRevision, plan, op) =>
       rewriteJournaled(core, path, expectedRevision, plan, op),
-    writeKeepingConflictCopy: (path, content, expectedRevision) =>
-      writeKeepingConflictCopy(core, path, content, expectedRevision),
+    writeKeepingConflictCopy: (path, content, expectedRevision, reason) =>
+      writeKeepingConflictCopy(core, path, content, expectedRevision, reason),
     renameFolder: (path, newPath, opts) => renameFolder(core, path, newPath, opts),
     previewRenameFolder: (path, newPath, opts) => previewRenameFolder(core, path, newPath, opts),
     trashFolder: (path) => trashFolder(core, path),
@@ -112,6 +112,7 @@ export function createVaultService(options: VaultServiceOptions): VaultService {
     pendingJournal: () => open(() => pendingJournal(core)),
     completeJournal: (id) => completeJournal(core, id),
     undoJournal: (id) => undoJournal(core, id),
+    exclusive: (task) => core.queue.run(task),
     onChange(listener) {
       listeners.add(listener);
       return () => {

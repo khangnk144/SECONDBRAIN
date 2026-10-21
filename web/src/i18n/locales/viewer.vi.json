@@ -1,0 +1,44 @@
+{
+  "closeTab": "Đóng thẻ",
+  "retry": "Thử lại",
+  "noFile": "Chưa chọn tệp nào.",
+  "notViewable": "{{name}} không xem được trong app. Bạn có thể tải nó về hoặc mở bằng ứng dụng khác.",
+  "files": {
+    "download": "Tải về",
+    "openExternal": "Mở bằng ứng dụng khác",
+    "downloaded": "Đã tải {{name}} về máy.",
+    "opening": "Đang mở {{name}} bằng ứng dụng mặc định của máy.",
+    "missing": "Không tìm thấy tệp {{name}}. Có thể nó đã được đổi tên hoặc chuyển vào thùng rác.",
+    "offline": "Chưa kết nối được với máy chủ. Bấm đúp Mở Second Brain trên màn hình rồi thử lại.",
+    "downloadFailed": "Không tải được {{name}}. Hãy thử lại sau ít phút.",
+    "executable": "Second Brain không tự mở chương trình hay tập lệnh như {{name}}. Nếu bạn tin tệp này, hãy mở nó từ thư mục của nó.",
+    "openFailed": "Không mở được {{name}} bằng ứng dụng khác. Bạn có thể bấm Tải về rồi mở tệp đã tải."
+  },
+  "pdf": {
+    "loading": "Đang mở {{name}}…",
+    "password": "{{name}} được đặt mật khẩu nên chưa xem được trong app. Hãy tải về rồi mở bằng ứng dụng khác.",
+    "invalid": "Không mở được {{name}}: tệp không phải PDF hợp lệ hoặc đã bị hỏng. Bạn vẫn có thể tải nó về.",
+    "loadFailed": "Không mở được {{name}}. Bấm Thử lại; nếu vẫn lỗi, hãy mở lại Second Brain.",
+    "toolbar": "Công cụ xem PDF",
+    "pagesLabel": "Các trang của {{name}}",
+    "pageLabel": "Trang {{page}} / {{total}}",
+    "pageFailed": "Không hiện được trang này.",
+    "previous": "Trang trước",
+    "next": "Trang sau",
+    "withKey": "{{label}} ({{keys}})",
+    "pageWord": "Trang",
+    "pageInput_one": "Số trang, trong {{count}} trang",
+    "pageInput_other": "Số trang, trong {{count}} trang",
+    "pageOf": "/ {{total}}",
+    "zoomOut": "Thu nhỏ",
+    "zoomIn": "Phóng to",
+    "zoomValue": "{{percent}}%",
+    "fitWidth": "Vừa chiều rộng"
+  },
+  "references": {
+    "title": "Ghi chú nhắc đến tài liệu này",
+    "loading": "Đang tải…",
+    "loadError": "Chưa tải được danh sách ghi chú. Hãy thử lại sau.",
+    "empty": "Chưa ghi chú nào nhắc đến tài liệu này."
+  }
+}

@@ -18,8 +18,9 @@ export function looksLikeMarkdown(text: string): boolean {
 /**
  * Paste: Markdown-looking plain text (`<u>…</u>` included) is parsed with the converter and
  * inserted as content (one line stays inline); HTML is limited to the schema (ProseMirror's
- * parser, which keeps `<u>` and `text-decoration: underline` as underline); pasted images are
- * left out with a toast until attachments exist.
+ * parser, which keeps `<u>` and `text-decoration: underline` as underline). Images inside pasted
+ * HTML point at web addresses the app never fetches, so they are left out with a toast; pasted
+ * image files are uploaded by `AttachmentDropPaste`, which runs first.
  */
 export const MarkdownPaste = Extension.create({
   name: 'markdownPaste',
@@ -45,10 +46,6 @@ export const MarkdownPaste = Extension.create({
             if (!data) return false;
             const text = data.getData('text/plain');
             const html = data.getData('text/html');
-            if (hasImageFile(data)) {
-              showImageToast();
-              if (!text && !html) return true;
-            }
             if (
               !text ||
               html.includes('data-pm-slice') ||
@@ -65,13 +62,7 @@ export const MarkdownPaste = Extension.create({
 });
 
 function showImageToast(): void {
-  showToast({ message: i18n.t('editor.paste.imageLater') });
-}
-
-function hasImageFile(data: DataTransfer): boolean {
-  return Array.from(data.items ?? []).some(
-    (item) => item.kind === 'file' && item.type.startsWith('image/'),
-  );
+  showToast({ message: i18n.t('editor.paste.htmlImagesDropped') });
 }
 
 function withoutImages(fragment: Fragment): Fragment {

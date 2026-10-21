@@ -1,7 +1,9 @@
 import { Extension, type Editor } from '@tiptap/core';
 import { NodeSelection } from '@tiptap/pm/state';
 import type { VaultPath } from '../../lib/api/vault-types';
+import { openVaultFile } from '../../lib/open-vault-file';
 import { isNotePath } from '../../lib/vault-paths';
+import { markdownImageDisplay } from '../attachments/embed-display';
 import type { EditorContext } from '../editor-context';
 import { followWikilink, pathFormTarget } from '../link-actions';
 import type { WikilinkAttributes } from '../schema/wikilink-node';
@@ -58,12 +60,23 @@ export function chooseLinkTarget(
   editor.view.focus();
 }
 
-/** Enter on a selected wikilink opens it (Ctrl/⌘+Enter: in a new tab). */
+/**
+ * Enter on a selected wikilink opens it (Ctrl/⌘+Enter: in a new tab); on a selected Markdown image
+ * of the vault it opens the file (the keyboard twin of a double click).
+ */
 export function createWikilinkKeys(context: EditorContext) {
   const followSelected = (editor: Editor, newTab: boolean) => {
     const { selection } = editor.state;
-    if (!(selection instanceof NodeSelection) || selection.node.type.name !== 'wikilink')
-      return false;
+    if (!(selection instanceof NodeSelection)) return false;
+    const { node } = selection;
+    if (node.type.name === 'image') {
+      const src = String(node.attrs['src'] ?? '');
+      const display = markdownImageDisplay(src, '', context.getNotePath());
+      if (display.mode === 'link' || !display.path) return false;
+      openVaultFile(display.path, { newTab });
+      return true;
+    }
+    if (node.type.name !== 'wikilink') return false;
     followLinkNode(editor, context, selection.from, { newTab });
     return true;
   };

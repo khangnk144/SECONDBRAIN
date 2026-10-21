@@ -3,6 +3,7 @@
   "loading": "Đang mở ghi chú…",
   "notFound": "Không tìm thấy ghi chú này. Có thể nó đã được đổi tên hoặc xóa.",
   "loadFailed": "Chưa mở được ghi chú vì chưa kết nối được với máy chủ. Mình sẽ thử lại khi có kết nối.",
+  "retryOpen": "Thử lại",
   "editorLabel": "Nội dung ghi chú {{title}}",
   "title": {
     "label": "Tiêu đề ghi chú (cũng là tên file)"

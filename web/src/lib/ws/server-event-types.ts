@@ -1,6 +1,8 @@
 /** Events pushed on `/ws`, mirrored from `server/src/ws/server-events.ts`. */
 import type { PendingJournalEntry } from '../api/journal-types';
+import type { ReminderEntry } from '../api/reminders-types';
 import type { VaultPath } from '../api/vault-types';
+import type { UiPrefs } from '../ui-prefs';
 
 export interface IndexProgress {
   phase: 'scan' | 'index' | 'swap' | 'done';
@@ -15,7 +17,13 @@ export type ServerEvent =
   | { type: 'note:renamed'; path: VaultPath; oldPath: VaultPath; revision: string }
   | { type: 'folder:changed'; path: VaultPath }
   | ({ type: 'index:progress' } & IndexProgress)
-  | { type: 'journal:pending'; entries: PendingJournalEntry[] };
+  | { type: 'journal:pending'; entries: PendingJournalEntry[] }
+  /** A reminder fired (on time or caught up); carries the final outcome of the server toast. */
+  | { type: 'reminder'; reminder: ReminderEntry }
+  /** Another vault is open now: windows keep their drafts and reload. */
+  | { type: 'vault:switched'; vaultId: string }
+  /** The UI settings changed (in any window): apply them here at once. */
+  | { type: 'settings:changed'; ui: UiPrefs };
 
 /**
  * `resync` is synthetic: emitted by the client after a reconnect, because events may have been

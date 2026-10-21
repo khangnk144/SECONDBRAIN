@@ -3,10 +3,12 @@ import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { withQuery } from '../../lib/api/query-string';
+import { fileRoute } from '../../lib/app-navigation';
 import { apiError, installFetchMock, type FetchMock } from '../../lib/testing/fetch-mock';
 import { resetAppState } from '../../lib/testing/reset-app-state';
 import { useToastStore } from '../../lib/toast-store';
 import { emitServerEvent } from '../../lib/ws/server-event-bus';
+import { startOpenVaultFile } from '../viewer/open-vault-file-in-app';
 import { GraphScreen } from './graph-screen';
 import { GraphView } from './graph-view';
 import { GRAPH_VIEW_KEYS } from './use-graph-view-keys';
@@ -108,15 +110,17 @@ describe('brain map screen', () => {
     expect(screen.queryByText('Đang vẽ bản đồ não…')).toBeNull();
   });
 
-  it('a document without a viewer yet gets a toast instead of opening', async () => {
+  it('a PDF source node opens in the viewer tab', async () => {
     const user = userEvent.setup();
+    const navigate = await resetAppState();
+    const stop = startOpenVaultFile();
     renderScreen({ focus: VAULT.pdf });
     const details = await screen.findByRole('region', { name: 'Newton 1687.pdf' });
     expect(within(details).getByText('Tài liệu')).toBeInTheDocument();
     await user.click(within(details).getByRole('button', { name: 'Mở tài liệu' }));
-    expect(useToastStore.getState().toasts.map((t) => t.message)).toEqual([
-      'Xem tài liệu ngay trong app sẽ có ở bản sau.',
-    ]);
+    expect(navigate).toHaveBeenLastCalledWith(fileRoute(VAULT.pdf), undefined);
+    expect(useToastStore.getState().toasts).toEqual([]);
+    stop();
   });
 
   it('0 resets the view and + / - zoom, but not while typing in the search box', async () => {

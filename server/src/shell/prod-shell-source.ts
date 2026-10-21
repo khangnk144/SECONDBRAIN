@@ -1,9 +1,10 @@
-import { existsSync, readdirSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import fastifyStatic from '@fastify/static';
 import type { FastifyInstance } from 'fastify';
 import type { ShellSource } from './shell-source.js';
+import { distUrlPath, listDistPublicPaths, staticFileHeaders } from './static-file-headers.js';
 
 /**
  * Production UI: hashed assets from web/dist through @fastify/static, and index.html read on
@@ -17,13 +18,9 @@ export async function registerProdShellSource(
   if (existsSync(distDir)) {
     // Allowlist instead of "everything but index.html": on NTFS, spellings such as
     // /INDEX.HTML, /index.html. or /index.html::$DATA reach the same file. Only hashed
-    // bundles under /assets/ and the exact top-level public files (favicon…) are served;
-    // the raw template is only ever rendered through "/" with placeholders filled in.
-    const publicFiles = new Set(
-      readdirSync(distDir, { withFileTypes: true })
-        .filter((entry) => entry.isFile() && entry.name !== 'index.html')
-        .map((entry) => `/${entry.name}`),
-    );
+    // bundles under /assets/ and the exact public files (favicon, manifest, sw.js, icons…)
+    // are served; the raw template is only ever rendered through "/" with placeholders filled in.
+    const publicFiles = listDistPublicPaths(distDir);
     await app.register(fastifyStatic, {
       root: distDir,
       prefix: '/',
@@ -31,6 +28,13 @@ export async function registerProdShellSource(
       wildcard: true,
       dotfiles: 'deny',
       allowedPath: (pathName) => pathName.startsWith('/assets/') || publicFiles.has(pathName),
+      setHeaders: (reply, filePath) => {
+        for (const [name, value] of Object.entries(
+          staticFileHeaders(distUrlPath(distDir, filePath)),
+        )) {
+          reply.header(name, value);
+        }
+      },
     });
   }
   return {

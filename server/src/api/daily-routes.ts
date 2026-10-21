@@ -43,13 +43,11 @@ export function registerDailyRoutes(
   context: AppContext,
   uiLanguage: () => TemplateLanguage,
 ): void {
-  const { vault } = context;
-
   app.get<{ Querystring: { date: string } }>(
     '/api/daily',
     { schema: { querystring: dateQuery } },
     async (request, reply) => {
-      const note = await vault.read(dailyNotePath(checkDate(request.query.date)));
+      const note = await context.vault.read(dailyNotePath(checkDate(request.query.date)));
       reply.header('cache-control', 'no-store');
       return { path: note.path, revision: note.revision };
     },
@@ -61,11 +59,11 @@ export function registerDailyRoutes(
     async (request, reply) => {
       const date = checkDate(request.body.date);
       const { content, cursor } = await dailyNoteContent(
-        vault,
+        context.vault,
         { date, now: context.now(), language: uiLanguage() },
         (code) => context.logger.warn(`Daily template not used (${code}); minimal note created.`),
       );
-      const result = await vault.create(dailyNotePath(date), content);
+      const result = await context.vault.create(dailyNotePath(date), content);
       await context.settled();
       return reply.code(201).send({ path: result.path, revision: result.revision, cursor });
     },

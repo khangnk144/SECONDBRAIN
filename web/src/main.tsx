@@ -5,6 +5,7 @@ import '@fontsource/be-vietnam-pro/700.css';
 import '@fontsource/jetbrains-mono/400.css';
 import './styles/tokens.css';
 import './styles/base.css';
+import './pwa/start-pwa';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './app/app';

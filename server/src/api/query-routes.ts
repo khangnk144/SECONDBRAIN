@@ -26,8 +26,6 @@ const noStore = (reply: FastifyReply) => reply.header('cache-control', 'no-store
  * all come from the same service (SPEC §4.7), which derives "today" from the clock on every call.
  */
 export function registerQueryRoutes(app: FastifyInstance, context: AppContext): void {
-  const { index, deadlines } = context;
-
   app.get<{ Querystring: SearchQuerystring }>(
     '/api/search',
     {
@@ -50,24 +48,24 @@ export function registerQueryRoutes(app: FastifyInstance, context: AppContext): 
       const { q = '', ...filters } = request.query;
       const query: SearchQuery = { q, ...filters };
       noStore(reply);
-      return { results: index.search(query) };
+      return { results: context.index.search(query) };
     },
   );
 
   app.get('/api/tags', async (_request, reply) => {
     noStore(reply);
-    return { tags: index.tags() };
+    return { tags: context.index.tags() };
   });
 
   // `[[` autocomplete and ghost/ambiguous rendering (F4): every note and file a link can target.
   app.get('/api/link-targets', async (_request, reply) => {
     noStore(reply);
-    return index.linkTargets();
+    return context.index.linkTargets();
   });
 
   app.get('/api/today', async (_request, reply) => {
     noStore(reply);
-    return deadlines.today();
+    return context.deadlines.today();
   });
 
   app.get<{ Querystring: { month?: string; includeArchive: boolean } }>(
@@ -86,7 +84,7 @@ export function registerQueryRoutes(app: FastifyInstance, context: AppContext): 
     async (request, reply) => {
       const month = request.query.month ?? toLocalDate(context.now()).slice(0, 7);
       noStore(reply);
-      return deadlines.calendar(month, { includeArchive: request.query.includeArchive });
+      return context.deadlines.calendar(month, { includeArchive: request.query.includeArchive });
     },
   );
 
@@ -95,7 +93,7 @@ export function registerQueryRoutes(app: FastifyInstance, context: AppContext): 
     { schema: { querystring: includeArchiveQuery } },
     async (request, reply) => {
       noStore(reply);
-      return deadlines.tasks({ includeArchive: request.query.includeArchive });
+      return context.deadlines.tasks({ includeArchive: request.query.includeArchive });
     },
   );
 }

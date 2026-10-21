@@ -3,6 +3,7 @@
   "loading": "Opening the note…",
   "notFound": "This note was not found. It may have been renamed or deleted.",
   "loadFailed": "The note could not be opened because the server is not reachable. It will try again once connected.",
+  "retryOpen": "Try again",
   "editorLabel": "Content of the note {{title}}",
   "title": {
     "label": "Note title (also the file name)"

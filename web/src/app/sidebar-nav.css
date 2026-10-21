@@ -1,0 +1,44 @@
+/* Additions to the sidebar nav: the reminders badge and the pinned "Cài đặt" entry. */
+.sidebar-nav__label {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.sidebar-nav__badge {
+  flex: 0 0 auto;
+  min-width: 20px;
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-s);
+  background: var(--accent-soft);
+  color: var(--ink);
+  font-size: max(12px, 0.75rem);
+  font-weight: 600;
+  line-height: 20px;
+  text-align: center;
+}
+
+.sidebar-nav--bottom {
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--line);
+}
+
+.sidebar-nav__keys {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 899px) {
+  .sidebar-nav--bottom {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  /* One sideways-scrolling row: items keep their full width, badge included. */
+  .sidebar-nav li,
+  .sidebar-nav__label {
+    flex: none;
+  }
+
+  .sidebar-nav__keys {
+    display: none;
+  }
+}

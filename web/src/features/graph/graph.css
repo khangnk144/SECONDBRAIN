@@ -204,6 +204,11 @@
   background: var(--accent-soft);
 }
 
+/* --ink-2 on --accent-soft is below 4.5:1: the selected result's folder line uses --ink. */
+.graph-results__item.is-active .graph-results__folder {
+  color: var(--ink);
+}
+
 .graph-results__title,
 .graph-neighbors__title {
   color: var(--ink);

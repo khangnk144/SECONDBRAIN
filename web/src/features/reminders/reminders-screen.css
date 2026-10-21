@@ -1,0 +1,136 @@
+/* "Nhắc nhở": a quiet list, no cards (design.md §5). Tokens only. */
+.reminders-screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 720px;
+}
+
+.reminders-screen__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+
+.reminders-screen__note,
+.reminders-screen__empty {
+  max-width: var(--measure);
+  color: var(--ink-2);
+}
+
+.reminders-screen__note a {
+  color: var(--accent);
+}
+
+.reminders-screen__note a:focus-visible,
+.reminder-row__title:focus-visible,
+.reminders-hint button:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-s);
+}
+
+.reminders-hint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  max-width: var(--measure);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  color: var(--ink);
+}
+
+.reminders-hint p {
+  flex: 1 1 16rem;
+  font-size: 0.875rem;
+}
+
+.reminders-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reminder-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.reminder-row__dot {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  margin-top: 9px;
+  border-radius: 50%;
+}
+
+.reminder-row__dot--urgent {
+  background: var(--urgent);
+}
+
+.reminder-row__dot--soon {
+  background: var(--soon);
+}
+
+.reminder-row__dot--ok {
+  background: var(--ok);
+}
+
+.reminder-row__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.reminder-row__title {
+  align-self: flex-start;
+  min-height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 500;
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.reminder-row__title:hover {
+  color: var(--accent);
+}
+
+.reminder-row__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  font-size: 0.875rem;
+  color: var(--ink-2);
+}
+
+.reminder-row__due--urgent {
+  color: var(--urgent-text);
+}
+
+.reminder-row__due--soon {
+  color: var(--soon-text);
+}
+
+.reminder-row__due--ok {
+  color: var(--ok-text);
+}
+
+.reminder-row__dismiss {
+  flex: 0 0 auto;
+}

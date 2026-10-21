@@ -4,7 +4,6 @@ import { installFetchMock, type FetchMock } from '../../lib/testing/fetch-mock';
 import { resetAppState } from '../../lib/testing/reset-app-state';
 import { saveMarkdown } from '../markdown/markdown-document';
 import { renderEditor } from '../__tests__/render-editor';
-import { SLASH_COMMANDS } from './slash-commands';
 
 function options() {
   const listbox = screen.getByRole('listbox', { name: 'Chèn khối' });
@@ -24,7 +23,7 @@ describe('slash menu (F3.3)', () => {
     vi.useRealTimers();
   });
 
-  it('lists the implemented blocks from the registry (no image yet)', () => {
+  it('lists the implemented blocks from the registry', () => {
     const t = renderEditor('Mở đầu.\n');
     t.newLine();
     t.type('/');
@@ -38,11 +37,11 @@ describe('slash menu (F3.3)', () => {
       'Trích dẫn',
       'Code',
       'Bảng',
+      'Ảnh',
       'Ngày',
       'Đường kẻ',
       'Mẫu',
     ]);
-    expect(SLASH_COMMANDS.map((c) => c.id)).not.toContain('image');
     const listbox = screen.getByRole('listbox');
     expect(t.root).toHaveAttribute('aria-controls', listbox.id);
     expect(t.root.getAttribute('aria-activedescendant')).toBe(

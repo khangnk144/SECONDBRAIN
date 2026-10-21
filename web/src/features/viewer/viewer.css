@@ -1,0 +1,275 @@
+/* Viewer tab of a vault file (PDF). Tokens only; the page drawing itself comes from pdf.js. */
+
+/*
+ * Like the brain map, the viewer takes the whole height of the main area: the pages scroll inside
+ * it while the toolbar stays put. Pages are not lines of text, so the 720 px measure does not apply.
+ */
+.app-main:has(.file-viewer) {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding-bottom: var(--space-4);
+}
+
+.app-main:has(.file-viewer) .app-main__inner {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  max-width: none;
+}
+
+.file-viewer {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+  min-height: 0;
+}
+
+.file-viewer__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  color: var(--ink-2);
+}
+
+.file-viewer__title {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 1.0625rem;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-viewer__note,
+.file-viewer__state {
+  color: var(--ink-2);
+  font-size: 0.875rem;
+}
+
+.file-viewer__state {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  max-width: 720px;
+}
+
+.file-viewer__state p {
+  color: var(--ink);
+}
+
+.file-viewer__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.pdf-document {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-height: 0;
+}
+
+.pdf-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+}
+
+.pdf-toolbar__group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.pdf-toolbar__group--end {
+  margin-left: auto;
+}
+
+.pdf-toolbar__page {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: var(--space-1);
+  color: var(--ink-2);
+  font-size: 0.875rem;
+}
+
+.pdf-toolbar__page-input.text-input {
+  width: 4.5em;
+  min-height: 32px;
+  padding: 0 var(--space-2);
+  text-align: center;
+}
+
+.pdf-toolbar__zoom {
+  min-width: 4.5ch;
+  color: var(--ink-2);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.pdf-toolbar__button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 32px;
+  padding: 0 var(--space-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-m);
+  background: transparent;
+  color: var(--ink-2);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.pdf-toolbar__button:hover {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.pdf-toolbar__button[aria-pressed='true'] {
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+
+.pdf-toolbar .icon-button:disabled,
+.pdf-toolbar__button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* The scroll area: arrows and the wheel scroll here; PageUp/PageDown move a page. */
+.pdf-scroller {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-l);
+  background: var(--bg);
+  scrollbar-gutter: stable;
+}
+
+.pdf-scroller:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+.pdf-pages {
+  display: flex;
+  flex-direction: column;
+  align-items: safe center;
+  gap: var(--space-4);
+  width: max-content;
+  min-width: 100%;
+  padding: var(--space-4);
+}
+
+.pdf-page {
+  --scale-round-x: 1px;
+  --scale-round-y: 1px;
+  position: relative;
+  flex: 0 0 auto;
+  overflow: hidden;
+  border-radius: var(--radius-s);
+  background: var(--paper);
+}
+
+.pdf-page__drawing {
+  position: absolute;
+  inset: 0;
+}
+
+.pdf-page__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.pdf-page__failed {
+  position: absolute;
+  inset: auto var(--space-4) var(--space-4);
+  color: var(--ink-2);
+  font-size: 0.875rem;
+}
+
+/*
+ * pdf.js text layer (selectable, transparent text over the drawing), after pdf.js's own rules.
+ * The layer's opacity makes the selection a see-through tint of the accent, so the page's own
+ * letters stay readable under it.
+ */
+.pdf-text-layer {
+  --min-font-size: 1;
+  --text-scale-factor: calc(var(--total-scale-factor) * var(--min-font-size));
+  --min-font-size-inv: calc(1 / var(--min-font-size));
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: clip;
+  opacity: 0.3;
+  line-height: 1;
+  letter-spacing: normal;
+  word-spacing: normal;
+  text-align: initial;
+  text-size-adjust: none;
+  forced-color-adjust: none;
+  transform-origin: 0 0;
+}
+
+.pdf-text-layer :is(span, br) {
+  position: absolute;
+  color: transparent;
+  white-space: pre;
+  cursor: text;
+  transform-origin: 0% 0%;
+  user-select: text;
+}
+
+.pdf-text-layer > :not(.markedContent),
+.pdf-text-layer .markedContent span:not(.markedContent) {
+  --font-height: 0;
+  --scale-x: 1;
+  --rotate: 0deg;
+  z-index: 1;
+  font-size: calc(var(--text-scale-factor) * var(--font-height));
+  transform: rotate(var(--rotate)) scaleX(var(--scale-x)) scale(var(--min-font-size-inv));
+}
+
+.pdf-text-layer .markedContent {
+  display: contents;
+}
+
+.pdf-text-layer span[role='img'] {
+  cursor: default;
+  user-select: none;
+}
+
+.pdf-text-layer ::selection {
+  background: var(--accent);
+  color: transparent;
+}
+
+.pdf-text-layer br::selection {
+  background: transparent;
+}
+
+/* Narrow windows: the sidebar sits above, so the page scrolls and the pages get a fixed share. */
+@media (max-width: 899px) {
+  .app-main:has(.file-viewer) {
+    height: auto;
+  }
+
+  .pdf-scroller {
+    flex: none;
+    height: 75vh;
+  }
+}

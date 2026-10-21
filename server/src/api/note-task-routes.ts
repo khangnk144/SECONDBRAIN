@@ -98,8 +98,6 @@ function deadlinePlanner(date: string): PatchPlanner {
  * index has the change, so Today and the calendar already show it.
  */
 export function registerNoteTaskRoutes(app: FastifyInstance, context: AppContext): void {
-  const { vault } = context;
-
   app.patch<{ Body: TaskBody }>(
     '/api/note/task',
     {
@@ -131,7 +129,9 @@ export function registerNoteTaskRoutes(app: FastifyInstance, context: AppContext
       const planner = taskPlanner(path, { line, expectedText }, edit, today, (text) => {
         lineText = text;
       });
-      const result = await withConflictReason(vault.patchWith(path, expectedRevision, planner));
+      const result = await withConflictReason(
+        context.vault.patchWith(path, expectedRevision, planner),
+      );
       await context.settled();
       return { revision: result.revision, lineText };
     },
@@ -182,7 +182,7 @@ export function registerNoteTaskRoutes(app: FastifyInstance, context: AppContext
       }
       try {
         const result = await withConflictReason(
-          vault.rewriteJournaled(path, expectedRevision, planner, 'reschedule'),
+          context.vault.rewriteJournaled(path, expectedRevision, planner, 'reschedule'),
         );
         const answer = { revision: result.revision, journalId: result.journalId };
         return lineText === undefined ? answer : { ...answer, lineText };

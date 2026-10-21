@@ -39,6 +39,7 @@ describe('sidebar context menus and row names (F2)', () => {
       'Chuyển vào Archive',
       'XóaDelete',
       'Hiện trong Explorer',
+      'Lịch sử phiên bản',
     ]);
     await user.keyboard('{ArrowDown}{ArrowDown}{Enter}');
     await waitFor(() => expect(useDialogStore.getState().queue).toHaveLength(1));

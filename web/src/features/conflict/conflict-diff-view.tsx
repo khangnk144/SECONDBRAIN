@@ -38,7 +38,10 @@ export function ConflictDiffView({ disk, mine }: ConflictDiffViewProps) {
       <p className="text-small">
         {counts.added + counts.removed === 0
           ? t('conflict.diff.noChanges')
-          : t('conflict.diff.summary', { added: counts.added, removed: counts.removed })}
+          : t('conflict.diff.summary', {
+              added: t('conflict.diff.summaryAdded', { count: counts.added }),
+              removed: t('conflict.diff.summaryRemoved', { count: counts.removed }),
+            })}
       </p>
       <ol className="conflict-diff__rows">
         {rows.map((row, index) =>

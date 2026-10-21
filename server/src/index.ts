@@ -9,6 +9,8 @@
  * shows when the server does not come up.
  */
 import { CliUsageError } from './config/cli-args.js';
+import { createHistoryPlugin } from './git/history-plugin.js';
+import { createRemindersPlugin } from './reminders/reminders-plugin.js';
 import { startServer } from './runtime/start-server.js';
 
 const EXIT_OK = 0;
@@ -19,7 +21,9 @@ const EXIT_USAGE = 64;
 
 async function main(): Promise<number> {
   const argv = process.argv.slice(2);
-  const result = await startServer({ argv, echoLogs: argv.includes('--dev') });
+  // Per-vault background services: they start with each opened vault and stop before it closes.
+  const plugins = [createRemindersPlugin(), createHistoryPlugin()];
+  const result = await startServer({ argv, echoLogs: argv.includes('--dev'), plugins });
 
   if (result.kind === 'already-running') {
     console.log(`Second Brain is already running at http://localhost:${result.port}`);

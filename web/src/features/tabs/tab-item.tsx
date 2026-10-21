@@ -1,12 +1,15 @@
-import { X } from '@phosphor-icons/react';
+import { FilePdf, X } from '@phosphor-icons/react';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { focusIsLost, focusOrMain } from '../../lib/focus-recovery';
-import { useTabsStore, type NoteTab } from '../../lib/tabs-store';
+import { tabKind, useTabsStore, type AppTab } from '../../lib/tabs-store';
 import { noteTitleFromPath } from '../../lib/vault-paths';
 
-/** One note tab: the title activates it, the × (or a middle click) closes it. */
-export function TabItem({ tab, active }: { tab: NoteTab; active: boolean }) {
+/**
+ * One tab: the title activates it, the × (or a middle click) closes it. A file tab (PDF viewer)
+ * shows the file name with its extension and a PDF icon.
+ */
+export function TabItem({ tab, active }: { tab: AppTab; active: boolean }) {
   const { t } = useTranslation();
   const ref = useRef<HTMLLIElement>(null);
   const title = noteTitleFromPath(tab.path);
@@ -44,6 +47,9 @@ export function TabItem({ tab, active }: { tab: NoteTab; active: boolean }) {
         title={tab.path}
         onClick={() => activate(tab.id)}
       >
+        {tabKind(tab) === 'file' ? (
+          <FilePdf className="tab__icon" size={16} aria-hidden="true" focusable="false" />
+        ) : null}
         {title}
       </button>
       <button

@@ -1,6 +1,8 @@
 /**
- * Fetch wrapper for the local API. Every /api call carries the session token
- * in the X-SB-Token header; errors follow the server's {error:{code,message,details}} shape.
+ * Fetch wrapper for the local API. Every /api call carries the session token in the X-SB-Token
+ * header and, once known, the id of the vault this window shows (so a request queued behind a
+ * vault switch is refused instead of landing in the other vault); errors follow the server's
+ * {error:{code,message,details}} shape.
  */
 export class ApiError extends Error {
   readonly status: number;
@@ -17,9 +19,19 @@ export class ApiError extends Error {
   }
 }
 
+/** Request header naming the vault this window shows (the server refuses a stale one). */
+export const VAULT_ID_HEADER = 'X-SB-Vault-Id';
+
 export interface ApiClientOptions {
   token: string | null;
   fetchImpl?: typeof fetch;
+  /** The vault this window shows, sent on every request once known. */
+  vaultId?: () => string | null;
+  /**
+   * Called when the server answers 409 `vault-switched`: another vault is open now, so nothing
+   * more of this window's state may reach the server (the page reloads into the new vault).
+   */
+  onVaultSwitched?: (vaultId: string | null) => void;
 }
 
 export interface ApiRequestInit {
@@ -27,9 +39,18 @@ export interface ApiRequestInit {
   body?: unknown;
 }
 
+/** A request whose body and answer are not JSON (multipart upload, file download). */
+export interface ApiRawInit {
+  method?: string;
+  body?: BodyInit;
+  signal?: AbortSignal;
+}
+
 export interface ApiClient {
   request<T>(path: string, init?: ApiRequestInit): Promise<T>;
   get<T>(path: string): Promise<T>;
+  /** Same headers and error handling as `request`; resolves with the successful response. */
+  raw(path: string, init?: ApiRawInit): Promise<Response>;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -54,27 +75,50 @@ async function toApiError(response: Response): Promise<ApiError> {
   }
 }
 
-export function createApiClient({ token, fetchImpl }: ApiClientOptions): ApiClient {
+/** True for the 409 the server sends once the vault this window shows is no longer open. */
+export function isVaultSwitchedError(error: unknown): error is ApiError {
+  return isApiError(error, 'CONFLICT') && error.details.reason === 'vault-switched';
+}
+
+function apiUrl(path: string): string {
+  return path.startsWith('/api/') ? path : '/api' + (path.startsWith('/') ? path : '/' + path);
+}
+
+export function createApiClient({
+  token,
+  fetchImpl,
+  vaultId,
+  onVaultSwitched,
+}: ApiClientOptions): ApiClient {
   const doFetch = fetchImpl ?? ((input, init) => fetch(input, init));
 
-  async function request<T>(path: string, init: ApiRequestInit = {}) {
+  function baseHeaders(): Record<string, string> {
     const headers: Record<string, string> = { Accept: 'application/json' };
     if (token) headers['X-SB-Token'] = token;
+    const id = vaultId?.();
+    if (id) headers[VAULT_ID_HEADER] = id;
+    return headers;
+  }
+
+  async function send(path: string, init: RequestInit): Promise<Response> {
+    const response = await doFetch(apiUrl(path), { ...init, credentials: 'same-origin' });
+    if (response.ok) return response;
+    const error = await toApiError(response);
+    if (isVaultSwitchedError(error)) {
+      const next = error.details.vaultId;
+      onVaultSwitched?.(typeof next === 'string' ? next : null);
+    }
+    throw error;
+  }
+
+  async function request<T>(path: string, init: ApiRequestInit = {}) {
+    const headers = baseHeaders();
     let body: string | undefined;
     if (init.body !== undefined) {
       headers['Content-Type'] = 'application/json';
       body = JSON.stringify(init.body);
     }
-    const url = path.startsWith('/api/')
-      ? path
-      : '/api' + (path.startsWith('/') ? path : '/' + path);
-    const response = await doFetch(url, {
-      method: init.method ?? 'GET',
-      headers,
-      body,
-      credentials: 'same-origin',
-    });
-    if (!response.ok) throw await toApiError(response);
+    const response = await send(path, { method: init.method ?? 'GET', headers, body });
     if (response.status === 204) return undefined as T;
     return (await response.json()) as T;
   }
@@ -82,6 +126,14 @@ export function createApiClient({ token, fetchImpl }: ApiClientOptions): ApiClie
   return {
     request,
     get: <T>(path: string) => request<T>(path),
+    // The browser sets the multipart boundary itself, so no Content-Type here.
+    raw: (path, init = {}) =>
+      send(path, {
+        method: init.method ?? 'GET',
+        headers: baseHeaders(),
+        body: init.body,
+        signal: init.signal,
+      }),
   };
 }
 

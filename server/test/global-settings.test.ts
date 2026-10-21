@@ -2,8 +2,11 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { resolveAppPaths } from '../src/config/app-paths.js';
-import { DEFAULT_UI_SETTINGS, loadOrCreateGlobalSettings } from '../src/config/global-settings.js';
-import { toPublicSettings } from '../src/api/settings-route.js';
+import {
+  DEFAULT_UI_SETTINGS,
+  loadOrCreateGlobalSettings,
+  normalizeSettings,
+} from '../src/config/global-settings.js';
 import { authHeaders, createTestApp, makeTempDir, removeDir } from './helpers/test-environment.js';
 
 describe('Global settings file', () => {
@@ -72,7 +75,7 @@ describe('Global settings file', () => {
 });
 
 describe('GET /api/settings', () => {
-  it('returns port and ui only, never the token or other keys', async () => {
+  it('keeps port and ui as before and never returns the token or other keys', async () => {
     const handle = await createTestApp(4786);
     (handle.settings as Record<string, unknown>).anthropicApiKey = 'sk-secret-value';
     await handle.app.ready();
@@ -82,10 +85,21 @@ describe('GET /api/settings', () => {
       headers: authHeaders(4786),
     });
     expect(res.statusCode).toBe(200);
-    expect(res.json()).toEqual({ port: 4786, ui: DEFAULT_UI_SETTINGS });
+    expect(res.json()).toMatchObject({ port: 4786, ui: DEFAULT_UI_SETTINGS });
+    expect(Object.keys(res.json()).sort()).toEqual([
+      'ai',
+      'configuredPort',
+      'port',
+      'reminders',
+      'restartRequired',
+      'system',
+      'ui',
+      'vault',
+    ]);
+    expect(res.json().vault).toBeNull(); // API-only build without a vault
     expect(res.body).not.toContain(handle.settings.sessionToken);
     expect(res.body).not.toContain('sk-secret-value');
-    expect(Object.keys(toPublicSettings(handle.settings, 4786).ui).sort()).toEqual([
+    expect(Object.keys(res.json().ui).sort()).toEqual([
       'fontSize',
       'language',
       'name',
@@ -93,5 +107,51 @@ describe('GET /api/settings', () => {
       'theme',
     ]);
     await handle.cleanup();
+  });
+});
+
+describe('Global settings sections for reminders, run at login and AI', () => {
+  it('fills defaults for a file written before these sections existed', () => {
+    const settings = normalizeSettings({});
+    expect(settings.reminders).toEqual({ time: '08:00' });
+    expect(settings.system).toEqual({ runAtLogin: false });
+    expect(settings.ai).toEqual({
+      provider: 'anthropic',
+      apiKeys: {},
+      chatModel: null,
+      embeddingModel: null,
+      folders: null,
+      enabled: false,
+      embeddings: false,
+    });
+  });
+
+  it('keeps valid values and unknown keys, repairs invalid ones', () => {
+    const settings = normalizeSettings({
+      reminders: { time: '24:00', snooze: 5 },
+      system: { runAtLogin: 'yes', tray: true },
+      ai: {
+        provider: 'openai',
+        apiKeys: { openai: 'sk-test-1234567890abcd', gemini: 42, mistral: 'm-key' },
+        chatModel: '  ',
+        embeddingModel: 'text-embedding-3-small',
+        folders: ['2 Areas', 7],
+        enabled: true,
+        futureFlag: 'x',
+      },
+    });
+    expect(settings.reminders).toEqual({ time: '08:00', snooze: 5 });
+    expect(settings.system).toEqual({ runAtLogin: false, tray: true });
+    expect(settings.ai).toMatchObject({
+      provider: 'openai',
+      apiKeys: { openai: 'sk-test-1234567890abcd', mistral: 'm-key' },
+      chatModel: null,
+      embeddingModel: 'text-embedding-3-small',
+      folders: ['2 Areas'],
+      enabled: true,
+      embeddings: false,
+      futureFlag: 'x',
+    });
+    expect(normalizeSettings({ reminders: { time: '07:30' } }).reminders.time).toBe('07:30');
   });
 });

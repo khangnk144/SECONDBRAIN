@@ -10,6 +10,15 @@ One entry per milestone (newest first). Format:
 - Known gaps: …
 ```
 
+## [M4] 2026-10-21 — Reminders, settings, attachments + PDF viewer, history, launcher + PWA (v1.0 candidate)
+- Added: server reminder scheduler (3 days, 1 day, due day at the configured time; catch-up after sleep or a restart; one summary toast for bursts) with Windows toasts (PowerShell, node-notifier fallback) and the in-app "Nhắc nhở" list, badge and one Web Notification across windows when no toast was shown.
+- Added: Settings screen (appearance applied live, reminder time, vault switch in process, rebuild with progress, backup export/restore, template restore, sample-data delete, log folder, run at login, port, install app, quit, AI keys stored masked) and `GET/PUT /api/settings`; vault host with per-vault plugins and an `x-sb-vault-id` guard.
+- Added: attachments (drop/paste into the editor and source mode, vault-wide unique names, inline images, file cards), "Tài liệu" view, pdf.js viewer tab under the strict CSP, downloads and "Mở bằng ứng dụng khác".
+- Added: git version history in the vault (exclude/attributes in `.git/info`, auto-commit every 10 minutes and on shutdown, history dialog with diff and revision-checked restore).
+- Added: PWA (manifest, icons, shell-only service worker with offline shell and update toast, install button), launcher `login` action, start-hidden.vbs, port-busy dialog naming the process, opening the installed app.
+- Fixed (review rounds): restored copies get their own vault id (and keep their reminder history), consistent backups, history restores that keep the replaced text, unreadable reminder store never overwritten, no vault inside a vault, recovery in place when the app opened before the server, focus after confirms and dismissals, contrast on selected rows, viewer keys in the shortcut sheet, English plurals.
+- Known gaps: see `MILESTONE-4.md` (manual Windows checks pending: real toast, run at login after a reboot, installed-app window, port-busy dialog, Explorer/default-app opening, S6 after a reboot).
+
 ## [M3] 2026-10-21 — Today, calendar, search, capture, daily notes, brain graph
 - Added: Today (greeting, one-sentence summary, 14-day strip over 60 days with overdue cell, popovers and keyboard path, today's tasks, inline capture, projects in progress, sample-data prompt, inline offline banner), "Việc cần làm" view, month calendar with day pane and rescheduling by drag or date picker (journaled, 10 s undo).
 - Added: brain map (d3-force on canvas, token colours, source nodes, intro/drift with reduced-motion support, hover/click/double-click, keyboard side panel, legend, hub names, local graph in the note pane).

@@ -10,6 +10,7 @@
     "today": "Trên trang Hôm nay",
     "calendar": "Trong Lịch",
     "graph": "Trên Bản đồ não",
+    "viewer": "Trong trình xem PDF",
     "local": "Ở các phần khác"
   },
   "local": {
@@ -21,6 +22,13 @@
   },
   "editor": {
     "tickTask": "Đánh dấu việc ở con trỏ là xong hoặc chưa xong (trên liên kết ghi chú thì mở trong thẻ mới, trên một thẻ #… thì tìm theo thẻ đó)"
+  },
+  "viewer": {
+    "pages": "Sang trang trước hoặc trang sau",
+    "ends": "Về trang đầu hoặc trang cuối",
+    "zoomIn": "Phóng to",
+    "zoomOut": "Thu nhỏ",
+    "actualSize": "Xem đúng cỡ (100%)"
   },
   "screens": {
     "stripDay": "Sang ngày trước hoặc ngày sau trong dải ngày",

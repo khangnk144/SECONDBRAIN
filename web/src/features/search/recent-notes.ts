@@ -38,7 +38,8 @@ export function mergeRecentNotes(
   serverRecents: readonly SearchResult[],
   limit = RECENT_NOTES_LIMIT,
 ): NoteHit[] {
-  const hits: NoteHit[] = [...tabs]
+  const hits: NoteHit[] = tabs
+    .filter((tab) => tab.kind !== 'file')
     .sort((a, b) => b.lastActive - a.lastActive)
     .map((tab) => recentHit(tab.path));
   for (const result of serverRecents) hits.push(toNoteHit(result));

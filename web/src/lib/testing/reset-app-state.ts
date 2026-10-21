@@ -1,6 +1,12 @@
 /** Test helper: puts every app-wide store back to a clean state for vault `vaultId`. */
 import { resetOwnWriteRevisions } from '../../features/deadline-items/own-write-revisions';
 import { resetNoteSessions } from '../../features/note-session/session-registry';
+import { resetHistoryDialog } from '../../features/history/open-history-dialog';
+import { resetReminders } from '../../features/reminders/reminders-store';
+import { resetPdfViews } from '../../features/viewer/pdf-view-memory';
+import { resetSettingsStore } from '../../features/settings/settings-store';
+import { setPageReload } from '../../features/settings/vault-reload';
+import { resetDocumentTargetRequests } from '../../editor/attachments/document-target-store';
 import { vi } from 'vitest';
 import { initI18n, i18n } from '../../i18n';
 import { setAppNavigator, type Navigator } from '../app-navigation';
@@ -15,6 +21,7 @@ import { useShortcutSheetUi } from '../shortcut-sheet-store';
 import { resetShortcuts } from '../shortcuts/shortcut-registry';
 import { useTabsStore } from '../tabs-store';
 import { resetToasts } from '../toast-store';
+import { resetVaultFileBlobs } from '../vault-file-blob';
 import { useTreeStore } from '../tree-store';
 import { useVaultStore } from '../vault-store';
 import { useWritingFocus } from '../writing-focus-store';
@@ -34,8 +41,15 @@ export async function resetAppState(vaultId: string | null = 'vault-a'): Promise
   resetToasts();
   resetDialogs();
   resetShortcuts();
+  resetVaultFileBlobs();
+  resetDocumentTargetRequests();
+  resetSettingsStore();
+  resetReminders();
+  setPageReload(null);
+  resetPdfViews();
+  resetHistoryDialog();
   clearServerEventHandlers();
-  useVaultStore.setState({ vaultId, ready: true });
+  useVaultStore.setState({ vaultId, ready: true, failed: false });
   useTreeStore.setState({ tree: null, status: 'idle', expanded: [] });
   useTabsStore.setState({ tabs: [], activeId: null, hydrated: true, routeActive: false });
   useLinkTargetsStore.setState({

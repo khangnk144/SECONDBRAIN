@@ -144,6 +144,132 @@ li[data-checked='true'] > .task-item__content {
   background: var(--accent-soft);
 }
 
+/* Embedded files (F15.2): images inline at most the text column wide, other files as a card. */
+.wikilink[data-display='image'],
+.wikilink[data-display='card'] {
+  padding: 0;
+  background: none;
+  color: var(--ink);
+  text-decoration: none;
+  cursor: default;
+}
+
+.embed-image {
+  display: inline-block;
+  max-width: 100%;
+  vertical-align: bottom;
+}
+
+.embed-image__img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-s);
+}
+
+.embed-placeholder {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 24px;
+  padding: 2px var(--space-2);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-s);
+  color: var(--ink-2);
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+
+.embed-image[data-state='loading'] .embed-placeholder {
+  border-style: solid;
+}
+
+.embed-placeholder__icon,
+.file-card__icon {
+  flex: none;
+}
+
+.file-card {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 100%;
+  padding: 2px 2px 2px var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: var(--paper);
+  vertical-align: middle;
+}
+
+.file-card[data-found='false'] {
+  padding-right: var(--space-2);
+  border-style: dashed;
+  color: var(--ink-2);
+}
+
+.file-card__name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.file-card__kind {
+  color: var(--ink-2);
+  font-size: max(12px, 0.78125rem);
+  white-space: nowrap;
+}
+
+.file-card__open {
+  min-width: 24px;
+  min-height: 24px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.file-card__open:hover {
+  background: var(--accent-soft);
+}
+
+.file-card__open:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.markdown-image {
+  display: inline-block;
+  max-width: 100%;
+  vertical-align: bottom;
+}
+
+.markdown-image.is-selected,
+.wikilink[data-display='image'].is-selected,
+.wikilink[data-display='card'].is-selected {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-s);
+}
+
+/* Where a dropped or pasted file will land while it uploads (a decoration, never saved). */
+.upload-placeholder {
+  display: inline-block;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-s);
+  background: var(--accent-soft);
+  color: var(--ink); /* --ink-2 on --accent-soft is below 4.5:1 */
+  font-size: 0.875rem;
+}
+
+.markdown-editor__content > .upload-placeholder {
+  display: block;
+  width: fit-content;
+  margin: var(--space-1) 0;
+}
+
 /* Tags: small pills. */
 .tag-pill {
   padding: 1px var(--space-1);

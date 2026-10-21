@@ -4,7 +4,7 @@
 // (F16.4: find a node, read its neighbours, open it without touching the canvas).
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import {
   appApi,
   createSampleData,
@@ -21,6 +21,15 @@ test.afterEach(async ({ page }) => resetVault(await appApi(page)));
 
 const vaultFile = (notePath: string) => path.join(e2eVaultDir(), ...notePath.split('/'));
 const dailyUrl = (date: string) => new RegExp(`path=Daily%2F${date}\\.md`);
+
+/**
+ * The address names the day and the screen shows it. The hash changes before React draws the
+ * new note, so until then the old note's buttons (same labels) still hold focus.
+ */
+async function dailyShown(page: Page, date: string): Promise<void> {
+  await expect(page).toHaveURL(dailyUrl(date));
+  await expect(page.locator('.daily-nav time')).toHaveAttribute('datetime', date);
+}
 
 test('daily notes by keyboard: Alt+T once, GET never creates, previous/next (F13)', async ({
   page,
@@ -83,17 +92,17 @@ test('daily notes by keyboard: Alt+T once, GET never creates, previous/next (F13
   await pressUntilFocused(page, '.daily-nav__step--next');
   await expect(page.locator('.daily-nav__step--next')).toHaveText('Ngày sau');
   await page.keyboard.press('Enter');
-  await expect(page).toHaveURL(dailyUrl(later));
+  await dailyShown(page, later);
   const tomorrowOfLater = isoAddDays(later, 1).slice(5).split('-').reverse().join('/');
   await expect(page.locator('.daily-nav__step--next')).toHaveText(`Tạo ngày ${tomorrowOfLater}`);
 
   // "Ngày trước" from `later` skips back over the gap to today, then to `earlier`.
   await pressUntilFocused(page, '.daily-nav__step--previous');
   await page.keyboard.press('Enter');
-  await expect(page).toHaveURL(dailyUrl(today));
+  await dailyShown(page, today);
   await pressUntilFocused(page, '.daily-nav__step--previous');
   await page.keyboard.press('Enter');
-  await expect(page).toHaveURL(dailyUrl(earlier));
+  await dailyShown(page, earlier);
 
   // Nothing before `earlier`: the button offers "Tạo ngày …" and creates that day.
   const dayBefore = isoAddDays(earlier, -1);
@@ -101,7 +110,7 @@ test('daily notes by keyboard: Alt+T once, GET never creates, previous/next (F13
   await expect(page.locator('.daily-nav__step--previous')).toHaveText(`Tạo ngày ${short}`);
   await pressUntilFocused(page, '.daily-nav__step--previous');
   await page.keyboard.press('Enter');
-  await expect(page).toHaveURL(dailyUrl(dayBefore));
+  await dailyShown(page, dayBefore);
   await expect.poll(() => existsSync(vaultFile(`Daily/${dayBefore}.md`))).toBe(true);
   expect(await dailyFiles()).toHaveLength(4);
 });

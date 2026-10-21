@@ -41,7 +41,6 @@ const dryRunSchema = { type: 'boolean', default: false } as const;
  * dry runs, used by the confirm dialog to list the notes whose links would change (F4).
  */
 export function registerNoteOperationRoutes(app: FastifyInstance, context: AppContext): void {
-  const { vault } = context;
   // Neither step throws, so the `finally` below never hides the operation's own error.
   const afterOperation = async () => {
     await context.settled();
@@ -75,9 +74,9 @@ export function registerNoteOperationRoutes(app: FastifyInstance, context: AppCo
         });
       }
       const { expectedRevision, relink = true, dryRun = false } = request.body;
-      if (dryRun) return vault.previewRename(path, newPath, { expectedRevision, relink });
+      if (dryRun) return context.vault.previewRename(path, newPath, { expectedRevision, relink });
       try {
-        return await vault.rename(path, newPath, { expectedRevision, relink });
+        return await context.vault.rename(path, newPath, { expectedRevision, relink });
       } finally {
         await afterOperation();
       }
@@ -105,9 +104,9 @@ export function registerNoteOperationRoutes(app: FastifyInstance, context: AppCo
       const path = guardVaultPath(request.body.path);
       const folder = guardFolder(request.body.folder);
       const { expectedRevision, relink = true, dryRun = false } = request.body;
-      if (dryRun) return vault.previewMove(path, folder, { expectedRevision, relink });
+      if (dryRun) return context.vault.previewMove(path, folder, { expectedRevision, relink });
       try {
-        return await vault.move(path, folder, { expectedRevision, relink });
+        return await context.vault.move(path, folder, { expectedRevision, relink });
       } finally {
         await afterOperation();
       }
@@ -140,7 +139,7 @@ export function registerNoteOperationRoutes(app: FastifyInstance, context: AppCo
         throw new VaultError('VALIDATION', 'Give one expected revision per path.', {});
       }
       try {
-        return await vault.trash(paths, expectedRevisions, 'user');
+        return await context.vault.trash(paths, expectedRevisions, 'user');
       } finally {
         await afterOperation();
       }

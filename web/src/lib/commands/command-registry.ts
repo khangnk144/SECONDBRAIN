@@ -6,6 +6,8 @@
 import {
   CALENDAR_ROUTE,
   navigateTo,
+  REMINDERS_ROUTE,
+  RESOURCES_ROUTE,
   TAGS_ROUTE,
   TASKS_ROUTE,
   TODAY_ROUTE,
@@ -19,7 +21,13 @@ import {
   runAppShortcut,
   triggerRegisteredShortcut,
 } from './command-actions';
+import { openHistoryDialog } from '../../features/history/open-history-dialog';
 import { isImplemented, type AppFeature } from './implemented-features';
+import {
+  exportBackupFromCommand,
+  quitAppFromCommand,
+  toggleThemeFromCommand,
+} from './settings-command-actions';
 
 export interface AppCommand {
   id: string;
@@ -64,6 +72,14 @@ function noteOnScreen(): boolean {
 
 const severalTabs = () => noteOnScreen() && useTabsStore.getState().tabs.length > 1;
 
+/** The note of the active tab when a note (not a file viewer) is on screen. */
+function activeNotePath(): string | null {
+  if (!noteOnScreen()) return null;
+  const { tabs, activeId } = useTabsStore.getState();
+  const tab = tabs.find((candidate) => candidate.id === activeId);
+  return tab && (tab.kind ?? 'note') === 'note' ? tab.path : null;
+}
+
 export const APP_COMMANDS: readonly AppCommand[] = [
   shortcutCommand('new-note', {
     labelKey: 'commands.newNote',
@@ -89,6 +105,13 @@ export const APP_COMMANDS: readonly AppCommand[] = [
     feature: 'graph',
   }),
   navigation('openTags', TAGS_ROUTE, 'tags', ['tags', 'thẻ', '#']),
+  navigation('openReminders', REMINDERS_ROUTE, 'reminders', ['reminders', 'nhắc', 'notification']),
+  navigation('openResources', RESOURCES_ROUTE, 'attachments', [
+    'documents',
+    'pdf',
+    'attachments',
+    'đính kèm',
+  ]),
   shortcutCommand('shortcut-sheet', {
     labelKey: 'commands.shortcutSheet',
     keywords: ['shortcuts', 'keyboard', 'phím tắt', 'help'],
@@ -138,6 +161,43 @@ export const APP_COMMANDS: readonly AppCommand[] = [
     keywords: ['index', 'rebuild', 'reindex', 'chỉ mục', 'tìm kiếm'],
     feature: 'search-index',
     run: () => void rebuildIndex(),
+  },
+  shortcutCommand('settings', {
+    labelKey: 'commands.openSettings',
+    keywords: ['settings', 'preferences', 'tùy chỉnh', 'cấu hình'],
+    feature: 'settings',
+  }),
+  {
+    id: 'note-history',
+    labelKey: 'commands.noteHistory',
+    keywords: ['history', 'versions', 'git', 'restore', 'lịch sử', 'phiên bản', 'khôi phục'],
+    feature: 'history',
+    isAvailable: () => activeNotePath() !== null,
+    run: () => {
+      const path = activeNotePath();
+      if (path !== null) openHistoryDialog(path);
+    },
+  },
+  {
+    id: 'export-backup',
+    labelKey: 'commands.exportBackup',
+    keywords: ['backup', 'export', 'zip', 'sao lưu'],
+    feature: 'settings',
+    run: () => void exportBackupFromCommand(),
+  },
+  {
+    id: 'toggle-theme',
+    labelKey: 'commands.toggleTheme',
+    keywords: ['theme', 'dark', 'light', 'chế độ', 'màu'],
+    feature: 'settings',
+    run: () => void toggleThemeFromCommand(),
+  },
+  {
+    id: 'quit-app',
+    labelKey: 'commands.quitApp',
+    keywords: ['quit', 'exit', 'stop', 'tắt', 'dừng'],
+    feature: 'settings',
+    run: quitAppFromCommand,
   },
 ];
 

@@ -1,5 +1,6 @@
 import type { Editor } from '@tiptap/core';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { DocumentTargetChooserHost } from '../../editor/attachments/document-target-chooser';
 import { FormattingToolbar } from '../../editor/formatting/formatting-toolbar';
 import type { MarkdownEditorHandle } from '../../editor/markdown-editor';
 import { navigateTo, noteRoute } from '../../lib/app-navigation';
@@ -14,6 +15,7 @@ import type { SessionView } from '../note-session/note-session-types';
 import { PropertyBar } from '../properties/property-bar';
 import { NoteBanners } from './note-banners';
 import { NoteEditorHost } from './note-editor-host';
+import { noteScreenDropHandlers } from './note-file-drop';
 import { NoteTitle } from './note-title';
 import { retitleFirstHeading } from './retitle-first-heading';
 import { SaveIndicator } from './save-indicator';
@@ -93,7 +95,11 @@ export function NoteView(props: NoteViewProps) {
   }, [inSource]);
 
   return (
-    <article className="note-screen" aria-labelledby={titleId}>
+    <article
+      className="note-screen"
+      aria-labelledby={titleId}
+      {...noteScreenDropHandlers(() => editor.current, inSource)}
+    >
       <FormattingToolbar
         editor={tiptap}
         sourceMode={inSource}
@@ -162,6 +168,8 @@ export function NoteView(props: NoteViewProps) {
           />
         ) : null}
       </div>
+      {/* "Lưu vào" for documents dropped into the editor or source mode. */}
+      <DocumentTargetChooserHost />
     </article>
   );
 }

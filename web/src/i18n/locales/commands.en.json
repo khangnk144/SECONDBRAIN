@@ -17,5 +17,13 @@
   "rebuildIndex": "Rebuild the index",
   "rebuildStarted": "Rebuilding the index. You can keep searching meanwhile.",
   "rebuildRunning": "The index is already being rebuilt. Give it a moment.",
-  "rebuildDone": "The index is rebuilt."
+  "rebuildDone": "The index is rebuilt.",
+  "openSettings": "Open Settings",
+  "openReminders": "Open Reminders",
+  "openResources": "Open Documents",
+  "exportBackup": "Export a backup",
+  "exportBackupBusy": "Preparing the backup…",
+  "toggleTheme": "Switch between light and dark",
+  "quitApp": "Quit Second Brain",
+  "noteHistory": "Show version history"
 }

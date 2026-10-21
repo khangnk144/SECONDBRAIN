@@ -58,13 +58,11 @@ export function registerNoteRoutes(
   context: AppContext,
   uiLanguage: () => TemplateLanguage,
 ): void {
-  const { vault, index } = context;
-
   app.get<{ Querystring: PathQuery }>(
     '/api/note',
     { schema: { querystring: pathQuerySchema } },
     async (request, reply): Promise<NoteResponse> => {
-      const note = await vault.read(guardNotePath(request.query.path));
+      const note = await context.vault.read(guardNotePath(request.query.path));
       reply.header('cache-control', 'no-store');
       return {
         path: note.path,
@@ -73,8 +71,8 @@ export function registerNoteRoutes(
         utf8: note.utf8,
         mtime: note.mtimeMs,
         ...noteMetadata(context, note),
-        backlinks: index.backlinks(note.path),
-        outlinks: index.outlinks(note.path),
+        backlinks: context.index.backlinks(note.path),
+        outlinks: context.index.outlinks(note.path),
         class: classifyPath(note.path),
       };
     },
@@ -101,8 +99,8 @@ export function registerNoteRoutes(
       const path = guardNotePath(request.body.path);
       // "Giữ bản của tôi": the disk version shown by the conflict UI goes to the trash first.
       const result = conflictCopy
-        ? await vault.writeKeepingConflictCopy(path, content, expectedRevision)
-        : await vault.write(path, content, expectedRevision);
+        ? await context.vault.writeKeepingConflictCopy(path, content, expectedRevision)
+        : await context.vault.write(path, content, expectedRevision);
       await context.settled();
       return 'trashId' in result
         ? { revision: result.revision, trashId: result.trashId }
@@ -141,15 +139,15 @@ export function registerNoteRoutes(
       const { content, cursor } =
         exact !== undefined
           ? { content: exact, cursor: null }
-          : await newNoteContent(vault, template, {
+          : await newNoteContent(context.vault, template, {
               title,
               date: toLocalDate(now),
               now,
               language: uiLanguage(),
             });
       const result = unique
-        ? await vault.createUnique(path, content)
-        : await vault.create(path, content);
+        ? await context.vault.createUnique(path, content)
+        : await context.vault.create(path, content);
       await context.settled();
       return reply.code(201).send({ path: result.path, revision: result.revision, cursor });
     },

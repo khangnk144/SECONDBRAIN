@@ -80,6 +80,50 @@ describe('WebSocket client', () => {
     expect(latest().closed).toBe(true);
   });
 
+  it('emits resync on a first open that only worked after failed attempts, not on a clean one', () => {
+    const events: ClientEvent[] = [];
+    const options = {
+      url: 'ws://x/ws',
+      createSocket: (url: string) => new FakeSocket(url),
+      onEvent: (event: ClientEvent) => events.push(event),
+      onStateChange: () => {},
+    };
+    // The app started before the server: two refused attempts, then the server is up.
+    const late = createWsClient(options);
+    late.start();
+    latest().drop();
+    vi.advanceTimersByTime(500);
+    latest().drop();
+    vi.advanceTimersByTime(1_000);
+    latest().open();
+    expect(events).toEqual([{ type: 'resync' }]);
+    late.stop();
+
+    // The server was there from the start: nothing was missed.
+    events.length = 0;
+    const clean = createWsClient(options);
+    clean.start();
+    latest().open();
+    expect(events).toEqual([]);
+    clean.stop();
+
+    // A socket that could not even be created counts as a failed attempt too.
+    let refuse = true;
+    const thrown = createWsClient({
+      ...options,
+      createSocket: (url: string) => {
+        if (refuse) throw new Error('blocked');
+        return new FakeSocket(url);
+      },
+    });
+    thrown.start();
+    refuse = false;
+    vi.advanceTimersByTime(500);
+    latest().open();
+    expect(events).toEqual([{ type: 'resync' }]);
+    thrown.stop();
+  });
+
   it('ignores pongs and malformed messages; stop prevents reconnects', () => {
     const onEvent = vi.fn();
     const client = createWsClient({

@@ -78,11 +78,119 @@ describe('launcher files', () => {
     expect(ps).toContain('[System.IO.FileMode]::CreateNew');
     expect(ps).toContain('$LockMaxAgeMinutes = 15');
     expect(ps).toContain('$OtherLauncherWaitSeconds = 600');
-    expect(ps).toMatch(/if \(-not \(Enter-LauncherLock\)\) \{\r\n\s+Wait-ForOtherLauncher/);
+    // Without the lock (start mode) the launcher waits for the other one instead of starting.
+    expect(ps).toMatch(
+      /if \(-not \(Enter-LauncherLock\)\) \{(\r\n\s+(#[^\r]*|if \(\$LoginMode\) \{ return \}))*\r\n\s+Wait-ForOtherLauncher\r\n\s+return/,
+    );
     expect(ps).toMatch(/finally \{\r\n\s+Exit-LauncherLock/);
     const locked = ps.slice(ps.indexOf('function Start-SecondBrainLocked'));
     expect(locked).toContain("@('install'");
     expect(locked).toContain("@('run', 'build')");
+  });
+
+  it('login starts the same way, never opens a browser and stays silent when running (F18.6)', () => {
+    const ps = read('start-second-brain.ps1').toString('utf8');
+    expect(ps).toContain('start-second-brain.ps1 login');
+    expect(ps).toContain("$LoginMode = ($Action -eq 'login')");
+    expect(ps).toMatch(/'login' \{ Start-SecondBrain \}/);
+    expect(ps).toContain('Dùng: start, stop hoặc login.');
+    expect(ps).toMatch(
+      /function Open-App\(\[int\]\$Port\) \{\r\n\s+if \(\$LoginMode\) \{ return \}/,
+    );
+    const start = ps.slice(ps.indexOf('function Start-SecondBrain {'));
+    // Already running at sign-in: nothing to do or show; another launcher starting it: leave it be.
+    expect(start).toMatch(
+      /if \(Test-AppHealth \$port\) \{\r\n\s+#[^\r]*\r\n\s+if \(\$LoginMode\) \{ return \}/,
+    );
+    expect(start).toMatch(
+      /if \(-not \(Enter-LauncherLock\)\) \{\r\n\s+#[^\r]*\r\n\s+if \(\$LoginMode\) \{ return \}/,
+    );
+    // A launcher that waited for the lock checks again before starting a second node process.
+    const afterLock = start.slice(start.indexOf('try {'));
+    expect(afterLock.indexOf('Test-AppHealth $port')).toBeGreaterThan(-1);
+    expect(afterLock.indexOf('Test-AppHealth $port')).toBeLessThan(
+      afterLock.indexOf('Start-SecondBrainLocked'),
+    );
+  });
+
+  it('reports failures in launcher.log and one message box (always for a busy port)', () => {
+    const ps = read('start-second-brain.ps1').toString('utf8');
+    expect(ps).toContain("$LauncherLogFile = Join-Path $StateDir 'logs/launcher.log'");
+    expect(ps).toContain('[System.Windows.Forms.MessageBox]::Show($owner, $Message, $AppTitle,');
+    const stop = ps.slice(ps.indexOf('function Stop-WithProblem'));
+    expect(stop.slice(0, stop.indexOf('exit 1'))).toMatch(
+      /Write-LauncherLog[\s\S]*if \(\$LoginMode -or \$Dialog\) \{[\s\S]*Show-MessageBox \$text/,
+    );
+    // Node missing or too old takes the same path (a message box in login mode).
+    const node = ps.slice(
+      ps.indexOf('function Assert-Node'),
+      ps.indexOf('function Test-BuildNeeded'),
+    );
+    expect(node.match(/Stop-WithProblem/g)).toHaveLength(2);
+    expect(node).not.toMatch(/\bexit\b/);
+    expect(ps).toMatch(/\} catch \{\r\n\s+Stop-WithProblem "Có lỗi: /);
+  });
+
+  it('names the program holding the port when the server exits with code 2 (F21.4)', () => {
+    const ps = read('start-second-brain.ps1').toString('utf8');
+    expect(ps).toContain('$ExitPortBusy = 2');
+    expect(ps).toContain('if ($server.HasExited -and $server.ExitCode -eq $ExitPortBusy) {');
+    expect(ps).toContain(
+      'Stop-WithProblem (Get-PortBusyMessage $port (Get-PortOwnerName $port)) -Dialog',
+    );
+    expect(ps).toContain('Get-NetTCPConnection -LocalPort $Port -State Listen');
+    expect(ps).toContain('[int]$listener.OwningProcess');
+    expect(ps).toContain('$process = Get-Process -Id $ownerPid');
+    expect(ps).toContain('& netstat.exe -ano -p TCP');
+    expect(ps).toContain(
+      'Cổng $Port đang bị $who dùng. Đóng chương trình đó, hoặc đổi cổng trong Cài đặt của Second Brain rồi mở lại.',
+    );
+    expect(ps).toContain("$who = 'một chương trình khác'");
+  });
+
+  it('opens the installed app when its Start menu shortcut exists, else the browser', () => {
+    const ps = read('start-second-brain.ps1').toString('utf8');
+    const find = ps.slice(ps.indexOf('function Find-InstalledAppShortcut'));
+    expect(find).toContain("Join-Path $env:APPDATA 'Microsoft\\Windows\\Start Menu\\Programs'");
+    for (const shortcut of [
+      "'Second Brain.lnk'",
+      "'Chrome Apps\\Second Brain.lnk'",
+      "'Edge Apps\\Second Brain.lnk'",
+    ]) {
+      expect(find).toContain(shortcut);
+    }
+    expect(find).toContain('New-Object -ComObject WScript.Shell');
+    expect(find).toContain("if ($arguments -notmatch '--app-id=') { continue }");
+    expect(find).toContain('StartsWith("http://localhost:$Port/")');
+    // A shortcut without --app-url (Chrome) is trusted only on the default port.
+    expect(find).toMatch(
+      /\} elseif \(\$Port -ne \$DefaultPort\) \{(\r\n\s+#[^\r]*)*\r\n\s+continue/,
+    );
+    expect(ps).toContain(
+      'if ($null -ne $shortcut) { Start-Process -FilePath $shortcut } else { Start-Process $url }',
+    );
+  });
+
+  it('start-hidden.vbs is ASCII with CRLF and starts the login action hidden, without waiting', () => {
+    const bytes = read('start-hidden.vbs');
+    expect([...bytes].every((b) => b < 0x80)).toBe(true);
+    const text = bytes.toString('utf8');
+    expect(hasOnlyCrlf(text)).toBe(true);
+    expect(text).toContain('Option Explicit');
+    expect(text).toContain('fso.GetParentFolderName(WScript.ScriptFullName)');
+    expect(text).toContain('fso.BuildPath(folder, "start-second-brain.ps1")');
+    expect(text).toContain(
+      'command = "powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File """ & script & """ login"',
+    );
+    expect(text).toContain('Set shell = CreateObject("WScript.Shell")');
+    expect(text).toMatch(/^shell\.Run command, 0, False\r$/m);
+  });
+
+  it('git keeps CRLF for the Windows scripts', () => {
+    const attributes = readFileSync(path.join(appRoot, '.gitattributes'), 'utf8');
+    for (const pattern of ['*.cmd', '*.ps1', '*.vbs']) {
+      expect(attributes).toContain(`${pattern} text eol=crlf`);
+    }
   });
 
   it('uses only Windows PowerShell 5.1 syntax', () => {

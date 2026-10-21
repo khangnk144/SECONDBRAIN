@@ -22,7 +22,6 @@ const pathBody = {
  * refused with 403 `FORBIDDEN`.
  */
 export function registerFolderRoutes(app: FastifyInstance, context: AppContext): void {
-  const { vault } = context;
   const afterOperation = async () => {
     await context.settled();
     await context.refreshPendingJournal();
@@ -33,7 +32,7 @@ export function registerFolderRoutes(app: FastifyInstance, context: AppContext):
     { schema: { body: pathBody } },
     async (request, reply) => {
       const path = guardVaultPath(request.body.path);
-      await vault.createFolder(path);
+      await context.vault.createFolder(path);
       await context.settled();
       return reply.code(201).send({ path });
     },
@@ -59,9 +58,9 @@ export function registerFolderRoutes(app: FastifyInstance, context: AppContext):
       const path = guardVaultPath(request.body.path);
       const newPath = guardVaultPath(request.body.newPath);
       const { relink = true, dryRun = false } = request.body;
-      if (dryRun) return vault.previewRenameFolder(path, newPath, { relink });
+      if (dryRun) return context.vault.previewRenameFolder(path, newPath, { relink });
       try {
-        return await vault.renameFolder(path, newPath, { relink });
+        return await context.vault.renameFolder(path, newPath, { relink });
       } finally {
         await afterOperation();
       }
@@ -74,7 +73,7 @@ export function registerFolderRoutes(app: FastifyInstance, context: AppContext):
     async (request) => {
       const path = guardVaultPath(request.body.path);
       try {
-        return await vault.trashFolder(path);
+        return await context.vault.trashFolder(path);
       } finally {
         await afterOperation();
       }

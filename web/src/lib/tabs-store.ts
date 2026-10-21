@@ -1,12 +1,14 @@
 import { create } from 'zustand';
 import { i18n } from '../i18n';
 import type { VaultPath } from './api/vault-types';
-import { navigateTo, noteRoute, TODAY_ROUTE } from './app-navigation';
-import { loadTabs, saveTabs, type NoteTab } from './tabs-persistence';
+import { fileRoute, navigateTo, noteRoute, TODAY_ROUTE } from './app-navigation';
+import { loadTabs, saveTabs, tabKind, type AppTab, type TabKind } from './tabs-persistence';
+import { wasExpectedRemoval } from './tabs-store-removals';
 import { showToast } from './toast-store';
 import { isInsideFolder, noteTitleFromPath, replacePathPrefix, samePath } from './vault-paths';
 
-export type { NoteTab } from './tabs-persistence';
+export { tabKind, type AppTab, type NoteTab, type TabKind } from './tabs-persistence';
+export { expectTabRemoval } from './tabs-store-removals';
 export const MAX_TABS = 20;
 
 export interface OpenNoteOptions {
@@ -19,79 +21,66 @@ export interface OpenNoteOptions {
 }
 
 interface TabsState {
-  tabs: NoteTab[];
+  tabs: AppTab[];
   activeId: string | null;
   /** Saved tabs of the current vault have been read. */
   hydrated: boolean;
-  /** The note route is on screen (closing the active tab then navigates). */
+  /** A tab route (a note, or a file in the viewer) is on screen: closing the active tab navigates. */
   routeActive: boolean;
   hydrate: () => void;
   setRouteActive: (active: boolean) => void;
   openNote: (path: VaultPath, options?: OpenNoteOptions) => void;
-  /** The route changed to `#/note?path=` (deep link, back/forward): mirror it without navigating. */
-  syncFromRoute: (path: VaultPath) => void;
+  /** Opens a vault file in the in-app viewer tab (`#/file?path=`). */
+  openFile: (path: VaultPath, options?: { newTab?: boolean }) => void;
+  /** The route changed to a tab route (deep link, back/forward): mirror it without navigating. */
+  syncFromRoute: (path: VaultPath, kind?: TabKind) => void;
   activate: (id: string) => void;
   closeTab: (id: string) => void;
   closeActiveTab: () => void;
   activateNext: () => void;
   activatePrevious: () => void;
-  /** A note or folder moved: every tab at or below `oldPath` follows it. */
+  /** A note, file or folder moved: every tab at or below `oldPath` follows it. */
   renamePath: (oldPath: VaultPath, newPath: VaultPath) => void;
-  /** Closes the tabs of these notes (`notify` = tell the user why, for deletions from outside). */
+  /** Closes the tabs of these paths (`notify` = tell the user why, for deletions from outside). */
   closePaths: (paths: VaultPath[], options?: { notify?: boolean }) => void;
   /** Closes every tab below a folder (folder trashed). */
   closeFolder: (folder: VaultPath) => void;
 }
 
+/** Where a tab lives: the editor for notes, the viewer for files. */
+export function tabRoute(tab: Pick<AppTab, 'kind' | 'path'>): string {
+  return tabKind(tab) === 'file' ? fileRoute(tab.path) : noteRoute(tab.path);
+}
+
 let clock = 0;
 let idSeq = 0;
-/** Removals the app itself started (trash): their WS deletion events need no toast. */
-let expectedRemovals: { matches: (path: VaultPath) => boolean; until: number }[] = [];
-const EXPECTED_REMOVAL_MS = 30_000;
-
-/** Announces that the app is about to delete these notes or everything below `folder`. */
-export function expectTabRemoval(paths: VaultPath[], folder?: VaultPath): void {
-  const now = Date.now();
-  expectedRemovals = expectedRemovals.filter((entry) => entry.until > now);
-  expectedRemovals.push({
-    until: now + EXPECTED_REMOVAL_MS,
-    matches: (path) =>
-      paths.some((p) => samePath(p, path)) ||
-      (folder !== undefined && isInsideFolder(path, folder)),
-  });
-}
-
-function wasExpected(path: VaultPath): boolean {
-  const now = Date.now();
-  return expectedRemovals.some((entry) => entry.until > now && entry.matches(path));
-}
 
 const newId = () => `tab-${Date.now().toString(36)}-${++idSeq}`;
 const activeTab = (s: Pick<TabsState, 'tabs' | 'activeId'>) =>
   s.tabs.find((tab) => tab.id === s.activeId) ?? null;
 
 export const useTabsStore = create<TabsState>((set, get) => {
-  function commit(tabs: NoteTab[], activeId: string | null) {
+  function commit(tabs: AppTab[], activeId: string | null) {
     set({ tabs, activeId });
     if (get().hydrated) saveTabs({ tabs, activeId });
   }
 
-  function touch(tabs: NoteTab[], id: string): NoteTab[] {
+  function touch(tabs: AppTab[], id: string): AppTab[] {
     clock += 1;
     return tabs.map((tab) => (tab.id === id ? { ...tab, lastActive: clock } : tab));
   }
 
   /** Puts `path` in the tab set (no navigation); returns nothing, the state says the rest. */
-  function place(path: VaultPath, newTab: boolean) {
+  function place(path: VaultPath, kind: TabKind, newTab: boolean) {
     const { tabs, activeId } = get();
-    const existing = tabs.find((tab) => samePath(tab.path, path));
+    const existing = tabs.find((tab) => tabKind(tab) === kind && samePath(tab.path, path));
     if (existing) return commit(touch(tabs, existing.id), existing.id);
     const active = activeTab(get());
     if (!newTab && active) {
-      const replaced = tabs.map((tab) => (tab.id === active.id ? { ...tab, path } : tab));
+      const replaced = tabs.map((tab) => (tab.id === active.id ? { ...tab, kind, path } : tab));
       return commit(touch(replaced, active.id), active.id);
     }
-    const tab: NoteTab = { id: newId(), path, lastActive: 0 };
+    const tab: AppTab = { id: newId(), kind, path, lastActive: 0 };
     let next = [...tabs, tab];
     if (tabs.length >= MAX_TABS) {
       const victim = tabs
@@ -108,7 +97,7 @@ export const useTabsStore = create<TabsState>((set, get) => {
     commit(touch(next, tab.id), tab.id);
   }
 
-  function closeWhere(predicate: (tab: NoteTab) => boolean, notify: boolean) {
+  function closeWhere(predicate: (tab: AppTab) => boolean, notify: boolean) {
     const { tabs, activeId, routeActive } = get();
     const closing = tabs.filter(predicate);
     if (closing.length === 0) return;
@@ -123,7 +112,7 @@ export const useTabsStore = create<TabsState>((set, get) => {
     }
     commit(nextActive ? touch(remaining, nextActive) : remaining, nextActive);
     if (notify) {
-      for (const tab of closing.filter((t) => !wasExpected(t.path))) {
+      for (const tab of closing.filter((t) => !wasExpectedRemoval(t.path))) {
         showToast({
           message: i18n.t('tabs.closedDeleted', { title: noteTitleFromPath(tab.path) }),
         });
@@ -131,7 +120,7 @@ export const useTabsStore = create<TabsState>((set, get) => {
     }
     if (routeActive && nextActive !== activeId) {
       const next = activeTab(get());
-      navigateTo(next ? noteRoute(next.path) : TODAY_ROUTE);
+      navigateTo(next ? tabRoute(next) : TODAY_ROUTE);
     }
   }
 
@@ -157,19 +146,23 @@ export const useTabsStore = create<TabsState>((set, get) => {
       if (get().routeActive !== routeActive) set({ routeActive });
     },
     openNote: (path, options = {}) => {
-      place(path, options.newTab === true);
+      place(path, 'note', options.newTab === true);
       navigateTo(noteRoute(path, { isNew: options.isNew, cursor: options.cursor }));
     },
-    syncFromRoute: (path) => {
+    openFile: (path, options = {}) => {
+      place(path, 'file', options.newTab === true);
+      navigateTo(fileRoute(path));
+    },
+    syncFromRoute: (path, kind = 'note') => {
       const active = activeTab(get());
-      if (active && samePath(active.path, path)) return;
-      place(path, false);
+      if (active && tabKind(active) === kind && samePath(active.path, path)) return;
+      place(path, kind, false);
     },
     activate: (id) => {
       const tab = get().tabs.find((t) => t.id === id);
       if (!tab) return;
       commit(touch(get().tabs, id), id);
-      navigateTo(noteRoute(tab.path));
+      navigateTo(tabRoute(tab));
     },
     closeTab: (id) => closeWhere((tab) => tab.id === id, false),
     closeActiveTab: () => {
@@ -187,9 +180,9 @@ export const useTabsStore = create<TabsState>((set, get) => {
       if (tabs.every((tab, i) => tab.path === get().tabs[i]?.path)) return;
       commit(tabs, get().activeId);
       const after = activeTab(get());
-      // Keep the address bar on the note the active tab now shows.
+      // Keep the address bar on what the active tab now shows.
       if (get().routeActive && before && after && before.path !== after.path) {
-        navigateTo(noteRoute(after.path), { replace: true });
+        navigateTo(tabRoute(after), { replace: true });
       }
     },
     closePaths: (paths, options = {}) =>

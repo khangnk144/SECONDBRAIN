@@ -1,0 +1,6 @@
+{
+  "reminders": "Nhắc nhở",
+  "resources": "Tài liệu",
+  "settings": "Cài đặt",
+  "withCount": "{{label}}, {{count}}"
+}

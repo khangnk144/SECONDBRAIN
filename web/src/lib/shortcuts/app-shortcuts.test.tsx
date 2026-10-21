@@ -27,7 +27,7 @@ describe('app shortcuts (F22)', () => {
     vi.unstubAllGlobals();
   });
 
-  it('lists exactly the implemented shortcuts, one registry; no Alt+, before settings exist', () => {
+  it('lists exactly the implemented shortcuts, one registry', () => {
     render(<Shortcuts />);
     expect(listShortcuts().map((s) => `${s.id} ${s.keys}`)).toEqual([
       'toggle-left-pane Alt+1',
@@ -36,6 +36,7 @@ describe('app shortcuts (F22)', () => {
       'daily-note Alt+T',
       'quick-capture Alt+Q',
       'graph Alt+G',
+      'settings Alt+,',
       'close-tab Alt+W',
       'previous-tab Alt+[',
       'next-tab Alt+]',
@@ -44,6 +45,20 @@ describe('app shortcuts (F22)', () => {
     ]);
     expect(listShortcuts().every((s) => s.labelKey.startsWith('shortcuts.'))).toBe(true);
     expect(shortcutKeys('quick-capture')).toBe('Alt+Q');
+    expect(shortcutKeys('settings')).toBe('Alt+,');
+  });
+
+  it('Alt+, opens Settings, by key or by its physical position (F22)', async () => {
+    const user = userEvent.setup();
+    render(<Shortcuts />);
+    await user.keyboard('{Alt>},{/Alt}');
+    expect(navigate).toHaveBeenLastCalledWith('/settings', undefined);
+    navigate.mockClear();
+    // A layout where Alt+, types another character still matches by the key's code.
+    window.dispatchEvent(
+      new KeyboardEvent('keydown', { key: '≤', code: 'Comma', altKey: true, bubbles: true }),
+    );
+    expect(navigate).toHaveBeenLastCalledWith('/settings', undefined);
   });
 
   it('Alt+T opens the daily note, Alt+G the graph, Ctrl+/ the sheet', async () => {
@@ -61,7 +76,7 @@ describe('app shortcuts (F22)', () => {
     const user = userEvent.setup();
     const { getByRole } = render(<Shortcuts />);
     getByRole('textbox').focus();
-    await user.keyboard('{Alt>}t{/Alt}{Alt>}g{/Alt}');
+    await user.keyboard('{Alt>}t{/Alt}{Alt>}g{/Alt}{Alt>},{/Alt}');
     expect(mock.calls).toEqual([]);
     expect(navigate).not.toHaveBeenCalled();
     await user.keyboard('{Alt>}q{/Alt}');

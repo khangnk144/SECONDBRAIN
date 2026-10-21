@@ -38,7 +38,9 @@ export function ProjectCard({
   const { progress } = project;
   const allDone = progress !== null && progress.total > 0 && progress.done === progress.total;
   const urgency = project.daysLeft === null ? null : urgencyOf(project.daysLeft);
-  const progressText = progress ? t('today.projects.progress', progress) : '';
+  const progressText = progress
+    ? t('today.projects.progress', { done: progress.done, count: progress.total })
+    : '';
   const percent = progress ? Math.round((100 * progress.done) / Math.max(1, progress.total)) : 0;
 
   async function markDone() {

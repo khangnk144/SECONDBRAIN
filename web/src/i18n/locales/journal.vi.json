@@ -1,7 +1,9 @@
 {
   "region": "Thao tác chưa hoàn tất",
-  "pending": "Một thao tác {{op}} chưa hoàn tất ({{done}}/{{total}} file).",
-  "pendingGeneric": "Một thao tác chưa hoàn tất ({{done}}/{{total}} file).",
+  "pending_one": "Một thao tác {{op}} chưa hoàn tất ({{done}}/{{count}} file).",
+  "pending_other": "Một thao tác {{op}} chưa hoàn tất ({{done}}/{{count}} file).",
+  "pendingGeneric_one": "Một thao tác chưa hoàn tất ({{done}}/{{count}} file).",
+  "pendingGeneric_other": "Một thao tác chưa hoàn tất ({{done}}/{{count}} file).",
   "ops": {
     "rename": "đổi tên",
     "move": "di chuyển",

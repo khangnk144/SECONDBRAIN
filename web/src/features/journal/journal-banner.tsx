@@ -15,7 +15,7 @@ function EntryRow({ entry }: { entry: PendingJournalEntry }) {
   const { t } = useTranslation();
   const busy = useJournalStore((state) => state.busyId === entry.id);
   const key = opKey(entry.op);
-  const counts = { done: entry.appliedSteps, total: entry.totalSteps };
+  const counts = { done: entry.appliedSteps, count: entry.totalSteps };
   const message = key
     ? t('journal.pending', { ...counts, op: t(`journal.ops.${key}`) })
     : t('journal.pendingGeneric', counts);

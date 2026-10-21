@@ -1,5 +1,7 @@
 import type { VaultPath } from './api/vault-types';
-import { useTabsStore } from './tabs-store';
+import { startOpenVaultFile } from '../features/viewer/open-vault-file-in-app';
+import { tabKind, useTabsStore } from './tabs-store';
+import { samePath } from './vault-paths';
 import { subscribeServerEvent } from './ws/server-event-bus';
 
 /**
@@ -13,10 +15,18 @@ export function setKeepTabWhenDeleted(predicate: (path: VaultPath) => boolean): 
   keepTabWhenDeleted = predicate;
 }
 
+/** A file tab stays when its file goes: the viewer says it is missing and offers to close. */
+function isFileTab(path: VaultPath): boolean {
+  return useTabsStore
+    .getState()
+    .tabs.some((tab) => tabKind(tab) === 'file' && samePath(tab.path, path));
+}
+
 /**
- * Keeps open tabs in step with the vault: a renamed note's tab follows it; a deleted note's tab
- * closes with a 4 s toast unless it has unsaved text. Deletions made by the app itself close
- * their tabs first, so no toast.
+ * Keeps open tabs in step with the vault: a renamed note's or file's tab follows it; a deleted
+ * note's tab closes with a 4 s toast unless it has unsaved text. Deletions made by the app itself
+ * close their tabs first, so no toast. Also installs `openVaultFile` (PDFs open as tabs) for the
+ * app's lifetime.
  */
 export function startTabsSync(): () => void {
   const unsubscribers = [
@@ -24,9 +34,10 @@ export function startTabsSync(): () => void {
       useTabsStore.getState().renamePath(event.oldPath, event.path),
     ),
     subscribeServerEvent('note:deleted', (event) => {
-      if (keepTabWhenDeleted(event.path)) return;
+      if (keepTabWhenDeleted(event.path) || isFileTab(event.path)) return;
       useTabsStore.getState().closePaths([event.path], { notify: true });
     }),
+    startOpenVaultFile(),
   ];
   return () => unsubscribers.forEach((unsubscribe) => unsubscribe());
 }

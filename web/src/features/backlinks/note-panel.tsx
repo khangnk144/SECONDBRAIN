@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { LocalGraphSection } from '../graph/local-graph-section';
+import { HistorySection } from '../history/history-section';
 import { MentionsSection } from '../mentions/mentions-section';
 import { OutlineSection } from '../outline/outline-section';
 import { BacklinksSection } from './backlinks-section';
@@ -64,6 +65,7 @@ export function NotePanel() {
         onLinked={() => void reload()}
       />
       <LocalGraphSection path={path} />
+      <HistorySection path={path} />
     </div>
   );
 }

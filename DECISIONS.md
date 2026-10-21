@@ -281,3 +281,107 @@ Decision:
 - Shortcuts: a blocked app Ctrl combination (Ctrl+K, Ctrl+/ while typing in an overlay) still prevents the browser default; Alt combinations pass through (AltGr). A pane toggle pressed before the per-vault pane settings load is kept.
 Why: Never change what the user did not touch, never lose a tick, and keep every screen readable at 360 px and by keyboard.
 Spec sections affected: §4.6, §4.9, §4.10, F9, F10, F11, F12, F13, F14, F16, F22 (interpretations, additive).
+
+## 2026-10-21 M4: libraries and building blocks
+Context: SPEC §8 lists `simple-git` and `vite-plugin-pwa`; it names no zip or multipart library. Rule 10 asks for the simplest implementation.
+Decision:
+- **No `vite-plugin-pwa`:** a hand-written service worker (`web/src/pwa/service-worker.ts`) built by a ~100-line Vite plugin (`web/vite-plugin-service-worker.ts`) with a `BUILD_ID` and the precache list. It gives exact control over "shell only" caching (the shell HTML carries the session token and is rendered per request) and avoids a plugin whose peer range does not cover Vite 8.
+- **No `simple-git`:** git runs through `execFile` with an argument array (never a shell), a serial queue and hardened `-c` flags (see the history entry).
+- **`fflate` 0.8.3** for backup zips (streaming, pure JS; 0.8.3 fixes a ZIP64 parsing advisory). It cannot write ZIP64, so an export above 4,000,000,000 bytes or 65,000 entries is refused with `too-large`.
+- **`@fastify/multipart` 10.1.2**, registered only inside the plugin scopes of `POST /api/attachments` and `POST /api/backup/restore`; the app's JSON body limit stays 10 MB.
+- **`node-notifier` 10.0.1** as the toast fallback (the moderate `uuid` advisory concerns `v3/v5/v6` with a caller buffer, which node-notifier never calls; 11.0.0 was under two weeks old).
+- **`pdfjs-dist` 6.4.299** for the viewer.
+- Per-vault background services are **vault plugins** (`server/src/app-context/vault-plugins.ts`): the vault host starts them after a vault opens and closes them before it closes; routes look their plugin up per request.
+Why: Fewer moving parts, behaviour we can test, nothing that weakens the CSP.
+Spec sections affected: §8 (library list), F17, F20, F21.
+
+## 2026-10-21 M4: settings, vault switch, backup, run at login
+Context: SPEC F18 lists what Settings holds; switching, backup and run-at-login details are left open.
+Decision:
+- Settings gain `reminders.time` (default 08:00), `system.runAtLogin`, and `ai` (provider, per-provider API keys, models, folder scope; `enabled`/`embeddings` cannot be turned on before Phase 3: `ai-not-available`). `GET /api/settings` is an allowlisted view; keys only as `…last4` (keys must be 16–512 printable ASCII). `PUT /api/settings` takes partial bodies checked by a strict validator (unknown keys → 400 `unknown-field`; Fastify's validator would silently drop them), saves one change at a time and updates the live settings in place; a UI change is broadcast as `settings:changed`. Port 1024–65535, applied at the next start (`restartRequired`).
+- **Vault switch in process:** a vault host owns the open context, one WebSocket hub for all vaults and the plugins; routes get a delegating context. `POST /api/vault/switch {path|null}` needs an existing absolute folder (an empty one becomes a new vault), gates new requests, lets running ones finish (≤ 10 s), closes plugins and vault, opens the new one and **reopens the previous vault on any failure** (400 `VAULT_UNUSABLE` with a reason). `vaultPath` is saved only after success; clients reload on `vault:switched`. Optional header `x-sb-vault-id`: a stale id gets 409 `vault-switched`, so a save queued behind a switch never lands in the other vault.
+- **Backup:** the zip holds every file of the vault except `.secondbrain/cache`, `.secondbrain/logs`, `.git` and temp files (so `vault.json`, `state/`, `trash/` are in), empty folders included, symlinks skipped, never anything outside the vault (no settings, token or keys). `.git` is left out on purpose: history would double the size of every attachment. Restore goes into a missing or empty folder outside the vault and the app folders, through a temp sibling folder, with path-guard rules on every entry and zip-bomb caps (4 GB, 200,000 entries); with `open` the app switches to it. A restored vault gets a **fresh vault id** (a new id in its `vault.json`, written before the copy is moved into place; every other byte is as backed up): it is a new location next to the original, and the stale-window guard (`x-sb-vault-id`) must tell a window of the original from one of the copy, otherwise a save queued in a window of the original lands in the copy. Browser drafts and tabs are therefore not shared between the two.
+- **Run at login:** `%APPDATA%\…\Startup\Second Brain.lnk` → `wscript.exe "<app>\launcher\start-hidden.vbs"` (no window, no browser), created with PowerShell's `WScript.Shell`, removed by deleting that one file; `GET` reports the file on disk. Not offered off Windows.
+- `POST /api/logs/reveal` is the dedicated route for the log folder (note and file routes still refuse `.secondbrain/`). New error codes `VAULT_UNUSABLE` (400), `UNAVAILABLE` (503).
+Why: F18.3 requires that a failed switch keeps the current vault and that no state mixes; F18.5 requires a backup that restores intact and never carries secrets.
+Spec sections affected: §4.13, F18, F21.4, §9 (additive routes and codes).
+
+## 2026-10-21 M4: reminders
+Context: SPEC F17 defines thresholds, dedupe and catch-up; timing details are open.
+Decision:
+- The server evaluates at start, every 60 s and after a late tick or a new local date (wake). Per item and due date only the latest threshold whose time has come fires; earlier unfired ones are recorded as superseded (never shown). A fire time passed by more than 5 minutes is a catch-up (`missed`). Catch-up window: the 3- and 1-day thresholds while `due ≥ today`; the due-day one until the end of the next day (titled "Đã quá hạn"); older items get no toast (they are on Today anyway).
+- More than 3 reminders in one pass → one summary toast "Bạn có n deadline sắp tới" that opens Today.
+- The store (`state/reminders.json`) is written **before** the toast with `toast: 'failed'` and rewritten with the real outcome, so a crash never repeats a toast. Task reminders also match by note + text + due date + threshold, so editing lines above a task does not remind it again; renaming a note can.
+- Windows toast: Windows PowerShell 5.1 by absolute path, the toast XML passed base64-encoded (user text is never script code), `activationType="protocol"` deep link `http://localhost:<port>/#/note?path=…` (the app's route instead of SPEC's `#/note/<path>`), the AppUserModelID of Windows PowerShell (the app has none registered); `node-notifier` as fallback; other platforms `unsupported`. Texts in the UI language at fire time.
+- `GET /api/reminders` lists entries not dismissed, fired in the last 7 days, whose item is still open with the same due date; dismissing has no WS event.
+Why: One toast per real reminder, never a flood after a long sleep, never a repeat after a crash.
+Spec sections affected: F17 (interpretations), §9.
+
+## 2026-10-21 M4: attachments, documents view, opening files
+Context: SPEC §4.8 and F15 give placement and uniqueness; names and edge cases are open.
+Decision:
+- Upload names: Windows-invalid, control and `[ ] # ^` characters → space (they would break `[[name]]`), format characters dropped, dots/spaces trimmed, ≤ 120 code points, reserved names → `Tệp đính kèm YYYY-MM-DD HH-mm.<ext>`. Unique across the whole vault, compared case-insensitively after NFC against every file **and every note title** (a title wins over a file name when a link resolves); uploads to one vault run one at a time. Images → `Attachments/<YYYY-MM>/`; pdf → papers, ppt/pptx/key/odp → slides, everything else (an uploaded `.md` too) → other.
+- `GET /api/files?download=1` forces a download. `POST /api/files/open-external` opens a vault file with the OS app, never folders and never programs/scripts (Microsoft's unsafe-attachment list plus sh, command, desktop…), checked on the name and on the real target of a link.
+- `GET /api/resources` reads size/mtime with one `lstat` of the indexed path (metadata only, never follows a link); `referencedBy` counts resolved, non-ambiguous links, no self-links.
+- Editor: files of one drop upload in order; one "Lưu vào" choice per drop, preselected from the last choice per vault (else by type); a link on an empty line or between blocks gets its own paragraph, inside text it goes inline, inside code it becomes a paragraph after the block; a drop outside the text (title, property bar, margins) goes to the end of the note (otherwise the browser would open the file and leave the app). Upload placeholders are decorations, never saved. The slash menu gains "Ảnh". Embedded images: `![[x.png|300]]` / `|300x200` set the size (as in Obsidian), other aliases are alt text; non-image embeds render as cards; Markdown image sources are resolved relative to the note then the vault root, `data:image/` shown as is, any other scheme or `//` never fetched. Blob URLs are cached per vault and revision and revoked 30 s after last use.
+Why: Links to attachments must resolve unambiguously and nothing from the vault may run in the app origin.
+Spec sections affected: §4.4, §4.8, F15 (interpretations), §9.
+
+## 2026-10-21 M4: version history with git
+Context: SPEC F20 asks for git in the vault with a `.gitignore`; F1.1 says an empty folder gets exactly the standard entries.
+Decision:
+- Ignore rules go to **`.git/info/exclude`**, not a `.gitignore`, so the user's folder gets no new file; `.git/info/attributes` gets `* -text -filter -ident -working-tree-encoding` so a `.gitattributes` in the vault can never change the stored bytes (a restored version is byte-exact). Identity is set repo-locally only when none resolves; global/system config never written. Hooks off (`core.hooksPath` = the null device), fsmonitor, signing and pagers off, inherited `GIT_*` variables dropped, `safe.directory` for the vault. Never a command that changes the working tree; a restore is a revision-checked vault write followed by a commit `restore: <path> @ <short>`.
+- The first commit after `git init` runs in the background; auto-commit every 10 minutes and on close (≤ 10 s); a stale `index.lock` (> 10 min) is removed; failures are logged as codes and never block saving. `.secondbrain/state/**` is part of the history (durable state). Attachments are committed too, so the repository grows with them (a size cap may come later).
+- Routes: `GET /api/history/status`, `GET /api/history?path=`, `GET /api/history/version`, `POST /api/history/restore`; 503 `UNAVAILABLE` with a reason when history is off.
+Why: History must never surprise the user's folder or rewrite a file she did not ask to restore.
+Spec sections affected: F1.1, F20 (interpretations), §9.
+
+## 2026-10-21 M4: PWA and launcher
+Context: SPEC F21 lists the launcher, the PWA and its checklist.
+Decision:
+- Service worker: navigations network first (4 s), the shell cached only from a 200 same-origin `text/html` response; assets cache first; `/api`, `/ws` and everything else never intercepted. Registered only in production builds on `http://localhost:<port>`; checks for a new build hourly and on every WebSocket reconnect; "Có bản mới của app." with "Tải lại" (10 s) reloads that window once.
+- Manifest with relative URLs and `launch_handler.client_mode: focus-existing`; icons rendered from `favicon.svg` by `scripts/gen-icons.ts`.
+- Launcher: `login` action (no browser, silent when running), failures in `.secondbrain/logs/launcher.log` and one message box; the port-busy dialog names the process holding the port; the installed app (Start-menu shortcut with `--app-id=`) is opened instead of a browser tab, except after a port change (an installed PWA belongs to its origin: Settings tells the owner to reinstall it).
+- The cached shell contains the session token (same origin only, like the page); a token change without a port change leaves an offline-started window with the old token until reload.
+Why: The app must open like a real app, offline included, and say clearly why when it cannot start.
+Spec sections affected: F21, §8.
+
+## 2026-10-21 M4: Settings screen, reminders in the app, language switch
+Context: SPEC F17, F18, F19 and design.md §1 (few settings) leave interaction details open.
+Decision:
+- Settings is one calm page: Giao diện, Nhắc nhở, Kho ghi chú, Ứng dụng, AI, Kết nối Claude (MCP). No global Save: choices save on change, text fields (name, port, reminder time, model names) on blur/Enter (Esc restores), the API key only on Enter or "Lưu khóa" and the field empties after saving; "Đã lưu" shows 2 s. UI preferences apply before the request and revert if it fails; other windows follow `settings:changed`.
+- AI and MCP are honest about Phase 3: "AI có thể nối sau vài bước, ở bản sau."; the MCP section is one sentence, no config snippet (no MCP server exists in this build). AI folder scope: no stored list = every top folder except `3 Resources` and `4 Archive`.
+- Vault switch from the client: open notes are saved and their drafts written first; after any switch (here, another window's `vault:switched`, or a 409 `vault-switched`) drafts are written and the page reloads. Every `/api` request (uploads and file fetches included) sends `X-SB-Vault-Id`. Restore always opens the restored vault; its hint says the restored copy is a separate vault (its own tabs and drafts).
+- Port: "Cần khởi động lại để dùng cổng mới." plus a line to reinstall the installed app (it belongs to the old origin).
+- Reminders: the list (`/reminders`) and the sidebar badge refresh on the `reminder` event, vault events, reconnect and when the window comes back into view. A browser notification is shown **only when the server's Windows toast was not shown** (SPEC F17 lists both channels; one alert per reminder avoids a double alert on Windows), in exactly one window (Web Lock `sb-reminders-leader`, else a BroadcastChannel claim), tagged with the reminder key; click opens the note. Permission is never requested without a click; denied → the list only and a one-time hint per vault. Texts are relative to today ("Còn n ngày", "Ngày mai đến hạn", "Hôm nay đến hạn", "Đã quá hạn"; "Đã nhắc lúc HH:mm" / "Nhắc bù lúc HH:mm").
+- Language switch (F19.2): the routed screen is rebuilt in the new language (except Settings itself, so focus stays on the chosen radio); toasts already on screen are re-translated.
+- The palette's light/dark command makes the theme an explicit choice. "Thoát Second Brain" asks first and saves open notes before stopping. Navigation: Nhắc nhở below Lịch, Tài liệu after Thẻ, Cài đặt pinned at the bottom of the left pane.
+Why: Every change visible at once and nothing lost when the vault or language changes.
+Spec sections affected: F17, F18, F19, F21, F22 (interpretations).
+
+## 2026-10-21 M4: PDF viewer, documents view, opening files, history UI
+Context: SPEC F15, F20, F23 leave the viewer and history UI open; the CSP forbids eval and WebAssembly.
+Decision:
+- pdf.js 6.4.299 runs from its **legacy build** (the modern build calls `Map#getOrInsertComputed`, missing in Chromium 141), with WebAssembly off: JPEG 2000/JBIG2 use pdf.js's JavaScript decoders through a same-origin dispatcher module; no `unsafe-eval`/`wasm-unsafe-eval` added. The document is loaded from an `ArrayBuffer` fetched with the token. Standard fonts and CMaps are not bundled (PDFs without embedded fonts use system fonts; CJK may look off). pdf.js (~2.4 MB) loads only when a PDF opens.
+- Viewer: opens at "Vừa chiều rộng", zoom 25–400 %, keys only while focus is in the viewer, page/zoom remembered per file for the session, reload in place on change, "Không tìm thấy tệp …" with "Đóng thẻ" on deletion (the tab stays), full main height.
+- Tabs gain `kind: 'note' | 'file'` (saved; old tabs load as notes; unknown kinds dropped). A plain click on a PDF replaces the active tab like a note link.
+- `openVaultFile`: PDF → viewer tab; images, HTML and every other file → token-fetched blob saved with `<a download>` (never a navigation or frame) and a toast with "Mở bằng ứng dụng khác".
+- "Tài liệu" groups papers, slides, web, other, other `3 Resources` subfolders, the `3 Resources` root, then `Attachments/<month>` newest first.
+- History: a dialog without a route (tree menu "Lịch sử phiên bản", a right-pane "Lịch sử" section that loads on expand, palette "Xem lịch sử phiên bản"); the diff reads from the current note to the chosen version; restoring an identical version is disabled; a 409 reloads the list and the note; git missing → "Lịch sử cần Git. Cài Git for Windows để bật."
+Why: Documents open in the app without weakening the CSP; history is reachable but never in the way.
+Spec sections affected: F15, F16 (source nodes open), F20, F23 (interpretations).
+
+## 2026-10-21 M4 review rounds: rules added while fixing confirmed findings
+Context: Two independent reviews (data safety/security; UI/spec/accessibility in a real browser) and the e2e run found defects whose fixes needed rules SPEC does not spell out.
+Decision:
+- **A restored backup is a new vault with its own id** (replaces the earlier "keeps its id" rule): the stale-window guard (`x-sb-vault-id`) must tell the original and the copy apart, or a save meant for one lands in the other. The copy keeps what had already been reminded: the reminder keys in `state/reminders.json` move to the new id during the restore.
+- **Backup export holds the vault's write queue** while it builds the zip into a temp file under `.secondbrain/cache/` (no rename, move, trash or save can interleave; reads are never blocked), then streams the finished file with `content-length`. Saves made meanwhile wait (on a multi-GB vault, about a minute); the export needs free space for the zip; every skipped file is counted in `x-sb-backup-unreadable` and Settings warns; a read error inside a file fails the export (500) instead of sending a truncated zip.
+- **A history restore never loses the replaced text:** pending changes are committed first and HEAD must hold exactly the bytes being replaced; otherwise the current text is copied to the trash (reason `history-restore`); if even that fails nothing is written (500 `copy-failed`).
+- An unreadable `reminders.json` (anything but "missing") is never overwritten: writes are refused, no toast fires, the read is retried next tick.
+- A vault switch or restore target that is, contains or sits inside the open vault is refused (`overlaps-vault`, `target-inside-vault`). "Mở bằng ứng dụng khác" also refuses macro-enabled Office types. A blob URL of a vault file is never navigated to or framed (an SVG would run its scripts there).
+- **A window started before the server recovers in place, never by reload:** the WebSocket emits `resync` after any open that follows a closed or refused socket (also the first), the vault check is retried until `/health` answers, then per-vault state is read and everything refetches; a note that failed to open shows "Chưa mở được ghi chú…" with "Thử lại". No per-vault state is read while the vault is unknown (the tab strip is empty meanwhile).
+- Settings: action buttons stay focusable while busy (`aria-disabled`) and confirmations come before the busy state, so focus returns to the trigger; the reminder time is a 24-hour `HH:mm` text field; Esc clears a field's error; after a switch or restore a 4 s toast names the vault folder. Reminders: "Bỏ qua tất cả" asks first (dismissing has no undo on the server); focus moves to the next row after "Bỏ qua".
+- Secondary text on `--accent-soft` surfaces uses `--ink` (`--ink-2` on `--accent-soft` is below 4.5:1 in five of six theme/palette sets); the contrast check includes `--ink`/`--accent-soft` and a CSS guard test refuses `--ink-2` text on `--accent-soft`.
+- The shortcut sheet lists the PDF viewer keys as screen-local keys, from the viewer's own key list. English texts with counts use plural forms.
+Why: Never lose or misplace the user's text, never repeat a reminder, and make every screen recover and stay readable by itself.
+Spec sections affected: §4.10, §4.11, §4.13, F17, F18, F20, F21, F22.2, design.md §2.5, §7 (interpretations).

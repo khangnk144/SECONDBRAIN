@@ -1,5 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ApiError, createApiClient, journalConflictCount, noteConflictDetails } from './api-client';
+import {
+  ApiError,
+  createApiClient,
+  isVaultSwitchedError,
+  journalConflictCount,
+  noteConflictDetails,
+} from './api-client';
 
 function jsonResponse(status: number, body: unknown): Response {
   return new Response(JSON.stringify(body), {
@@ -75,5 +81,71 @@ describe('createApiClient', () => {
     expect(journalConflictCount(journal)).toBe(2);
     expect(journalConflictCount(new ApiError(404, 'NOT_FOUND', 'x'))).toBeNull();
     expect(noteConflictDetails(new Error('x'))).toBeNull();
+  });
+
+  it('names the vault this window shows once it is known', async () => {
+    const fetchImpl = vi.fn(async () => jsonResponse(200, {}));
+    let vaultId: string | null = null;
+    const client = createApiClient({ token: 't', fetchImpl, vaultId: () => vaultId });
+    await client.get('/tree');
+    vaultId = 'vault-ả';
+    await client.request('/note', { method: 'PUT', body: {} });
+    const headers = fetchImpl.mock.calls.map(
+      (call) => (call as unknown as [string, RequestInit])[1].headers as Record<string, string>,
+    );
+    expect(headers[0]?.['X-SB-Vault-Id']).toBeUndefined();
+    expect(headers[1]?.['X-SB-Vault-Id']).toBe('vault-ả');
+  });
+
+  it('a 409 vault-switched tells the app (it reloads) and still rejects the call', async () => {
+    const fetchImpl = vi.fn(async () =>
+      jsonResponse(409, {
+        error: {
+          code: 'CONFLICT',
+          message: 'x',
+          details: { reason: 'vault-switched', vaultId: 'b' },
+        },
+      }),
+    );
+    const onVaultSwitched = vi.fn();
+    const client = createApiClient({ token: 't', fetchImpl, vaultId: () => 'a', onVaultSwitched });
+    const error = await client.request('/note', { method: 'PUT', body: {} }).catch((e) => e);
+    expect(isVaultSwitchedError(error)).toBe(true);
+    expect(onVaultSwitched).toHaveBeenCalledWith('b');
+    // A note conflict is something else: no reload for it.
+    const plain = vi.fn(async () =>
+      jsonResponse(409, {
+        error: { code: 'CONFLICT', message: 'x', details: { currentRevision: 'r' } },
+      }),
+    );
+    await createApiClient({ token: 't', fetchImpl: plain, onVaultSwitched })
+      .get('/note')
+      .catch(() => undefined);
+    expect(onVaultSwitched).toHaveBeenCalledTimes(1);
+  });
+
+  it('raw requests carry the same headers but leave the body type to the browser', async () => {
+    const fetchImpl = vi.fn(async () => new Response('zip', { status: 200 }));
+    const client = createApiClient({ token: 't', fetchImpl, vaultId: () => 'v' });
+    const form = new FormData();
+    form.append('target', 'D:\\Khôi phục');
+    const response = await client.raw('/backup/restore', { method: 'POST', body: form });
+    expect(await response.text()).toBe('zip');
+    const [url, init] = fetchImpl.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe('/api/backup/restore');
+    expect(init.body).toBe(form);
+    const headers = init.headers as Record<string, string>;
+    expect(headers['X-SB-Token']).toBe('t');
+    expect(headers['X-SB-Vault-Id']).toBe('v');
+    expect(headers['Content-Type']).toBeUndefined();
+    const failing = vi.fn(async () =>
+      jsonResponse(400, {
+        error: { code: 'VALIDATION', message: 'x', details: { reason: 'too-large' } },
+      }),
+    );
+    const error = await createApiClient({ token: 't', fetchImpl: failing })
+      .raw('/backup/export', { method: 'POST' })
+      .catch((e: unknown) => e);
+    expect(error).toMatchObject({ code: 'VALIDATION', details: { reason: 'too-large' } });
   });
 });

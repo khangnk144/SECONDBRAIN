@@ -36,6 +36,8 @@ export const PAIRS: ContrastPair[] = [
       ['--ink-2', '--paper'],
       ['--on-accent', '--accent'],
       ['--accent', '--accent-soft'],
+      // Text on selected rows and other --accent-soft surfaces (secondary text included).
+      ['--ink', '--accent-soft'],
       ['--toast-fg', '--toast-bg'],
       ['--urgent-text', '--bg'],
       ['--soon-text', '--bg'],

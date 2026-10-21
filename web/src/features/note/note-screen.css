@@ -151,6 +151,25 @@
   tab-size: 4;
 }
 
+/* "Đang tải lên <tên>…" for files dropped into source mode (outside the text itself). */
+.source-editor__uploads {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  list-style: none;
+  color: var(--ink-2);
+  font-size: 0.875rem;
+}
+
+.source-editor__uploads li {
+  color: var(--ink); /* on --accent-soft: --ink-2 would be below 4.5:1 */
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-s);
+  background: var(--accent-soft);
+}
+
 .source-editor:focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: -1px;
@@ -161,4 +180,8 @@
     flex-direction: column;
     gap: var(--space-2);
   }
+}
+
+.note-screen__retry {
+  justify-self: start;
 }

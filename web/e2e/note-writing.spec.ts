@@ -132,7 +132,8 @@ test('renaming from the title lists the linking notes, rewrites their links and 
   await expect
     .poll(async () => (await api.tryRead('2 Areas/Xác suất.md'))?.content ?? null)
     .toBe('# Xác suất\n');
-  expect((await api.readNote('0 Inbox/Bài XS.md')).content).toBe(
-    'Học [[Xác suất]] và [[Xác suất|XS]].\n',
-  );
+  // Undo restores the files one step at a time: the linking note may come back a moment later.
+  await expect
+    .poll(async () => (await api.readNote('0 Inbox/Bài XS.md')).content)
+    .toBe('Học [[Xác suất]] và [[Xác suất|XS]].\n');
 });

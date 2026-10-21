@@ -1,13 +1,14 @@
 import type { FastifyInstance } from 'fastify';
 import { errorCodeOf, VaultUnusableError } from '../app-context/app-context-errors.js';
-import {
-  createAppContext,
-  type AppContext,
-  type AppContextOptions,
-} from '../app-context/create-app-context.js';
+import type { AppContext, AppContextOptions } from '../app-context/create-app-context.js';
+import { openVaultHost, type VaultHost } from '../app-context/vault-host.js';
+import type { VaultPlugin } from '../app-context/vault-plugins.js';
 import { resolveAppPaths, type AppPaths } from '../config/app-paths.js';
 import { parseCliOptions, resolvePort } from '../config/cli-args.js';
-import { loadOrCreateGlobalSettings } from '../config/global-settings.js';
+import { loadOrCreateGlobalSettings, saveGlobalSettings } from '../config/global-settings.js';
+import { storedApiKeys } from '../config/settings-sections.js';
+import { createSettingsStore } from '../config/settings-store.js';
+import type { RunAtLoginService } from '../system/run-at-login.js';
 import { buildApp } from '../http/build-app.js';
 import type { AppLogger } from '../logging/rotating-file-logger.js';
 import { createVaultHandoverLogger } from '../logging/vault-handover-logger.js';
@@ -21,7 +22,9 @@ export type StartResult =
   | {
       kind: 'started';
       app: FastifyInstance;
+      /** The routes' context: always the vault that is open now. */
       context: AppContext;
+      host: VaultHost;
       port: number;
       paths: AppPaths;
       logger: AppLogger;
@@ -41,6 +44,10 @@ export interface StartServerInput {
   echoLogs?: boolean;
   /** Clock and watcher timing for the vault context (tests). */
   contextOptions?: Pick<AppContextOptions, 'now' | 'watcher' | 'faults'>;
+  /** Per-vault background services (reminders, history), started for every vault that opens. */
+  plugins?: readonly VaultPlugin[];
+  /** Startup-shortcut service override (tests). */
+  runAtLogin?: RunAtLoginService;
 }
 
 /**
@@ -54,7 +61,7 @@ export async function startServer(input: StartServerInput): Promise<StartResult>
   const { settings, created, corruptBackup } = await loadOrCreateGlobalSettings(paths.settingsFile);
   const logger = createVaultHandoverLogger({
     dir: paths.logsDir,
-    secrets: () => [settings.sessionToken],
+    secrets: () => [settings.sessionToken, ...storedApiKeys(settings.ai)],
     echo: input.echoLogs,
   });
   if (created) logger.info('Created global settings with a new session token.');
@@ -73,14 +80,20 @@ export async function startServer(input: StartServerInput): Promise<StartResult>
     return { kind: 'already-running', port };
   }
 
-  let context: AppContext;
+  const store = createSettingsStore(
+    () => settings,
+    (next) => saveGlobalSettings(paths.settingsFile, next),
+  );
+  let host: VaultHost;
   try {
-    context = await createAppContext({
+    host = await openVaultHost({
       home: paths.homeDir,
       appDir: paths.appDir,
-      settings,
+      settings: store,
       logger,
-      ...input.contextOptions,
+      port,
+      plugins: input.plugins,
+      contextOptions: input.contextOptions,
     });
   } catch (error) {
     if (error instanceof VaultUnusableError) {
@@ -98,19 +111,22 @@ export async function startServer(input: StartServerInput): Promise<StartResult>
   });
   const app = await buildApp({
     getSettings: () => settings,
+    settingsStore: store,
     port,
     mode,
     webDir: paths.webDir,
     webDistDir: paths.webDistDir,
+    appDir: paths.appDir,
     logger,
     version: SERVER_VERSION,
-    context,
+    host,
+    runAtLogin: input.runAtLogin,
     requestShutdown: () => {
       logger.info('Shutdown requested through the API.');
       resolveShutdownRequest();
     },
   }).catch(async (error: unknown) => {
-    await context.close();
+    await host.close();
     throw error;
   });
 
@@ -118,7 +134,7 @@ export async function startServer(input: StartServerInput): Promise<StartResult>
     await app.listen({ host: LISTEN_HOST, port });
   } catch (error) {
     await app.close();
-    await context.close();
+    await host.close();
     if ((error as NodeJS.ErrnoException).code !== 'EADDRINUSE') throw error;
     if (await probeExistingServer(port)) {
       logger.info(
@@ -142,11 +158,22 @@ export async function startServer(input: StartServerInput): Promise<StartResult>
   const stop = async (): Promise<void> => {
     if (stopped) return;
     stopped = true;
-    // HTTP first (no new writes can arrive), then the vault (queued writes, watcher, index).
+    // HTTP first (no new writes can arrive), then the vault: its plugins first (the history
+    // plugin commits on close), then queued writes, watcher and index.
     await app.close();
-    await context.close();
+    await host.close();
     await removeServerInfoIfOwned(paths.serverInfoFile, process.pid);
     logger.info('Server stopped.');
   };
-  return { kind: 'started', app, context, port, paths, logger, stop, shutdownRequested };
+  return {
+    kind: 'started',
+    app,
+    context: host.context,
+    host,
+    port,
+    paths,
+    logger,
+    stop,
+    shutdownRequested,
+  };
 }

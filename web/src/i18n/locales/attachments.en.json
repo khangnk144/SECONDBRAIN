@@ -1,0 +1,42 @@
+{
+  "uploading": "Uploading {{name}}…",
+  "chooser": {
+    "title": "Save to",
+    "one": "Where to keep {{name}} in 3 Resources.",
+    "many_one": "Where to keep {{count}} file in 3 Resources: {{names}}.",
+    "many_other": "Where to keep {{count}} files in 3 Resources: {{names}}.",
+    "papers": "Papers",
+    "slides": "Slides",
+    "other": "Other documents",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "errors": {
+    "tooLarge": "Couldn't upload {{name}}: the file is larger than 200 MB.",
+    "invalid": "Couldn't upload {{name}}: its name or content can't be used. Rename the file and try again.",
+    "offline": "Couldn't upload {{name}}: the server isn't reachable. Start Second Brain again, then drop the file once more.",
+    "failed": "Couldn't upload {{name}}. Drop the file again to retry.",
+    "notInserted": "Saved {{name}} to the vault but couldn't insert the link. Type {{link}} into the note if you need it."
+  },
+  "image": {
+    "loading": "Loading image {{name}}",
+    "missing": "Image not found: {{name}}",
+    "failed": "Couldn't show image {{name}}. Reopen the note to try again.",
+    "external": "Web image not loaded: {{url}}",
+    "title": "{{name}}. Double-click, or select it and press Enter, to open."
+  },
+  "card": {
+    "open": "Open",
+    "openLabel": "Open {{name}}",
+    "missing": "File not found: {{name}}",
+    "kind": {
+      "pdf": "PDF",
+      "slides": "Slides",
+      "document": "Document",
+      "sheet": "Spreadsheet",
+      "web": "Web page",
+      "image": "Image",
+      "other": "File"
+    }
+  }
+}

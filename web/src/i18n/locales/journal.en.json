@@ -1,7 +1,9 @@
 {
   "region": "Unfinished operations",
-  "pending": "A {{op}} did not finish ({{done}}/{{total}} files).",
-  "pendingGeneric": "An operation did not finish ({{done}}/{{total}} files).",
+  "pending_one": "A {{op}} did not finish ({{done}}/{{count}} file).",
+  "pending_other": "A {{op}} did not finish ({{done}}/{{count}} files).",
+  "pendingGeneric_one": "An operation did not finish ({{done}}/{{count}} file).",
+  "pendingGeneric_other": "An operation did not finish ({{done}}/{{count}} files).",
   "ops": {
     "rename": "rename",
     "move": "move",

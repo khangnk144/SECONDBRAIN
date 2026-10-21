@@ -1,5 +1,6 @@
 import type { AnyExtension, Node } from '@tiptap/core';
 import type { EditorContext } from './editor-context';
+import { AttachmentDropPaste } from './extensions/attachment-drop-paste';
 import { ClickBelowEnd } from './extensions/click-below-end';
 import { createEditorTriggers } from './extensions/editor-triggers';
 import { InlineDecorations } from './extensions/inline-decorations';
@@ -10,6 +11,7 @@ import { TableKeys } from './extensions/table-keys';
 import { WritingFocus } from './extensions/writing-focus';
 import { FormattingKeys } from './formatting/formatting-keys';
 import { createTaskItemView, toggleTaskAtSelection } from './extensions/task-item-view';
+import { createImageView } from './extensions/image-view';
 import { createVerbatimBlockView } from './extensions/verbatim-block-view';
 import { createWikilinkKeys } from './extensions/wikilink-follow';
 import { createWikilinkView } from './extensions/wikilink-view';
@@ -20,7 +22,8 @@ export const HISTORY_DEPTH = 200;
 
 /**
  * The editor's extensions: the Markdown schema's node and mark types (unchanged in meaning) with
- * the writing behaviour added on top – node views, input rules, popups, decorations, paste.
+ * the writing behaviour added on top – node views, input rules, popups, decorations, paste, and
+ * file drops/pastes that upload attachments.
  */
 export function createEditorExtensions(context: EditorContext): AnyExtension[] {
   const schemaExtensions = createSchemaExtensions()
@@ -37,6 +40,7 @@ export function createEditorExtensions(context: EditorContext): AnyExtension[] {
     createEditorTriggers(context),
     TableKeys,
     ListIndentKeys,
+    AttachmentDropPaste,
     MarkdownPaste,
     WritingFocus,
     ClickBelowEnd,
@@ -56,6 +60,8 @@ function withBehaviour(extension: AnyExtension, context: EditorContext): AnyExte
       });
     case 'wikilink':
       return extension.extend({ addNodeView: () => createWikilinkView(context) });
+    case 'image':
+      return extension.extend({ addNodeView: () => createImageView(context) });
     case 'verbatimBlock':
       return extension.extend({ addNodeView: () => createVerbatimBlockView });
     default:

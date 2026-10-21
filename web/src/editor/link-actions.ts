@@ -3,6 +3,7 @@ import type { VaultPath } from '../lib/api/vault-types';
 import type { LinkResolution } from '../lib/link-resolution';
 import { useLinkTargetsStore } from '../lib/link-targets-store';
 import { createNote } from '../lib/note-operations';
+import { openVaultFile } from '../lib/open-vault-file';
 import { useTabsStore } from '../lib/tabs-store';
 import { showToast } from '../lib/toast-store';
 import { isNotePath } from '../lib/vault-paths';
@@ -30,8 +31,10 @@ export function isFileTarget(target: string): boolean {
 }
 
 /**
- * Follows a wikilink: a resolved link opens its note (Ctrl+click: new tab), an ambiguous one asks
- * which note is meant, a ghost creates `0 Inbox/<Target>.md` and opens it (F4.5).
+ * Follows a wikilink: a resolved link opens its note (Ctrl+click: new tab) or, for any other file
+ * (`[[bài giảng 3.pdf]]`, an `.html` page), hands it to `openVaultFile` (the viewer decides how;
+ * nothing is rendered here); an ambiguous one asks which note is meant, a ghost creates
+ * `0 Inbox/<Target>.md` and opens it (F4.5).
  */
 export async function followWikilink(
   attrs: WikilinkAttributes,
@@ -43,7 +46,7 @@ export async function followWikilink(
     if (isNotePath(resolution.path)) {
       useTabsStore.getState().openNote(resolution.path, { newTab: options.newTab });
     } else {
-      showToast({ message: i18n.t('editor.wikilink.fileLater') });
+      openVaultFile(resolution.path, { newTab: options.newTab });
     }
     return;
   }

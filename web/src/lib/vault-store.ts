@@ -6,6 +6,11 @@ interface VaultState {
   vaultId: string | null;
   /** True once the boot health check answered (or failed): per-vault state may be read. */
   ready: boolean;
+  /**
+   * The last health check got no answer (the server was not running yet): the open vault is
+   * still unknown, so nothing per vault can be read and no note can open until a retry works.
+   */
+  failed: boolean;
   setVault: (vaultId: string | null) => void;
   /** Reads the vault id from `GET /api/health`; a failure leaves `vaultId` null but `ready`. */
   load: () => Promise<string | null>;
@@ -14,14 +19,15 @@ interface VaultState {
 export const useVaultStore = create<VaultState>((set) => ({
   vaultId: null,
   ready: false,
-  setVault: (vaultId) => set({ vaultId, ready: true }),
+  failed: false,
+  setVault: (vaultId) => set({ vaultId, ready: true, failed: false }),
   load: async () => {
     try {
       const health = await getHealth();
-      set({ vaultId: health.vaultId, ready: true });
+      set({ vaultId: health.vaultId, ready: true, failed: false });
       return health.vaultId;
     } catch {
-      set({ vaultId: null, ready: true });
+      set({ vaultId: null, ready: true, failed: true });
       return null;
     }
   },

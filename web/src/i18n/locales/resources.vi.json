@@ -1,0 +1,31 @@
+{
+  "title": "Tài liệu",
+  "loading": "Đang tải danh sách tài liệu…",
+  "loadError": "Chưa tải được danh sách tài liệu. Kiểm tra máy chủ rồi bấm Thử lại.",
+  "retry": "Thử lại",
+  "empty": "Chưa có tài liệu nào. Kéo một file PDF vào ghi chú để lưu nó ở đây.",
+  "filterLabel": "Lọc tài liệu",
+  "filterPlaceholder": "Lọc theo tên tệp",
+  "count_one": "{{count}} tệp",
+  "count_other": "{{count}} tệp",
+  "filtered_one": "{{count}} trên {{total}} tệp khớp",
+  "filtered_other": "{{count}} trên {{total}} tệp khớp",
+  "noMatch": "Không có tệp nào khớp “{{filter}}”.",
+  "dateFormat": "DD/MM/YYYY",
+  "referencedIn": "Được nhắc trong",
+  "noReferences": "Chưa ghi chú nào nhắc đến",
+  "revealFailed": "Không mở được thư mục chứa {{name}}. Hãy thử lại sau.",
+  "kind": {
+    "pdf": "Tệp PDF",
+    "image": "Ảnh",
+    "document": "Tài liệu",
+    "note": "Ghi chú",
+    "other": "Tệp"
+  },
+  "menu": {
+    "button": "Thao tác với {{name}}",
+    "label": "Thao tác với {{name}}",
+    "open": "Mở",
+    "reveal": "Hiện trong thư mục"
+  }
+}

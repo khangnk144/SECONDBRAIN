@@ -1,0 +1,10 @@
+{
+  "update": {
+    "message": "Có bản mới của app.",
+    "reload": "Tải lại"
+  },
+  "install": {
+    "button": "Cài đặt app",
+    "hint": "Mở bằng Chrome hoặc Edge để cài app."
+  }
+}

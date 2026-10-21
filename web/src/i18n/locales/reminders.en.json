@@ -1,0 +1,45 @@
+{
+  "title": "Reminders",
+  "time": "I remind you at {{time}}.",
+  "changeTime": "Change the reminder time",
+  "listLabel": "Reminder list",
+  "empty": "No reminders yet. I will remind you 3 days before, 1 day before and on the due day.",
+  "loading": "Loading reminders…",
+  "loadError": "Reminders could not be loaded. Check that the server is running, then try again.",
+  "retry": "Try again",
+  "unavailable": "Reminders are paused for this vault. Restart Second Brain to turn them back on.",
+  "dismiss": "Dismiss",
+  "dismissNamed": "Dismiss the reminder “{{title}}”",
+  "dismissAll": "Dismiss all",
+  "dismissAllTitle_one": "Dismiss {{count}} reminder?",
+  "dismissAllTitle_other": "Dismiss all {{count}} reminders?",
+  "dismissAllBody": "They leave this list. The deadlines stay on Today.",
+  "dismissFailed": "The reminder could not be dismissed. Check that the server is running, then try again.",
+  "badge_one": "{{count}} reminder",
+  "badge_other": "{{count}} reminders",
+  "due": {
+    "overdue": "Overdue",
+    "today": "Due today",
+    "tomorrow": "Due tomorrow",
+    "daysLeft_one": "{{count}} day left",
+    "daysLeft_other": "{{count}} days left"
+  },
+  "fired": {
+    "onTime": "Reminded at {{time}}",
+    "onTimeOnDate": "Reminded at {{time}}, {{date}}",
+    "onTimeNoTime": "Reminded",
+    "missed": "Caught up at {{time}}",
+    "missedOnDate": "Caught up at {{time}}, {{date}}",
+    "missedNoTime": "Caught up"
+  },
+  "hint": {
+    "notAsked": "The browser may not show notifications yet, so reminders appear in this list. To turn them on, open Settings, Reminders, and click “Allow browser notifications”.",
+    "denied": "The browser blocks notifications from the app, so reminders only appear in this list. To turn them on, click the lock icon next to the address, find Notifications and choose Allow.",
+    "unsupported": "This browser does not show notifications, so reminders appear in this list.",
+    "dismiss": "Got it"
+  },
+  "notification": {
+    "title": "Reminder: {{title}}",
+    "body": "{{due}}, due {{date}}."
+  }
+}

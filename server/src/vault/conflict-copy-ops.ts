@@ -1,19 +1,24 @@
 import { trashFileAbs, writeTrashMeta } from './trash-store.js';
 import { writeStateFile, type VaultCore } from './vault-core.js';
 import { readAtRevision, replaceContent } from './vault-write-ops.js';
-import type { ConflictCopyResult, TrashEntry, VaultPath } from './vault-types.js';
+import type { ConflictCopyResult, TrashEntry, TrashReason, VaultPath } from './vault-types.js';
+
+/** Why the bytes on disk are kept: "keep mine" of the conflict UI, or a history restore. */
+export type KeptCopyReason = Extract<TrashReason, 'conflict' | 'history-restore'>;
 
 /**
  * "Keep mine" of the conflict UI (SPEC §4.10): the version on disk (at `expectedRevision`, the one
  * the conflict UI showed) is copied into a new trash entry with `reason: 'conflict'`, then the
  * client's content replaces it atomically. The copy is complete before the note is touched, so a
- * crash in between leaves the note as it was and at worst one extra trash copy.
+ * crash in between leaves the note as it was and at worst one extra trash copy. A version restore
+ * uses the same step (`history-restore`) when the text it replaces could not be committed first.
  */
 export function writeKeepingConflictCopy(
   core: VaultCore,
   input: VaultPath,
   content: string,
   expectedRevision: string,
+  reason: KeptCopyReason = 'conflict',
 ): Promise<ConflictCopyResult> {
   return core.queue.run(async () => {
     const { target, current } = await readAtRevision(core, input, expectedRevision);
@@ -21,7 +26,7 @@ export function writeKeepingConflictCopy(
       id: core.newId(),
       opId: core.newId(),
       originalPaths: [target.vaultPath],
-      reason: 'conflict',
+      reason,
       deletedAt: core.now().toISOString(),
     };
     await writeTrashMeta(core, trash);

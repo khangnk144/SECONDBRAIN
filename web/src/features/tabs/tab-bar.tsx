@@ -3,7 +3,7 @@ import { useTabsStore } from '../../lib/tabs-store';
 import { TabItem } from './tab-item';
 import './tab-bar.css';
 
-/** Note tabs above the note screen (SPEC F23); overflow scrolls horizontally. */
+/** Tabs (notes and PDFs in the viewer) above the screen (SPEC F23); overflow scrolls horizontally. */
 export function TabBar() {
   const { t } = useTranslation();
   const tabs = useTabsStore((state) => state.tabs);

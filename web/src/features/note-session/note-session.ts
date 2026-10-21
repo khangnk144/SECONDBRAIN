@@ -29,6 +29,8 @@ export interface NoteSession {
   getView(): SessionView;
   subscribe(listener: () => void): () => void;
   open(): Promise<void>;
+  /** "Thử lại" after a failed open: opens again (nothing happens once the note is open). */
+  retryOpen(): void;
   /** Every doc-changing editor transaction. */
   docChanged(doc: ProseMirrorNode): void;
   /** Saves now; resolves true when the disk holds the text of record. */
@@ -96,6 +98,7 @@ export function createNoteSession(
     getView: () => core.view(),
     subscribe: (listener) => core.subscribe(listener),
     open: () => run(() => openSession(core)),
+    retryOpen: reopen,
     docChanged(doc) {
       if (core.phase !== 'ready' || core.readOnly || core.conflict || core.source) return;
       if (doc === core.doc) return;

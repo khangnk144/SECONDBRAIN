@@ -69,3 +69,14 @@ export function noteRoute(path: VaultPath, options: NoteRouteOptions = {}): stri
       : undefined;
   return withQuery(NOTE_ROUTE, { path, new: options.isNew ? '1' : undefined, cursor });
 }
+
+// Screens added in M4 (owned by their tracks; names fixed here so tracks can link to each other).
+export const SETTINGS_ROUTE = '/settings';
+export const REMINDERS_ROUTE = '/reminders';
+export const RESOURCES_ROUTE = '/resources';
+export const FILE_ROUTE = '/file';
+
+/** `/file?path=<encoded>`: the in-app viewer tab of a vault file (PDF). */
+export function fileRoute(path: VaultPath): string {
+  return withQuery(FILE_ROUTE, { path });
+}

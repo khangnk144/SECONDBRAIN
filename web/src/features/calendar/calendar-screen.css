@@ -207,11 +207,15 @@
   display: none;
 }
 
-/* On the opened day's soft fill, muted text would drop below 4.5:1 in the light theme. */
+/* On the opened day's (or drop target's) soft fill, muted text would drop below 4.5:1. */
 .calendar-cell.is-selected .calendar-cell__number,
 .calendar-cell.is-selected .calendar-item__title,
 .calendar-cell.is-selected .calendar-cell__more,
-.calendar-cell.is-selected .calendar-cell__count {
+.calendar-cell.is-selected .calendar-cell__count,
+.calendar-cell.is-drop-target .calendar-cell__number,
+.calendar-cell.is-drop-target .calendar-item__title,
+.calendar-cell.is-drop-target .calendar-cell__more,
+.calendar-cell.is-drop-target .calendar-cell__count {
   color: var(--ink);
 }
 

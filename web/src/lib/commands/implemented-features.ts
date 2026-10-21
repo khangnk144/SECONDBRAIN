@@ -18,10 +18,11 @@ export const APP_FEATURES = [
   'source-mode',
   'tabs',
   'search-index',
-  // Not in this build yet.
   'settings',
   'reminders',
   'attachments',
+  'history',
+  // Not in this build yet.
   'ai',
 ] as const;
 
@@ -42,6 +43,10 @@ export const IMPLEMENTED_FEATURES: readonly AppFeature[] = [
   'source-mode',
   'tabs',
   'search-index',
+  'settings',
+  'reminders',
+  'attachments',
+  'history',
 ];
 
 export function isImplemented(feature: AppFeature): boolean {

@@ -107,6 +107,11 @@ describe('path guard through the API (F1.5)', () => {
           { path: bad, ...rev, target: { kind: 'note' }, date: '2026-10-20' },
         ],
         ['GET', `/api/graph/local?${q(bad)}`, undefined],
+        ['GET', `/api/files?${q(bad)}&download=1`, undefined],
+        ['POST', '/api/files/open-external', { path: bad }],
+        ['GET', `/api/history?${q(bad)}`, undefined],
+        ['GET', `/api/history/version?${q(bad)}&commit=abcdef1`, undefined],
+        ['POST', '/api/history/restore', { path: bad, commit: 'abcdef1', ...rev }],
       ] as const) {
         await expectInvalidPath(await t.call(method, url, payload));
       }
@@ -135,6 +140,10 @@ describe('path guard through the API (F1.5)', () => {
       }),
     );
     await expectInvalidPath(await t.call('POST', '/api/reveal', { path: 'linked folder' }));
+    await expectInvalidPath(await t.call('POST', '/api/files/open-external', { path: 'link.md' }));
+    await expectInvalidPath(
+      await t.call('POST', '/api/files/open-external', { path: 'linked folder/secret.md' }),
+    );
     await expectInvalidPath(
       await t.call('PATCH', '/api/note/task', {
         path: 'link.md',

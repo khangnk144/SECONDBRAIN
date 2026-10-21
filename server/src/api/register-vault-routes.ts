@@ -1,10 +1,12 @@
 import type { FastifyInstance } from 'fastify';
 import type { AppContext } from '../app-context/create-app-context.js';
+import { registerAttachmentRoutes } from './attachment-routes.js';
 import { registerCaptureRoute } from './capture-route.js';
 import { registerDailyRoutes } from './daily-routes.js';
 import { registerFilesRoute } from './files-route.js';
 import { registerFolderRoutes } from './folder-routes.js';
 import { registerGraphRoutes } from './graph-routes.js';
+import { registerHistoryRoutes } from './history-routes.js';
 import { registerJournalRoutes } from './journal-routes.js';
 import { registerMaintenanceRoutes } from './maintenance-routes.js';
 import { registerNoteFrontmatterRoutes } from './note-frontmatter-routes.js';
@@ -12,7 +14,10 @@ import { registerNoteMentionRoutes } from './note-mention-routes.js';
 import { registerNoteOperationRoutes } from './note-operation-routes.js';
 import { registerNoteRoutes } from './note-routes.js';
 import { registerNoteTaskRoutes } from './note-task-routes.js';
+import { registerOpenExternalRoute } from './open-external-route.js';
 import { registerQueryRoutes } from './query-routes.js';
+import { registerReminderRoutes } from './reminder-routes.js';
+import { registerResourcesRoutes } from './resources-routes.js';
 import type { TemplateLanguage } from '../templates/template-variables.js';
 import type { RevealOptions } from './reveal-command.js';
 import { registerRevealRoute } from './reveal-route.js';
@@ -23,6 +28,8 @@ export interface VaultRouteOptions {
   reveal?: RevealOptions;
   /** UI language of the global settings: template variables are written in it (F13.2). */
   uiLanguage?: () => TemplateLanguage;
+  /** Global settings (the reminder time is reported even when the reminder plugin is off). */
+  settings?: () => { [key: string]: unknown };
 }
 
 /**
@@ -51,5 +58,10 @@ export function registerVaultRoutes(
   registerQueryRoutes(app, context);
   registerGraphRoutes(app, context);
   registerFilesRoute(app, context);
+  registerAttachmentRoutes(app, context);
+  registerResourcesRoutes(app, context);
+  registerOpenExternalRoute(app, context, options.reveal);
+  registerHistoryRoutes(app, context);
   registerMaintenanceRoutes(app, context);
+  registerReminderRoutes(app, context, { settings: options.settings });
 }

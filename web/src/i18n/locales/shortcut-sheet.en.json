@@ -10,6 +10,7 @@
     "today": "On Today",
     "calendar": "In the calendar",
     "graph": "On the brain map",
+    "viewer": "In the PDF viewer",
     "local": "Elsewhere"
   },
   "local": {
@@ -21,6 +22,13 @@
   },
   "editor": {
     "tickTask": "Tick or untick the task at the caret (on a note link: open it in a new tab; on a #tag: search for that tag)"
+  },
+  "viewer": {
+    "pages": "Previous or next page",
+    "ends": "First or last page",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "actualSize": "Show at actual size (100%)"
   },
   "screens": {
     "stripDay": "Previous or next day in the strip",

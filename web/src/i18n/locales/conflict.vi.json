@@ -25,7 +25,11 @@
   },
   "diff": {
     "title": "So sánh bản trên đĩa với bản của bạn",
-    "summary": "{{added}} dòng chỉ có ở bản của bạn (+), {{removed}} dòng chỉ có trên đĩa (−).",
+    "summary": "{{added}}, {{removed}}.",
+    "summaryAdded_one": "{{count}} dòng chỉ có ở bản của bạn (+)",
+    "summaryAdded_other": "{{count}} dòng chỉ có ở bản của bạn (+)",
+    "summaryRemoved_one": "{{count}} dòng chỉ có trên đĩa (−)",
+    "summaryRemoved_other": "{{count}} dòng chỉ có trên đĩa (−)",
     "noChanges": "Hai bản giống nhau từng dòng (chỉ khác kiểu xuống dòng).",
     "added": "Chỉ có ở bản của bạn:",
     "removed": "Chỉ có trên đĩa:",

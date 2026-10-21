@@ -1,0 +1,45 @@
+{
+  "title": "Nhắc nhở",
+  "time": "Mình nhắc bạn lúc {{time}}.",
+  "changeTime": "Đổi giờ nhắc",
+  "listLabel": "Danh sách nhắc nhở",
+  "empty": "Chưa có nhắc nhở nào. Mình sẽ nhắc bạn trước hạn 3 ngày, 1 ngày và đúng ngày.",
+  "loading": "Đang tải nhắc nhở…",
+  "loadError": "Chưa tải được nhắc nhở. Kiểm tra máy chủ đang chạy rồi thử lại nhé.",
+  "retry": "Thử lại",
+  "unavailable": "Nhắc nhở đang tạm dừng với kho này. Khởi động lại Second Brain để bật lại.",
+  "dismiss": "Bỏ qua",
+  "dismissNamed": "Bỏ qua nhắc nhở “{{title}}”",
+  "dismissAll": "Bỏ qua tất cả",
+  "dismissAllTitle_one": "Bỏ qua {{count}} nhắc nhở?",
+  "dismissAllTitle_other": "Bỏ qua cả {{count}} nhắc nhở?",
+  "dismissAllBody": "Chúng sẽ rời khỏi danh sách này. Các deadline vẫn còn trên trang Hôm nay.",
+  "dismissFailed": "Chưa bỏ qua được nhắc nhở. Kiểm tra máy chủ đang chạy rồi thử lại nhé.",
+  "badge_one": "{{count}} nhắc nhở",
+  "badge_other": "{{count}} nhắc nhở",
+  "due": {
+    "overdue": "Đã quá hạn",
+    "today": "Hôm nay đến hạn",
+    "tomorrow": "Ngày mai đến hạn",
+    "daysLeft_one": "Còn {{count}} ngày",
+    "daysLeft_other": "Còn {{count}} ngày"
+  },
+  "fired": {
+    "onTime": "Đã nhắc lúc {{time}}",
+    "onTimeOnDate": "Đã nhắc lúc {{time}}, {{date}}",
+    "onTimeNoTime": "Đã nhắc",
+    "missed": "Nhắc bù lúc {{time}}",
+    "missedOnDate": "Nhắc bù lúc {{time}}, {{date}}",
+    "missedNoTime": "Nhắc bù"
+  },
+  "hint": {
+    "notAsked": "Trình duyệt chưa được phép hiện thông báo, nên nhắc nhở hiện trong danh sách này. Muốn bật, vào Cài đặt, phần Nhắc nhở, rồi bấm “Cho phép thông báo trên trình duyệt”.",
+    "denied": "Trình duyệt đang chặn thông báo của app, nên nhắc nhở chỉ hiện trong danh sách này. Muốn bật, bấm biểu tượng ổ khóa cạnh địa chỉ trang, tìm mục Thông báo và chọn Cho phép.",
+    "unsupported": "Trình duyệt này không hiện thông báo, nên nhắc nhở hiện trong danh sách này.",
+    "dismiss": "Đã hiểu"
+  },
+  "notification": {
+    "title": "Nhắc nhở: {{title}}",
+    "body": "{{due}}, hạn {{date}}."
+  }
+}

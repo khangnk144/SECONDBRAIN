@@ -1,17 +1,15 @@
-import { i18n } from '../../i18n';
 import type { VaultPath } from '../../lib/api/vault-types';
+import { openVaultFile } from '../../lib/open-vault-file';
 import { useTabsStore } from '../../lib/tabs-store';
-import { showToast } from '../../lib/toast-store';
 import { isNotePath } from '../../lib/vault-paths';
 
 /**
- * Opens a node: a Markdown file (note, or a raw source in `.md`) opens in the editor; other
- * documents only get a toast until the attachment viewer exists.
+ * Opens a node: a Markdown file (note, or a raw source in `.md`) opens in the editor; a source node
+ * of another type goes through `openVaultFile` (a PDF opens in the viewer tab, anything else is
+ * offered as a download, never rendered in the app).
  */
 export function openGraphNode(id: VaultPath, options: { newTab?: boolean } = {}): void {
-  if (isNotePath(id)) {
-    useTabsStore.getState().openNote(id, { newTab: options.newTab === true });
-    return;
-  }
-  showToast({ message: i18n.t('graph.sourceLater') });
+  const newTab = options.newTab === true;
+  if (isNotePath(id)) useTabsStore.getState().openNote(id, { newTab });
+  else openVaultFile(id, { newTab });
 }

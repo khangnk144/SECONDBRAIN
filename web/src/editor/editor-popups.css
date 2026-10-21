@@ -36,6 +36,14 @@
   background: var(--accent-soft);
 }
 
+/* The selected option's secondary text: --ink-2 on --accent-soft is below 4.5:1. */
+.editor-popup__option[aria-selected='true'] .editor-popup__icon,
+.editor-popup__option[aria-selected='true'] .editor-popup__meta,
+.editor-popup__option[aria-selected='true'] .tag-option__hash,
+.editor-popup__option[aria-selected='true'] .tag-option__parent {
+  color: var(--ink);
+}
+
 .editor-popup__icon {
   flex: none;
   color: var(--ink-2);
@@ -153,6 +161,10 @@
 
 .date-popup__day:hover {
   background: var(--accent-soft);
+}
+
+.date-popup__day.is-outside:hover {
+  color: var(--ink);
 }
 
 .date-popup__day.is-outside {

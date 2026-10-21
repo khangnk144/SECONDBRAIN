@@ -9,11 +9,17 @@ export function resolveTheme(theme: ThemePreference, win: Window = window): 'dar
   return prefersLight ? 'light' : 'dark';
 }
 
+/** The OS-theme listener of each document, so applying new prefs replaces the old one. */
+const followers = new WeakMap<Document, () => void>();
+
 /**
- * Applies theme, palette, font size and language to <html>. Returns a cleanup
- * function that stops following OS theme changes (only relevant for 'system').
+ * Applies theme, palette, font size and language to <html> (the CSS reads the data attributes,
+ * so every screen restyles at once, without a reload). With 'system' it keeps following OS theme
+ * changes until prefs are applied again. Returns a cleanup function that stops following.
  */
 export function applyUiPrefs(prefs: UiPrefs, doc: Document = document): () => void {
+  followers.get(doc)?.();
+  followers.delete(doc);
   const root = doc.documentElement;
   const win = doc.defaultView ?? window;
   const apply = () => {
@@ -27,5 +33,10 @@ export function applyUiPrefs(prefs: UiPrefs, doc: Document = document): () => vo
   if (prefs.theme !== 'system' || typeof win.matchMedia !== 'function') return () => {};
   const query = win.matchMedia(LIGHT_QUERY);
   query.addEventListener('change', apply);
-  return () => query.removeEventListener('change', apply);
+  const stop = () => {
+    query.removeEventListener('change', apply);
+    if (followers.get(doc) === stop) followers.delete(doc);
+  };
+  followers.set(doc, stop);
+  return stop;
 }

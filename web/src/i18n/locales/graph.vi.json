@@ -4,7 +4,6 @@
   "loadError": "Không tải được bản đồ não. Kiểm tra máy chủ đang chạy rồi thử lại.",
   "retry": "Thử lại",
   "empty": "Chưa có ghi chú nào để vẽ. Viết vài ghi chú và nối chúng bằng [[ ]] nhé.",
-  "sourceLater": "Xem tài liệu ngay trong app sẽ có ở bản sau.",
   "controls": {
     "label": "Điều khiển khung nhìn",
     "zoomIn": "Phóng to (+)",

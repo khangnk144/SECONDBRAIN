@@ -1,0 +1,42 @@
+{
+  "uploading": "Đang tải lên {{name}}…",
+  "chooser": {
+    "title": "Lưu vào",
+    "one": "Nơi lưu {{name}} trong 3 Resources.",
+    "many_one": "Nơi lưu {{count}} tệp trong 3 Resources: {{names}}.",
+    "many_other": "Nơi lưu {{count}} tệp trong 3 Resources: {{names}}.",
+    "papers": "Bài báo (papers)",
+    "slides": "Slide",
+    "other": "Tài liệu khác",
+    "save": "Lưu",
+    "cancel": "Hủy"
+  },
+  "errors": {
+    "tooLarge": "Không tải lên được {{name}}: tệp lớn hơn 200 MB.",
+    "invalid": "Không tải lên được {{name}}: tên hoặc nội dung tệp không dùng được. Đổi tên tệp rồi thử lại.",
+    "offline": "Không tải lên được {{name}}: chưa kết nối được với máy chủ. Mở lại Second Brain rồi kéo tệp vào lần nữa.",
+    "failed": "Không tải lên được {{name}}. Kéo tệp vào lần nữa để thử lại.",
+    "notInserted": "Đã lưu {{name}} vào kho nhưng chưa chèn được liên kết. Gõ {{link}} vào ghi chú nếu bạn cần."
+  },
+  "image": {
+    "loading": "Đang tải ảnh {{name}}",
+    "missing": "Không tìm thấy ảnh {{name}}",
+    "failed": "Không hiện được ảnh {{name}}. Mở lại ghi chú để thử lại.",
+    "external": "Ảnh từ web không được tải: {{url}}",
+    "title": "{{name}}. Bấm đúp hoặc chọn rồi bấm Enter để mở."
+  },
+  "card": {
+    "open": "Mở",
+    "openLabel": "Mở {{name}}",
+    "missing": "Không tìm thấy tệp {{name}}",
+    "kind": {
+      "pdf": "PDF",
+      "slides": "Slide",
+      "document": "Tài liệu",
+      "sheet": "Bảng tính",
+      "web": "Trang web",
+      "image": "Ảnh",
+      "other": "Tệp"
+    }
+  }
+}

@@ -7,6 +7,7 @@ import type { WebSocketHub } from '../ws/websocket-hub.js';
 import { errorCodeOf } from './app-context-errors.js';
 import type { AppContext } from './create-app-context.js';
 import type { VaultChangeRouter } from './vault-change-router.js';
+import type { VaultPluginInstance } from './vault-plugins.js';
 
 export interface ContextParts {
   vault: VaultService;
@@ -27,6 +28,7 @@ export function assembleAppContext(parts: ContextParts): AppContext {
   let lastJournal = JSON.stringify(parts.pending);
   let rebuilding: Promise<void> | null = null;
   let closing: Promise<void> | null = null;
+  const plugins = new Map<string, VaultPluginInstance>();
 
   return {
     vault,
@@ -65,8 +67,23 @@ export function assembleAppContext(parts: ContextParts): AppContext {
     async greet(send) {
       send({ type: 'journal:pending', entries: await vault.pendingJournal() });
     },
+    plugin<T extends VaultPluginInstance>(name: string): T | null {
+      return (plugins.get(name) as T | undefined) ?? null;
+    },
+    attachPlugin(name, instance) {
+      plugins.set(name, instance);
+    },
     close() {
       closing ??= (async () => {
+        // Plugins first (their timers may still read the index or write through the vault).
+        for (const [name, instance] of [...plugins].reverse()) {
+          await instance
+            .close()
+            .catch((error: unknown) =>
+              logger.warn(`Closing the ${name} plugin failed (${errorCodeOf(error)}).`),
+            );
+        }
+        plugins.clear();
         await watcher?.close();
         await vault.close(); // queued writes finish and still reach the router
         await router.close();

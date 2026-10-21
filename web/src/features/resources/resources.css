@@ -1,0 +1,120 @@
+/* "Tài liệu" view: quiet grouped list, no cards (design.md §5). Tokens only. */
+.resources-screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 720px;
+}
+
+.resources-screen__note {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  max-width: var(--measure);
+  color: var(--ink-2);
+}
+
+.resources-screen__filter {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.resources-screen__filter .text-input {
+  max-width: 360px;
+}
+
+.resources-screen__count {
+  color: var(--ink-2);
+  font-size: max(12px, 0.78125rem);
+}
+
+.resource-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.resource-group__title {
+  color: var(--ink-2);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.resource-group__list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.resource-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-top: 1px solid var(--line);
+}
+
+.resource-row:first-child {
+  border-top: 0;
+}
+
+.resource-row__icon {
+  flex: 0 0 auto;
+  margin-top: 4px;
+  color: var(--ink-2);
+}
+
+.resource-row__main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.resource-row__name,
+.resource-row__ref {
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.resource-row__name {
+  align-self: flex-start;
+  min-height: 24px;
+  color: var(--ink);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.resource-row__name:hover,
+.resource-row__ref:hover {
+  text-decoration: underline;
+}
+
+.resource-row__facts,
+.resource-row__refs {
+  color: var(--ink-2);
+  font-size: max(12px, 0.78125rem);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.resource-row__ref {
+  min-height: 24px;
+  color: var(--accent);
+  font-size: inherit;
+}
+
+.resource-row__menu {
+  flex: 0 0 auto;
+}

@@ -1,0 +1,44 @@
+{
+  "closeTab": "Close tab",
+  "retry": "Try again",
+  "noFile": "No file chosen.",
+  "notViewable": "{{name}} can't be shown inside the app. You can download it or open it with another app.",
+  "files": {
+    "download": "Download",
+    "openExternal": "Open with another app",
+    "downloaded": "Downloaded {{name}} to this computer.",
+    "opening": "Opening {{name}} with this computer's default app.",
+    "missing": "Can't find the file {{name}}. It may have been renamed or moved to the trash.",
+    "offline": "Can't reach the server. Double-click Mở Second Brain on your desktop, then try again.",
+    "downloadFailed": "Couldn't download {{name}}. Please try again in a few minutes.",
+    "executable": "Second Brain doesn't start programs or scripts such as {{name}}. If you trust this file, open it from its folder.",
+    "openFailed": "Couldn't open {{name}} with another app. You can download it and open the downloaded file."
+  },
+  "pdf": {
+    "loading": "Opening {{name}}…",
+    "password": "{{name}} is password-protected, so it can't be shown inside the app yet. Download it and open it with another app.",
+    "invalid": "Couldn't open {{name}}: it isn't a valid PDF or it is damaged. You can still download it.",
+    "loadFailed": "Couldn't open {{name}}. Press Try again; if it still fails, restart Second Brain.",
+    "toolbar": "PDF viewer tools",
+    "pagesLabel": "Pages of {{name}}",
+    "pageLabel": "Page {{page}} of {{total}}",
+    "pageFailed": "This page couldn't be shown.",
+    "previous": "Previous page",
+    "next": "Next page",
+    "withKey": "{{label}} ({{keys}})",
+    "pageWord": "Page",
+    "pageInput_one": "Page number, of {{count}} page",
+    "pageInput_other": "Page number, of {{count}} pages",
+    "pageOf": "/ {{total}}",
+    "zoomOut": "Zoom out",
+    "zoomIn": "Zoom in",
+    "zoomValue": "{{percent}}%",
+    "fitWidth": "Fit width"
+  },
+  "references": {
+    "title": "Notes that mention this document",
+    "loading": "Loading…",
+    "loadError": "Couldn't load the notes. Please try again later.",
+    "empty": "No note mentions this document yet."
+  }
+}

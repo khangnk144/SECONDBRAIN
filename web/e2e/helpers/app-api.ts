@@ -29,7 +29,7 @@ export interface AppApi {
   status(url: string): Promise<number>;
 }
 
-function clientFor(request: APIRequestContext, token: string, origin: string): AppApi {
+export function clientFor(request: APIRequestContext, token: string, origin: string): AppApi {
   const headers = { 'X-SB-Token': token, Origin: origin };
   return {
     token,
@@ -50,7 +50,7 @@ function clientFor(request: APIRequestContext, token: string, origin: string): A
   };
 }
 
-async function shellToken(request: APIRequestContext): Promise<string> {
+export async function shellToken(request: APIRequestContext): Promise<string> {
   const html = await (await request.get('/')).text();
   const token = /<meta name="sb-token" content="([^"]+)"/.exec(html)?.[1];
   if (!token) throw new Error('no session token in the served shell');

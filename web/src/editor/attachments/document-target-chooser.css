@@ -1,0 +1,58 @@
+/* "Lưu vào" chooser for dropped documents: a radio list inside the shared modal frame. */
+.target-chooser {
+  width: min(400px, 100%);
+}
+
+.target-chooser__files {
+  overflow-wrap: anywhere;
+}
+
+.target-chooser__options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.target-chooser__option {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  align-items: center;
+  column-gap: var(--space-2);
+  min-height: 40px;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  cursor: pointer;
+}
+
+.target-chooser__option:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.target-chooser__option input {
+  width: 16px;
+  height: 16px;
+  margin: 0 auto;
+  accent-color: var(--accent);
+}
+
+.target-chooser__option input:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.target-chooser__label {
+  font-size: 0.9375rem;
+}
+
+.target-chooser__folder {
+  grid-column: 2;
+  color: var(--ink-2);
+  font-size: max(12px, 0.78125rem);
+}
+
+/* --ink-2 on --accent-soft is below 4.5:1 in most themes: secondary text there uses --ink. */
+.target-chooser__option:has(input:checked) .target-chooser__folder {
+  color: var(--ink);
+}

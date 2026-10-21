@@ -1,4 +1,6 @@
 import type { RebuildProgress } from '../index/index-types.js';
+import type { UiSettings } from '../config/global-settings.js';
+import type { ReminderEntry } from '../reminders/reminder-types.js';
 import type { PendingJournalEntry, VaultChange, VaultPath } from '../vault/vault-types.js';
 
 /**
@@ -12,7 +14,13 @@ export type ServerEvent =
   | { type: 'note:renamed'; path: VaultPath; oldPath: VaultPath; revision: string }
   | { type: 'folder:changed'; path: VaultPath }
   | ({ type: 'index:progress' } & RebuildProgress)
-  | { type: 'journal:pending'; entries: PendingJournalEntry[] };
+  | { type: 'journal:pending'; entries: PendingJournalEntry[] }
+  /** A reminder fired (on time or as a catch-up); clients refresh `GET /api/reminders`. */
+  | { type: 'reminder'; reminder: ReminderEntry }
+  /** Another vault is open now: clients flush what they hold and reload. */
+  | { type: 'vault:switched'; vaultId: string }
+  /** `PUT /api/settings` changed the UI settings: other windows apply them at once. */
+  | { type: 'settings:changed'; ui: UiSettings };
 
 /** The client-facing event for a vault change (app or external origin). */
 export function serverEventForChange(change: VaultChange): ServerEvent {

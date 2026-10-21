@@ -13,6 +13,7 @@ import type { VaultFaults } from '../vault/vault-faults.js';
 import type { VaultChange, VaultService } from '../vault/vault-types.js';
 import { startVaultWatcher, type VaultWatcher } from '../vault/vault-watcher.js';
 import type { ServerEvent } from '../ws/server-events.js';
+import type { VaultPluginInstance } from './vault-plugins.js';
 import { createWebSocketHub, type WebSocketHub } from '../ws/websocket-hub.js';
 import { errorCodeOf, VaultUnusableError } from './app-context-errors.js';
 import { assembleAppContext } from './assemble-app-context.js';
@@ -33,6 +34,11 @@ export interface AppContextOptions {
   watcher?: { renameWindowMs?: number; stabilityMs?: number } | false;
   /** Test-only disk faults and simulated crashes, passed to the vault service. */
   faults?: VaultFaults;
+  /**
+   * WebSocket clients to send events to. The vault host passes one hub that outlives every
+   * vault it opens (clients stay connected across a vault switch); default: a new hub.
+   */
+  hub?: WebSocketHub;
 }
 
 /** Everything the API needs about the open vault, created once at boot and closed on shutdown. */
@@ -52,6 +58,10 @@ export interface AppContext {
   refreshPendingJournal(): Promise<void>;
   /** Sends the connection-time state to a new WebSocket client. */
   greet(send: (event: ServerEvent) => void): Promise<void>;
+  /** A per-vault plugin started for this vault (`REMINDERS_PLUGIN`, `HISTORY_PLUGIN`), else null. */
+  plugin<T extends VaultPluginInstance>(name: string): T | null;
+  /** Host only: records a started plugin; `close()` closes plugins first, in reverse order. */
+  attachPlugin(name: string, instance: VaultPluginInstance): void;
   close(): Promise<void>;
 }
 
@@ -91,7 +101,7 @@ export async function createAppContext(options: AppContextOptions): Promise<AppC
   if (isVaultHandoverLogger(logger)) logger.moveToVault(vault.paths.logsDir);
   logger.info(`Vault ${vault.id} opened; ${created.length} missing standard entries created.`);
 
-  const hub = createWebSocketHub();
+  const hub = options.hub ?? createWebSocketHub();
   const broadcast = (event: ServerEvent) => hub.broadcast(event);
   const early: VaultChange[] = [];
   let forward: (change: VaultChange) => void = (change) => early.push(change);

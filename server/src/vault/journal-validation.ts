@@ -22,7 +22,13 @@ const OPS = new Set([
 const STATUSES = new Set(['planned', 'running', 'done', 'failed', 'undone', 'undoing']);
 const KINDS = new Set(['write', 'rename', 'trash', 'restore', 'folder-rename', 'folder-trash']);
 const FOLDER_KINDS = new Set(['folder-rename', 'folder-trash']);
-const REASONS = new Set(['user', 'conflict', 'sample-data', 'restore-collision']);
+const REASONS = new Set([
+  'user',
+  'conflict',
+  'sample-data',
+  'restore-collision',
+  'history-restore',
+]);
 
 type Loose = Record<string, unknown>;
 const isObject = (value: unknown): value is Loose => typeof value === 'object' && value !== null;

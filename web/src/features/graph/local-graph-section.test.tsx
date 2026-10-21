@@ -3,10 +3,10 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { GraphResponse } from '../../lib/api/graph-types';
 import type { Navigator } from '../../lib/app-navigation';
-import { noteRoute } from '../../lib/app-navigation';
+import { fileRoute, noteRoute } from '../../lib/app-navigation';
 import { apiError, installFetchMock, type FetchMock } from '../../lib/testing/fetch-mock';
 import { resetAppState } from '../../lib/testing/reset-app-state';
-import { useToastStore } from '../../lib/toast-store';
+import { startOpenVaultFile } from '../viewer/open-vault-file-in-app';
 import { graphRoute } from './graph-selection';
 import { LocalGraphSection } from './local-graph-section';
 import { installCanvasMock, VAULT, vaultGraph } from './__tests__/graph-test-helpers';
@@ -72,14 +72,16 @@ describe('local graph in the note panel (F16.6)', () => {
     expect(mock.callsTo('GET /api/graph/local').at(-1)?.query.get('depth')).toBe('2');
   });
 
-  it('opens a neighbour, toasts for a document and opens the full map on this note', async () => {
+  it('opens a neighbour, a document in the viewer and the full map on this note', async () => {
     const user = userEvent.setup();
+    const stop = startOpenVaultFile();
     render(<LocalGraphSection path={VAULT.hub} />);
     const list = await screen.findByRole('list', { name: 'Ghi chú kề của Giải tích 1' });
     await user.click(within(list).getByRole('button', { name: 'Đồ án Giải tích' }));
     expect(navigate).toHaveBeenLastCalledWith(noteRoute(VAULT.project), undefined);
     await user.click(within(list).getByRole('button', { name: 'Newton 1687.pdf' }));
-    expect(useToastStore.getState().toasts).toHaveLength(1);
+    expect(navigate).toHaveBeenLastCalledWith(fileRoute(VAULT.pdf), undefined);
+    stop();
     await user.click(screen.getByRole('button', { name: 'Mở bản đồ não' }));
     expect(navigate).toHaveBeenLastCalledWith(graphRoute(VAULT.hub), undefined);
     expect(graphRoute(VAULT.hub)).toBe(`/graph?focus=${encodeURIComponent(VAULT.hub)}`);

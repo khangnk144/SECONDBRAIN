@@ -13,7 +13,8 @@
     "table": "Table",
     "date": "Date",
     "divider": "Divider",
-    "template": "Template"
+    "template": "Template",
+    "image": "Image"
   },
   "templates": {
     "label": "Choose a template",
@@ -32,9 +33,8 @@
     "ambiguousTitle": "Several notes are called {{target}}. Click to choose one.",
     "chooseTarget": "Choose target…",
     "chooseTargetMenu": "Choose the note {{target}} links to",
-    "embedTitle": "Embeds {{target}}. Images will show in a later version.",
-    "fileMissing": "There's no file {{name}} in the vault yet.",
-    "fileLater": "Opening attachments comes in a later version."
+    "embedTitle": "Embeds {{target}}.",
+    "fileMissing": "{{name}} isn't in the vault. It may have been renamed or deleted; fix the link, or add the file to the vault again."
   },
   "tag": {
     "label": "Tag suggestions",
@@ -78,7 +78,7 @@
     "label": "Markdown kept as written, edit it in source mode (Alt+S)"
   },
   "paste": {
-    "imageLater": "Pasting images comes in a later version"
+    "htmlImagesDropped": "Images in content pasted from the web are left out. Save the image to your computer, then drop it into the note."
   },
   "toolbar": {
     "label": "Formatting",

@@ -4,7 +4,6 @@
   "loadError": "Couldn't load the brain map. Check that the server is running, then try again.",
   "retry": "Try again",
   "empty": "Nothing to draw yet. Write a few notes and connect them with [[ ]].",
-  "sourceLater": "Viewing documents inside the app arrives in a later version.",
   "controls": {
     "label": "View controls",
     "zoomIn": "Zoom in (+)",

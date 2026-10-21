@@ -51,3 +51,9 @@ export async function findVaultOverlap(
   }
   return null;
 }
+
+/** Both paths name the same folder once links are resolved (case-insensitive on Windows). */
+export async function isSameFolder(a: string, b: string): Promise<boolean> {
+  const [realA, realB] = await Promise.all([realOrPlanned(a), realOrPlanned(b)]);
+  return isSameOrInside(realA, realB) && isSameOrInside(realB, realA);
+}

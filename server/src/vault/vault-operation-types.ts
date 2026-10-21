@@ -87,12 +87,13 @@ export interface VaultEditingOperations {
   ): Promise<JournaledRewrite>;
   /**
    * Full replace at the CURRENT revision after copying the bytes on disk into a trash entry with
-   * `reason: 'conflict'` ("keep mine" of the conflict UI, SPEC §4.10).
+   * `reason: 'conflict'` ("keep mine" of the conflict UI, SPEC §4.10) or `'history-restore'`.
    */
   writeKeepingConflictCopy(
     path: VaultPath,
     content: string,
     expectedRevision: string,
+    reason?: 'conflict' | 'history-restore',
   ): Promise<ConflictCopyResult>;
   /** Renames or moves a folder with everything in it, relinking like rename(). Journaled. */
   renameFolder(

@@ -94,15 +94,6 @@ describe('paste', () => {
     expect(saved(current)).toBe('A cộng B\n');
   });
 
-  it('pasted image files are ignored with a toast', () => {
-    current = createTestEditor('A\n');
-    placeCaret(current.editor, 'A');
-    const handled = current.view.pasteHTML('', clipboard({}, [{ type: 'image/png' }]));
-    expect(handled).toBe(true);
-    expect(saved(current)).toBe('A\n');
-    expect(useToastStore.getState().toasts[0]?.message).toBe('Dán ảnh sẽ có ở bản sau');
-  });
-
   it('HTML is limited to the schema and its images are left out', () => {
     current = createTestEditor('A\n');
     newLineAtEnd(current.editor);
@@ -114,6 +105,8 @@ describe('paste', () => {
     });
     expect(images).toBe(0);
     expect(current.editor.state.doc.child(1).type.name).toBe('heading');
-    expect(useToastStore.getState().toasts).toHaveLength(1);
+    expect(useToastStore.getState().toasts.map((t) => t.message)).toEqual([
+      'Ảnh trong nội dung dán từ web không được giữ lại. Lưu ảnh về máy rồi kéo vào ghi chú.',
+    ]);
   });
 });

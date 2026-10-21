@@ -39,8 +39,10 @@ function parseEvent(data: unknown): ClientEvent | null {
 }
 
 /**
- * One WebSocket with reconnect (backoff 0.5 s → 10 s). After a reconnect it emits a synthetic
- * `resync` event, because changes made while the socket was down were never pushed.
+ * One WebSocket with reconnect (backoff 0.5 s → 10 s). After a reconnect – and after a first
+ * connection that only worked after failed attempts (the app started before the server) – it
+ * emits a synthetic `resync` event: changes made while the socket was down were never pushed,
+ * and whatever the app fetched meanwhile failed.
  */
 export function createWsClient(options: WsClientOptions): WsClient {
   const minDelay = options.minDelayMs ?? WS_MIN_DELAY_MS;
@@ -49,7 +51,8 @@ export function createWsClient(options: WsClientOptions): WsClient {
   let socket: WebSocketLike | null = null;
   let timer: ReturnType<typeof setTimeout> | null = null;
   let delay = minDelay;
-  let hasOpened = false;
+  /** A socket closed (or never opened) since the last open: the next open must resync. */
+  let missedEvents = false;
   let stopped = true;
 
   function scheduleReconnect() {
@@ -68,6 +71,7 @@ export function createWsClient(options: WsClientOptions): WsClient {
     try {
       current = createSocket(options.url);
     } catch {
+      missedEvents = true;
       options.onStateChange('closed');
       scheduleReconnect();
       return;
@@ -77,8 +81,8 @@ export function createWsClient(options: WsClientOptions): WsClient {
       if (socket !== current) return;
       delay = minDelay;
       options.onStateChange('open');
-      if (hasOpened) options.onEvent({ type: 'resync' });
-      hasOpened = true;
+      if (missedEvents) options.onEvent({ type: 'resync' });
+      missedEvents = false;
     };
     current.onmessage = (message) => {
       if (socket !== current) return;
@@ -91,6 +95,7 @@ export function createWsClient(options: WsClientOptions): WsClient {
     current.onclose = () => {
       if (socket !== current) return;
       socket = null;
+      missedEvents = true;
       options.onStateChange('closed');
       scheduleReconnect();
     };

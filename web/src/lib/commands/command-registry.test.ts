@@ -1,4 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { useHistoryDialog } from '../../features/history/history-dialog-store';
+import { resetHistoryDialog } from '../../features/history/open-history-dialog';
 import { i18n } from '../../i18n';
 import type { Navigator } from '../app-navigation';
 import { useCaptureUi } from '../capture-ui-store';
@@ -9,7 +11,9 @@ import { APP_SHORTCUTS } from '../shortcuts/use-app-shortcuts';
 import { useTabsStore } from '../tabs-store';
 import { installFetchMock, type FetchMock } from '../testing/fetch-mock';
 import { resetAppState } from '../testing/reset-app-state';
+import { useDialogStore } from '../dialogs/dialog-requests';
 import { useToastStore } from '../toast-store';
+import { useUiPrefsStore } from '../ui-prefs-store';
 import { emitServerEvent } from '../ws/server-event-bus';
 import { matchCommands } from './command-matching';
 import { APP_COMMANDS, availableCommands, commandKeys, type AppCommand } from './command-registry';
@@ -40,6 +44,10 @@ function noteScreenWithTabs() {
 
 /** What running each command must do. A new command without an entry here fails the test. */
 const EFFECTS: Record<string, () => Promise<void> | void> = {
+  'note-history': () => {
+    expect(useHistoryDialog.getState().path).toBe('b/Hai.md');
+    resetHistoryDialog();
+  },
   'new-note': async () => {
     await vi.waitFor(() => expect(mock.callsTo('POST /api/note')).toHaveLength(1));
   },
@@ -64,6 +72,31 @@ const EFFECTS: Record<string, () => Promise<void> | void> = {
   'close-tab': () => expect(useTabsStore.getState().tabs.map((t) => t.id)).toEqual(['a', 'c']),
   'previous-tab': () => expect(useTabsStore.getState().activeId).toBe('a'),
   'next-tab': () => expect(useTabsStore.getState().activeId).toBe('c'),
+  openReminders: () => expect(navigate).toHaveBeenLastCalledWith('/reminders', undefined),
+  openResources: () => expect(navigate).toHaveBeenLastCalledWith('/resources', undefined),
+  settings: () => expect(navigate).toHaveBeenLastCalledWith('/settings', undefined),
+  'export-backup': async () => {
+    await vi.waitFor(() => expect(mock.callsTo('POST /api/backup/export')).toHaveLength(1));
+    await vi.waitFor(() => expect(downloads).toEqual(['second-brain-sao-luu-2026-10-21-0930.zip']));
+    expect(toasts()).toContain(
+      i18n.t('settings.vault.exportDone', { name: 'second-brain-sao-luu-2026-10-21-0930.zip' }),
+    );
+  },
+  'toggle-theme': async () => {
+    await vi.waitFor(() => expect(mock.callsTo('PUT /api/settings')).toHaveLength(1));
+    expect(mock.callsTo('PUT /api/settings')[0]?.body).toEqual({ ui: { theme: 'light' } });
+    expect(useUiPrefsStore.getState().prefs.theme).toBe('light');
+    expect(document.documentElement.dataset.theme).toBe('light');
+  },
+  'quit-app': async () => {
+    // Asks first; nothing stops before she confirms.
+    await vi.waitFor(() => expect(useDialogStore.getState().queue).toHaveLength(1));
+    expect(mock.callsTo('POST /api/shutdown')).toHaveLength(0);
+    const request = useDialogStore.getState().queue[0];
+    if (request?.kind === 'confirm') request.resolve(true);
+    await vi.waitFor(() => expect(mock.callsTo('POST /api/shutdown')).toHaveLength(1));
+    await vi.waitFor(() => expect(toasts()).toContain(i18n.t('settings.app.quitDone')));
+  },
   'rebuild-index': async () => {
     await vi.waitFor(() => expect(mock.callsTo('POST /api/index/rebuild')).toHaveLength(1));
     await vi.waitFor(() => expect(toasts()).toContain(i18n.t('commands.rebuildStarted')));
@@ -73,6 +106,7 @@ const EFFECTS: Record<string, () => Promise<void> | void> = {
 };
 
 const sourceToggle = vi.fn();
+let downloads: string[] = [];
 
 describe('command registry (F8.4)', () => {
   beforeEach(async () => {
@@ -84,10 +118,45 @@ describe('command registry (F8.4)', () => {
     }));
     mock.on('GET /api/daily', { body: { path: 'Daily/x.md', revision: 'r' } });
     mock.on('POST /api/index/rebuild', { status: 202, body: { started: true } });
+    mock.on('PUT /api/settings', (call) => ({
+      body: { ui: { ...useUiPrefsStore.getState().prefs, ...(call.body as { ui: object }).ui } },
+    }));
+    mock.on('POST /api/shutdown', { status: 202, body: { ok: true } });
     sourceToggle.mockReset();
+    downloads = [];
+    vi.stubGlobal(
+      'URL',
+      Object.assign(URL, { createObjectURL: () => 'blob:x', revokeObjectURL: () => undefined }),
+    );
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (
+      this: HTMLAnchorElement,
+    ) {
+      downloads.push(this.download);
+    });
+    const realFetch = globalThis.fetch;
+    // The backup is a zip, not JSON: answered here before the JSON route table.
+    vi.stubGlobal('fetch', async (input: RequestInfo | URL, init?: RequestInit) => {
+      if (String(input) !== '/api/backup/export') return realFetch(input, init);
+      mock.calls.push({
+        method: 'POST',
+        url: '/api/backup/export',
+        path: '/api/backup/export',
+        query: new URLSearchParams(),
+        body: undefined,
+      });
+      return new Response('PK', {
+        status: 200,
+        headers: {
+          'content-disposition':
+            'attachment; filename="second-brain-sao-luu-2026-10-21-0930.zip"; filename*=UTF-8\'\'second-brain-sao-luu-2026-10-21-0930.zip',
+          'x-sb-backup-unreadable': '0',
+        },
+      });
+    });
   });
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.restoreAllMocks();
   });
 
   it('references only features this build has and has a label in both languages', () => {

@@ -47,6 +47,7 @@ export function loadDeadlineSources(
       type: note.type,
       status: note.status,
       deadline: note.deadline,
+      revision: note.revision,
     });
   }
   return { notes, tasks: rows.tasks };

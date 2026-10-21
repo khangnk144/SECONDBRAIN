@@ -1,5 +1,6 @@
 import { useDialogStore, type DialogRequest } from '../../lib/dialogs/dialog-requests';
 import { ConfirmDialogView } from './confirm-dialog-view';
+import { PickDateDialogView } from './pick-date-dialog-view';
 import { PickFolderDialogView } from './pick-folder-dialog-view';
 import { PromptDialogView } from './prompt-dialog-view';
 import { TemplatePickerView } from './template-picker-view';
@@ -47,6 +48,16 @@ function DialogView({ request }: { request: DialogRequest }) {
     case 'template':
       return (
         <TemplatePickerView
+          options={request.options}
+          onDone={(value) => {
+            close();
+            request.resolve(value);
+          }}
+        />
+      );
+    case 'pick-date':
+      return (
+        <PickDateDialogView
           options={request.options}
           onDone={(value) => {
             close();

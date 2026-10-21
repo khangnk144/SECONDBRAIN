@@ -1,0 +1,17 @@
+{
+  "title": "Tasks",
+  "includeArchive": "Include Archive",
+  "groups": {
+    "overdue": "Overdue",
+    "today": "Today",
+    "next7": "Next 7 days",
+    "later": "Later",
+    "noDate": "No due date"
+  },
+  "count_one": "{{count}} task",
+  "count_other": "{{count}} tasks",
+  "empty": "Nothing left to do. What a relief!",
+  "loading": "Loading your tasks…",
+  "loadError": "Your tasks could not be loaded. Please try again.",
+  "retry": "Try again"
+}

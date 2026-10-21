@@ -73,6 +73,7 @@ function projects(sources: DeadlineSources, today: string): ProjectSummary[] {
     out.push({
       path: note.path,
       title: note.title,
+      revision: note.revision,
       deadline: note.deadline,
       daysLeft,
       urgency: daysLeft === null ? null : urgencyFor(daysLeft, false),
@@ -103,12 +104,14 @@ export function buildTodayView(sources: DeadlineSources, today: string): TodayVi
   }));
   const overdue = open.filter((item) => item.date < today).sort(compareByDate);
   const tasks = todayTasks(sources, today);
+  // Each open item is counted once by the summary sentence: overdue ones only in "quá hạn", so
+  // the week and today's count start at today (a task due today is both this week's and today's).
   return {
     date: today,
     week,
     summary: {
-      deadlinesThisWeek: open.filter((i) => i.date >= week.start && i.date <= week.end).length,
-      openToday: tasks.filter((t) => !t.done).length,
+      deadlinesThisWeek: open.filter((i) => i.date >= today && i.date <= week.end).length,
+      openToday: tasks.filter((t) => !t.done && (t.date === null || t.date >= today)).length,
       overdue: overdue.length,
     },
     strip: { days, overdue },

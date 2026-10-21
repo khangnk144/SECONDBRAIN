@@ -8,6 +8,7 @@ import { MarkdownInputRules } from './extensions/markdown-input-rules';
 import { MarkdownPaste } from './extensions/markdown-paste';
 import { TableKeys } from './extensions/table-keys';
 import { WritingFocus } from './extensions/writing-focus';
+import { FormattingKeys } from './formatting/formatting-keys';
 import { createTaskItemView, toggleTaskAtSelection } from './extensions/task-item-view';
 import { createVerbatimBlockView } from './extensions/verbatim-block-view';
 import { createWikilinkKeys } from './extensions/wikilink-follow';
@@ -30,6 +31,7 @@ export function createEditorExtensions(context: EditorContext): AnyExtension[] {
   return [
     ...schemaExtensions,
     MarkdownInputRules,
+    FormattingKeys,
     InlineDecorations,
     createWikilinkKeys(context),
     createEditorTriggers(context),

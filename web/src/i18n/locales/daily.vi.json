@@ -1,0 +1,11 @@
+{
+  "navLabel": "Chuyển giữa các ghi chú hằng ngày",
+  "previous": "Ngày trước",
+  "next": "Ngày sau",
+  "create": "Tạo ngày {{date}}",
+  "openDay": "Mở ghi chú ngày {{date}}",
+  "createDay": "Chưa có ghi chú ngày {{date}}. Bấm để tạo.",
+  "longDateFormat": "dddd, DD/MM/YYYY",
+  "shortDateFormat": "DD/MM",
+  "fullDateFormat": "DD/MM/YYYY"
+}

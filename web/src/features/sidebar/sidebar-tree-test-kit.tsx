@@ -1,5 +1,5 @@
 /** Shared setup for the sidebar tree tests (not a test file itself). */
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { vi } from 'vitest';
 import { appRoutes } from '../../app/routes';
@@ -7,6 +7,7 @@ import { installFetchMock, type FetchMock } from '../../lib/testing/fetch-mock';
 import { resetAppState } from '../../lib/testing/reset-app-state';
 import { makeTree, type TreeFixture } from '../../lib/testing/tree-fixture';
 import { useTreeStore } from '../../lib/tree-store';
+import { todayView } from '../today/today-test-fixtures';
 
 export const REV = 'c'.repeat(64);
 export const FIXTURE: TreeFixture = {
@@ -35,6 +36,10 @@ export const item = (name: string) =>
     .getAllByRole('treeitem')
     .find((el) => el.querySelector('.tree-item__label')?.textContent === name) as HTMLElement;
 
+/** The toasts' polite live region (Today, where the app opens, has live regions of its own). */
+export const toastStatus = () =>
+  within(screen.getByRole('region', { name: 'Thông báo' })).getByRole('status');
+
 export function renderApp(path = '/') {
   const router = createMemoryRouter(appRoutes, { initialEntries: [path] });
   render(<RouterProvider router={router} />);
@@ -49,6 +54,9 @@ export async function setupSidebarTest(): Promise<FetchMock> {
     body: { path: call.query.get('path'), revision: REV, content: 'nội dung' },
   }));
   mock.on('GET /api/tree', { body: makeTree(FIXTURE) });
+  // The app opens on Today: nothing due, no sample-data offer.
+  mock.on('GET /api/today', { body: todayView() });
+  mock.on('GET /api/sample-data', { body: { offered: false, present: false } });
   useTreeStore.setState({ tree: makeTree(FIXTURE), status: 'ready' });
   useTreeStore.getState().hydrate();
   useTreeStore.setState({ expanded: ['0 Inbox', 'Daily'] });

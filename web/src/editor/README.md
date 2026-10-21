@@ -20,6 +20,7 @@ so any one can be `.extend()`ed or `.configure()`d by name); `editorSchema` is i
 | `wikilink` (inline atom) | `[[target#heading\|alias]]`, `![[…]]` | attrs `target`, `heading`, `alias`, `embed` |
 | `verbatimBlock` (atom) | any unsupported top-level block | attr `source` (`\n` line ends); top level only |
 | `bold`, `italic`, `strike`, `code`, `link` | `**`, `*`, `~~`, `` ` ``, `[](…)` | `code` combines with the other marks |
+| `underline` | `<u>…</u>` | only an exact lowercase pair of sibling tags around content; nesting written link > underline > strike > bold > italic |
 
 Tags (`#tag`) and task dates (`📅 2026-10-20`, `✅ …`) are plain text; decorate them in the UI.
 
@@ -30,6 +31,7 @@ loadMarkdown(source, schema?) → { doc, snapshot, frontmatter: { raw } | null }
 saveMarkdown(doc, snapshot) → string            // === source when nothing changed
 saveMarkdownWithSnapshot(doc, snapshot) → { text, snapshot, exact }
 documentEol(snapshot) → '\n' | '\r\n'
+caretForSourceOffset(doc, snapshot, offset) → CaretTarget   // a template's {{cursor}}
 ```
 
 **Load.** BOM and front matter (server fence rules) are set aside. The body is parsed with
@@ -37,7 +39,7 @@ remark + GFM (the server's reference parser), in chunks because micromark is qua
 of one parse (`markdown-chunks.ts`; each chunk is checked to end cleanly, link definitions are
 parsed in front of every chunk). Each top-level block keeps its original bytes, the bytes before
 it, and its editor node: a supported node when the mapping is exact, else a `verbatimBlock`
-(headings 4–6, HTML, math `$…$`/`$$…$$`, footnotes, reference links and definitions, `:::`
+(headings 4–6, HTML other than `<u>…</u>` pairs, math `$…$`/`$$…$$`, footnotes, reference links and definitions, `:::`
 containers, callouts `> [!x]`, code info strings, mixed or ordered task lists, ragged tables,
 wikilinks the editor cannot hold such as inside link text, NUL characters). Wikilinks are found
 with the server's raw-text scan and cut out of `text` nodes (`text-alignment.ts`). Lists and
@@ -65,9 +67,12 @@ editor content; front matter, BOM, CRLF/LF, NFD and the final newline never chan
 
 - Keep node identity: build the editor state from `loadMarkdown().doc`
   (`EditorState.create({ doc })`); a JSON round trip works but makes every save compare deeply.
-- Tick a task with `setNodeMarkup(pos, undefined, { checked })` and insert the done token as
-  plain text: `tr.insert(endOfFirstLine, schema.text(' ✅ 2026-10-19'))` (no marks), so the save
-  is a one-line text patch.
+- Tick a task with `toggleTask` (`extensions/task-toggle.ts`): `checked` changes and the done
+  token on the first line follows the server's view-patch rules (`markdown/done-token-rules.ts`:
+  the first ✅ token set to today in place, else ` ✅ <today>` appended as plain text; an untick
+  removes every ✅ token). The save writes it as a one-line text patch made the way the server
+  makes it (`task-tick-patch.ts`), so editor and Today/Calendar ticks write the same bytes
+  (`task-tick-server-parity.test.ts`).
 - `exact: false` is informational (logged, not an error). Empty paragraphs, a hard break at the
   end of a paragraph, and code/link marks on atoms have no Markdown form and are not saved.
 - Verbatim blocks are edited in source mode only (re-load the whole text after source mode).
@@ -91,4 +96,15 @@ editor content; front matter, BOM, CRLF/LF, NFD and the final newline never chan
 keys, writing focus) and **must never change a node's spec** – a changed node or mark set throws
 at creation. Popups (`popups/`: slash menu from a registry, `[[`, `#`, date picker) replace their
 trigger text through one transaction. The note session talks to the editor only through
-`MarkdownEditorHandle` (`focus`, `replaceDoc`, `getDoc`, `edit`).
+`MarkdownEditorHandle` (`focus`, `replaceDoc`, `getDoc`, `edit`; `focus({ caret })` places a
+`CaretTarget`, inserting the empty paragraph for a blank line outside the undo history).
+
+## Formatting toolbar (`formatting/`)
+`FORMATTING_COMMANDS` is the one registry (`id`, `labelKey`, `keys`, `group`, `icon`, `isActive`,
+`isEnabled`, `run` on a `FormattingContext`). The toolbar (`FormattingToolbar`, mounted by the note
+screen above the title) renders it as a WAI-ARIA toolbar, folds the four text styles into one menu
+and moves less-used commands into "Thêm" by width (`toolbar-layout.ts`, rem sizes shared with the
+CSS). `FormattingKeys` binds every registry key in the editor and always takes the key (no browser
+default such as view-source on `Ctrl+U`); `Alt+S` stays in the app shortcut registry. Commands are
+disabled on a verbatim block, in a code block (except paragraph/code block), for block commands in a
+table cell, and in source mode (except undo/redo/source).

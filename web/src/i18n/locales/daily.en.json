@@ -1,0 +1,11 @@
+{
+  "navLabel": "Move between daily notes",
+  "previous": "Previous day",
+  "next": "Next day",
+  "create": "Create {{date}}",
+  "openDay": "Open the note of {{date}}",
+  "createDay": "There is no note for {{date}} yet. Click to create it.",
+  "longDateFormat": "dddd, D MMMM YYYY",
+  "shortDateFormat": "D MMM",
+  "fullDateFormat": "D MMMM YYYY"
+}

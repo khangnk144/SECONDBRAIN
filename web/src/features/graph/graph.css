@@ -1,0 +1,307 @@
+/* Brain map (design.md screen 6) and the local graph of a note. Colors only from tokens.css. */
+.graph-screen {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--panel-w);
+  height: 100%;
+  min-height: 0;
+}
+
+.graph-screen__stage {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.graph-screen__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* Pointer drags pan the map instead of scrolling the page on touch screens. */
+  touch-action: none;
+}
+
+.graph-screen__title {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.25rem;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.graph-screen__message {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  color: var(--ink-2);
+  text-align: center;
+  line-height: 1.65;
+  pointer-events: none;
+}
+
+.graph-screen__message button {
+  pointer-events: auto;
+}
+
+.graph-screen__fps {
+  position: absolute;
+  right: var(--space-2);
+  bottom: var(--space-2);
+  color: var(--ink-2);
+  font-size: max(12px, 0.78125rem);
+}
+
+.graph-controls {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  display: flex;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: var(--paper);
+}
+
+/* Legend: dot colors are exactly the graph tokens. */
+.graph-legend {
+  position: absolute;
+  right: var(--space-2);
+  bottom: var(--space-2);
+  left: var(--space-2);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  color: var(--ink-2);
+  font-size: max(12px, 0.78125rem);
+  pointer-events: none;
+}
+
+.graph-legend__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.graph-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.graph-legend__dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.graph-legend__dot--projects {
+  background: var(--graph-projects);
+}
+.graph-legend__dot--areas {
+  background: var(--graph-areas);
+}
+.graph-legend__dot--resources {
+  background: var(--graph-resources);
+}
+.graph-legend__dot--wiki {
+  background: var(--graph-wiki);
+}
+.graph-legend__dot--daily {
+  background: var(--graph-daily);
+}
+.graph-legend__dot--other {
+  background: var(--graph-other);
+}
+.graph-legend__dot--source {
+  width: 8px;
+  height: 8px;
+  border: 1.5px solid var(--ink-2);
+  background: transparent;
+}
+
+.graph-legend__note {
+  margin: 0;
+}
+
+/* Side panel: the keyboard path through the map. */
+.graph-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-4);
+  border-left: 1px solid var(--line);
+}
+
+.graph-search,
+.graph-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.graph-panel__label,
+.graph-details__heading {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.graph-panel__hint,
+.graph-panel__count,
+.graph-details__meta,
+.graph-results__folder,
+.graph-neighbors__folder {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: max(12px, 0.78125rem);
+  line-height: 1.5;
+}
+
+.graph-panel__count:empty {
+  display: none;
+}
+
+.graph-results {
+  max-height: 280px;
+  margin: 0;
+  padding: var(--space-1);
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  list-style: none;
+}
+
+.graph-results__item,
+.graph-neighbors__item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 32px;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-s);
+  cursor: pointer;
+}
+
+.graph-results__item.is-active {
+  background: var(--accent-soft);
+}
+
+.graph-results__title,
+.graph-neighbors__title {
+  color: var(--ink);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.graph-details__title {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.graph-details__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-1) 0;
+}
+
+.graph-details__toggle,
+.local-graph__toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 32px;
+  color: var(--ink);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.graph-details__toggle input,
+.local-graph__toggle input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.graph-neighbors {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.graph-neighbors__item {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+}
+
+.graph-neighbors__item:hover {
+  background: var(--paper);
+}
+
+/* Local graph in the note's right panel. */
+.local-graph {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.local-graph__canvas {
+  display: block;
+  width: 100%;
+  height: 200px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: var(--bg);
+}
+
+.local-graph__open {
+  align-self: flex-start;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .graph-neighbors__item {
+    transition: background-color 150ms var(--ease);
+  }
+}
+
+/* Narrow windows: the panel goes below the map. */
+@media (max-width: 899px) {
+  .graph-screen {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(360px, 1fr) auto;
+  }
+
+  .graph-panel {
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+}

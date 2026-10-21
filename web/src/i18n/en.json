@@ -20,18 +20,6 @@
   "panel": {
     "label": "Right pane"
   },
-  "today": {
-    "dateFormat": "dddd, MMMM D",
-    "greeting": {
-      "morning": "Good morning, {{name}}.",
-      "noon": "Good midday, {{name}}.",
-      "afternoon": "Good afternoon, {{name}}.",
-      "evening": "Good evening, {{name}}.",
-      "late": "Up late, {{name}}."
-    },
-    "summaryNothingUrgent": "Nothing urgent today. Feel like writing something?",
-    "emptyHint": "Once you have notes, your next 14 days, today's tasks and projects in progress will show up here."
-  },
   "placeholder": {
     "tasks": {
       "title": "Tasks",
@@ -49,6 +37,10 @@
       "title": "This page could not be found",
       "body": "The link may be out of date.",
       "back": "Back to Today"
+    },
+    "calendarDay": {
+      "title": "The day you picked",
+      "body": "Click a day in the calendar to see its deadlines and its daily note."
     }
   },
   "panes": {
@@ -57,14 +49,5 @@
     "hideRight": "Collapse right pane",
     "showRight": "Open right pane",
     "withShortcut": "{{label}} ({{keys}})"
-  },
-  "shortcuts": {
-    "toggleLeftPane": "Collapse or open the left pane",
-    "toggleRightPane": "Collapse or open the right pane",
-    "newNote": "New note",
-    "closeTab": "Close the current tab",
-    "previousTab": "Previous tab",
-    "nextTab": "Next tab",
-    "search": "Search notes and commands"
   }
 }

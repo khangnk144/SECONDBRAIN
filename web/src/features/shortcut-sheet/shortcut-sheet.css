@@ -1,0 +1,78 @@
+/* Shortcut sheet: a wider modal (dialogs.css) with grouped rows, keys as <kbd> chips. */
+.modal.shortcut-sheet {
+  width: min(720px, 100%);
+  max-height: 80vh;
+  overflow: hidden;
+}
+
+.shortcut-sheet__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.shortcut-sheet__groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  min-height: 0;
+  overflow-y: auto;
+  margin: 0 calc(-1 * var(--space-2));
+  padding: var(--space-1) var(--space-2) var(--space-2);
+  border-radius: var(--radius-m);
+}
+
+.shortcut-sheet__group-title {
+  margin-bottom: var(--space-2);
+  color: var(--ink-2);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.shortcut-sheet__rows {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+  gap: 0 var(--space-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shortcut-sheet__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 32px;
+  padding: var(--space-1) 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.875rem;
+}
+
+.shortcut-sheet__label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.key-chips {
+  display: inline-flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-1);
+  color: var(--ink-2);
+  font-size: max(12px, 0.75rem);
+}
+
+.key-combo {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  white-space: nowrap;
+}
+
+.key-combo kbd {
+  color: var(--ink);
+}

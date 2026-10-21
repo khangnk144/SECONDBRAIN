@@ -29,6 +29,13 @@ describe('backend connection banner', () => {
     expect(screen.queryByRole('status')).toBeNull();
   });
 
+  it('the inline variant (inside Today) carries the same text with its own class', () => {
+    useConnectionStore.setState({ state: 'closed', closedSince: Date.now() - 5_000 });
+    render(<ConnectionBanner variant="inline" />);
+    expect(screen.getByRole('status')).toHaveClass('connection-banner--inline');
+    expect(screen.getByRole('status')).toHaveTextContent('Chưa kết nối với máy chủ.');
+  });
+
   it('does not flash for a short drop', () => {
     render(<ConnectionBanner />);
     act(() => useConnectionStore.getState().setState('closed'));

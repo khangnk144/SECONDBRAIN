@@ -6,6 +6,7 @@
 import type { ContentClass, LinkCatalog } from '../markdown/markdown-types.js';
 import type { VaultPath } from '../vault/vault-types.js';
 import type { LinkTargets } from './link-target-list.js';
+import type { GraphRows } from './view-row-queries.js';
 
 export interface IndexedNote {
   path: VaultPath;
@@ -144,11 +145,18 @@ export interface IndexService {
    * doubles need not implement it; the deadline service falls back to listNotes()/allTasks().
    */
   deadlineRows?(): DeadlineRows;
+  /** Note and file rows plus resolved links, for the graph (F16). */
+  graphRows(): GraphRows;
+  /** Paths of the notes in the `Daily` folder (prev/next daily navigation, F13.3). */
+  dailyNotePaths(): VaultPath[];
   close(): void;
 }
 
 export interface DeadlineRows {
-  notes: Pick<IndexedNote, 'path' | 'title' | 'class' | 'type' | 'status' | 'deadline'>[];
+  notes: Pick<
+    IndexedNote,
+    'path' | 'title' | 'class' | 'type' | 'status' | 'deadline' | 'revision'
+  >[];
   tasks: IndexedTask[];
 }
 
@@ -163,38 +171,17 @@ export interface IndexedTask {
   invalidDates: string[];
 }
 
-export type Urgency = 'done' | 'urgent' | 'soon' | 'ok';
-
-/** SPEC §4.7. Only user notes produce items (archived ones only when explicitly included). */
-export interface DeadlineItem {
-  /** `note:<path>` or `task:<path>#<line>`. */
-  id: string;
-  kind: 'note' | 'task';
-  /** Note title, or task text without tokens. */
-  title: string;
-  /** Due calendar date YYYY-MM-DD (local). */
-  date: string;
-  path: VaultPath;
-  noteTitle: string;
-  line: number | null;
-  /** Expected line text for task patches (tasks only). */
-  lineText: string | null;
-  done: boolean;
-  urgency: Urgency;
-  /** Calendar days from today (negative = overdue). */
-  daysLeft: number;
-  class: ContentClass;
-}
-
 export type { LinkTargetFile, LinkTargetNote, LinkTargets } from './link-target-list.js';
 
 // Shapes of the deadline service (Today, Calendar, Tasks), kept in their own file for size.
 export type {
   CalendarView,
+  DeadlineItem,
   DeadlineQueryOptions,
   DeadlineService,
   ProjectSummary,
   TaskEntry,
   TaskGroups,
   TodayView,
+  Urgency,
 } from './deadline-types.js';

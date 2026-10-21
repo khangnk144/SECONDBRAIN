@@ -1,0 +1,78 @@
+/* Date picker dialog: month grid + typed field. Tokens only. */
+.pick-date {
+  width: min(400px, 100%);
+}
+
+.pick-date__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.pick-date__month {
+  flex: 1;
+  text-align: center;
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.pick-date__today {
+  min-height: 32px;
+  margin-left: var(--space-2);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.pick-date__grid {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.pick-date__weekday {
+  padding-bottom: var(--space-1);
+  color: var(--ink-2);
+  font-size: max(12px, 0.78125rem);
+  font-weight: 500;
+}
+
+.pick-date__grid td {
+  padding: 2px;
+  text-align: center;
+}
+
+.pick-date__day {
+  width: 100%;
+  min-width: 32px;
+  height: 36px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-s);
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.pick-date__day:hover {
+  border-color: var(--line);
+}
+
+.pick-date__day.is-outside {
+  color: var(--ink-2);
+}
+
+/* Today keeps an accent ring, like its dot on the strip. */
+.pick-date__day.is-today {
+  border-color: var(--accent);
+}
+
+[aria-selected='true'] > .pick-date__day {
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+}

@@ -1,3 +1,10 @@
+/* Today (design.md screen 1, preview-hom-nay.html): calm lists, one card kind, tokens only. */
+.today {
+  display: flex;
+  flex-direction: column;
+  max-width: 720px;
+}
+
 .today__date {
   margin-bottom: 6px;
   font-size: 0.875rem;
@@ -8,15 +15,296 @@
   margin-bottom: 6px;
 }
 
+.today__greeting:focus {
+  outline: none;
+}
+
+.today__greeting:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Focus moved here after a mouse click (the sample card went away): no ring to explain. */
+.today__greeting[data-pointer-focus]:focus-visible {
+  outline: none;
+}
+
+/* One line is reserved while loading, so nothing jumps when the sentence arrives. */
 .today__summary {
+  min-height: 1.65em;
   max-width: var(--measure);
   color: var(--ink-2);
 }
 
-.today__hint {
+.today__summary-slot {
   max-width: var(--measure);
-  margin-top: var(--space-12);
-  font-size: max(12px, 0.78125rem); /* design.md §3: never below 12px */
+}
+
+.today__error {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin-top: var(--space-6);
+  color: var(--ink-2);
+}
+
+/* "Hôm nay" beside "Ghi nhanh" on wide windows, stacked below 900 px. */
+.today__pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2) var(--space-8);
+  margin-top: var(--space-4);
+}
+
+@media (min-width: 900px) {
+  .today__pair {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  }
+}
+
+.today__section {
+  min-width: 0;
+}
+
+.today__projects {
+  margin-top: var(--space-4);
+}
+
+.today__section-title {
+  margin: var(--space-6) 0 var(--space-2);
+  font-size: 0.875rem;
+  font-weight: 600;
   line-height: 1.5;
   color: var(--ink-2);
+}
+
+.today__section-title:focus {
+  outline: none;
+}
+
+.today__empty {
+  color: var(--ink-2);
+  font-size: 0.9375rem;
+}
+
+/* "Xem tất cả n việc quá hạn": a quiet link under the first overdue rows, to the Tasks view. */
+.today__more {
+  margin: var(--space-1) 0 var(--space-2) 32px;
+  font-size: max(12px, 0.8125rem);
+}
+
+.today__more-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  border-radius: var(--radius-s);
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.today__more-link:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.today__show-more {
+  align-self: flex-start;
+  margin-top: var(--space-2);
+}
+
+.today__invite {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+.today__hint {
+  margin-top: var(--space-2);
+  font-size: max(12px, 0.75rem);
+  line-height: 1.4;
+  color: var(--ink-2);
+}
+
+/* "Ghi nhanh": the blush box of the mock; grows with its text up to a few lines. */
+.quick-capture-inline {
+  display: block;
+  width: 100%;
+  min-height: calc(2lh + 2 * var(--space-3));
+  max-height: 12rem;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius-m);
+  background: var(--blush);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  resize: vertical;
+  field-sizing: content;
+}
+
+.quick-capture-inline::placeholder {
+  color: var(--ink-2);
+}
+
+.quick-capture-inline:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -1px;
+}
+
+.quick-capture-inline[aria-busy='true'] {
+  opacity: 0.7;
+}
+
+/* "Đồ án đang làm": the only cards on the screen (paper, line border, 14 px radius, no shadow). */
+.project-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.project-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-l);
+  background: var(--paper);
+}
+
+.project-card__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.project-card__title {
+  min-width: 0;
+  min-height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: transparent;
+  color: var(--ink);
+  font-weight: 500;
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.project-card__title:hover {
+  color: var(--accent);
+}
+
+.project-card__due {
+  flex: none;
+  font-size: max(12px, 0.8125rem);
+  white-space: nowrap;
+}
+
+.project-card__due--urgent {
+  color: var(--urgent-text);
+}
+
+.project-card__due--soon {
+  color: var(--soon-text);
+}
+
+.project-card__due--ok {
+  color: var(--ok-text);
+}
+
+.project-card__progress {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.project-card__bar {
+  flex: 1;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--line);
+}
+
+.project-card__fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+.project-card__count,
+.project-card__none {
+  flex: none;
+  font-size: max(12px, 0.8125rem);
+  color: var(--ink-2);
+}
+
+.project-card__offer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+.project-card__offer-text {
+  font-size: 0.875rem;
+}
+
+.project-card__actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.project-card__later {
+  background: transparent;
+  color: var(--ink-2);
+}
+
+.project-card__later:hover {
+  color: var(--ink);
+}
+
+/* First run: a calm question at the top (SPEC §10). */
+.sample-data-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-l);
+  background: var(--blush);
+}
+
+.sample-data-card__question {
+  font-size: 1.0625rem;
+}
+
+.sample-data-card__body {
+  max-width: var(--measure);
+  font-size: 0.9375rem;
+}
+
+.sample-data-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+@media (pointer: coarse) {
+  .project-card__title {
+    min-height: 40px;
+  }
 }

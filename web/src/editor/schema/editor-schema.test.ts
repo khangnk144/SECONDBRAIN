@@ -31,10 +31,17 @@ describe('editor schema', () => {
         'wikilink',
       ].sort(),
     );
-    expect(Object.keys(schema.marks).sort()).toEqual(['bold', 'code', 'italic', 'link', 'strike']);
-    expect(createSchemaExtensions().some((extension) => extension.name === 'underline')).toBe(
-      false,
-    );
+    expect(Object.keys(schema.marks).sort()).toEqual([
+      'bold',
+      'code',
+      'italic',
+      'link',
+      'strike',
+      'underline',
+    ]);
+    expect(
+      createSchemaExtensions().filter((extension) => extension.name === 'underline'),
+    ).toHaveLength(1);
   });
 
   it('lets code combine with the other marks', () => {

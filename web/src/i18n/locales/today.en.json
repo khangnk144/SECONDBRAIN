@@ -1,0 +1,94 @@
+{
+  "dateFormat": "dddd, MMMM D",
+  "greeting": {
+    "morning": "Good morning, {{name}}.",
+    "noon": "Good midday, {{name}}.",
+    "afternoon": "Good afternoon, {{name}}.",
+    "evening": "Good evening, {{name}}.",
+    "late": "Up late, {{name}}."
+  },
+  "summary": {
+    "nothingUrgent": "Nothing urgent today. Feel like writing something?",
+    "overdue_one": "You have {{count}} overdue item.",
+    "overdue_other": "You have {{count}} overdue items.",
+    "week_one": "{{count}} deadline this week.",
+    "week_other": "{{count}} deadlines this week.",
+    "openToday_one": "{{count}} task left today.",
+    "openToday_other": "{{count}} tasks left today.",
+    "loading": "Loading today's tasks…"
+  },
+  "loadError": "Today's tasks could not be loaded. Please try again.",
+  "retry": "Try again",
+  "strip": {
+    "caption": "Next 14 days",
+    "label": "Coming days",
+    "weekday": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    },
+    "monthStart": "MMM D",
+    "overdue": "Overdue ({{count}})",
+    "more": "+{{count}}",
+    "todayDate": "Today, {{date}}",
+    "cell_one": "{{date}}: {{count}} item",
+    "cell_other": "{{date}}: {{count}} items",
+    "cellEmpty": "{{date}}: nothing due yet",
+    "overdueCell_one": "Overdue: {{count}} item",
+    "overdueCell_other": "Overdue: {{count}} items",
+    "legend": {
+      "urgent": "urgent (≤ 2 days)",
+      "soon": "soon (3–7 days)",
+      "ok": "later",
+      "today": "today"
+    },
+    "popover": {
+      "close": "Close",
+      "empty": "Nothing due on this day yet."
+    },
+    "range": "{{from}} – {{to}}",
+    "rangeFromSameMonth": "MMMM D",
+    "rangeToSameMonth": "D",
+    "rangeDay": "MMMM D"
+  },
+  "tasks": {
+    "title": "Today",
+    "empty": "No tasks for today yet.",
+    "allOverdue_one": "See the {{count}} overdue task",
+    "allOverdue_other": "See all {{count}} overdue tasks"
+  },
+  "capture": {
+    "title": "Quick capture",
+    "placeholder": "Type something, then Enter…",
+    "hint": "Enter saves to Inbox, Shift+Enter starts a new line. <kbd>{{keys}}</kbd> opens quick capture on any screen.",
+    "saving": "Saving…"
+  },
+  "projects": {
+    "title": "Projects in progress",
+    "empty": "No projects yet. Create one from the Course project template?",
+    "create": "Create",
+    "newTitle": "New project",
+    "progress": "{{done}}/{{total}} tasks",
+    "progressLabel": "Progress of {{title}}",
+    "noTasks": "no tasks yet",
+    "donePrompt": "Every task is done. Mark the project done?",
+    "markDone": "Mark done",
+    "later": "Later",
+    "percent": "{{percent}}%",
+    "showMore_one": "Show {{count}} more project",
+    "showMore_other": "Show {{count}} more projects",
+    "markedDone": "Marked “{{title}}” as done."
+  },
+  "sample": {
+    "question": "Create sample data to try things out?",
+    "body": "A few sample courses, projects, deadlines and notes, so you can see how the app works before writing your own.",
+    "create": "Create sample data",
+    "creating": "Creating…",
+    "decline": "No, thanks",
+    "created": "Sample data created."
+  }
+}

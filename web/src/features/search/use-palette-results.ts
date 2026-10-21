@@ -1,7 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { getSearch } from '../../lib/api/search-api';
+import { recentNotePaths } from '../../lib/recent-notes-store';
 import { useTabsStore } from '../../lib/tabs-store';
-import { mergeRecentNotes, toNoteHit, type NoteHit } from './recent-notes';
+import {
+  mergeRecentNotes,
+  RECENT_NOTES_LIMIT,
+  recentHit,
+  toNoteHit,
+  type NoteHit,
+} from './recent-notes';
 
 /** Wait after the last keystroke before asking the server (brief: 120 ms). */
 export const SEARCH_DEBOUNCE_MS = 120;
@@ -22,23 +29,34 @@ function titleMatchesFirst(hits: NoteHit[]): NoteHit[] {
 }
 
 async function fetchHits(query: string): Promise<NoteHit[]> {
-  // The query goes out exactly as typed (NFD or NFC): the server folds it.
+  if (query.trim() === '') {
+    // SPEC F8: an empty query shows the most recently opened notes (per-vault history).
+    const history = recentNotePaths(RECENT_NOTES_LIMIT);
+    if (history.length > 0) return history.map(recentHit);
+    const { results } = await getSearch({ q: '' });
+    return mergeRecentNotes(useTabsStore.getState().tabs, results);
+  }
+  // The query goes out exactly as typed (NFD or NFC, filters included): the server folds it.
   const { results } = await getSearch({ q: query });
-  if (query.trim() === '') return mergeRecentNotes(useTabsStore.getState().tabs, results);
   return titleMatchesFirst(results.map(toNoteHit));
 }
 
 /**
  * Results for the palette input: the first request goes out at once (the palette just opened),
  * later ones 120 ms after typing stops; answers to outdated queries are dropped. The previous
- * hits stay on screen until the next answer arrives.
+ * hits stay on screen until the next answer arrives. `enabled: false` (command mode) asks
+ * nothing and drops answers still on their way.
  */
-export function usePaletteResults(query: string): PaletteResults {
+export function usePaletteResults(query: string, enabled = true): PaletteResults {
   const [state, setState] = useState<PaletteResults>({ answered: null, hits: [], error: false });
   const sequence = useRef(0);
   const first = useRef(true);
 
   useEffect(() => {
+    if (!enabled) {
+      sequence.current += 1;
+      return;
+    }
     const run = async () => {
       const id = ++sequence.current;
       try {
@@ -55,7 +73,7 @@ export function usePaletteResults(query: string): PaletteResults {
     }
     const handle = setTimeout(() => void run(), SEARCH_DEBOUNCE_MS);
     return () => clearTimeout(handle);
-  }, [query]);
+  }, [query, enabled]);
 
   return state;
 }

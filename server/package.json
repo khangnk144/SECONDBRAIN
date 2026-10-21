@@ -22,6 +22,7 @@
     "@fastify/websocket": "11.3.4",
     "better-sqlite3": "13.0.3",
     "chokidar": "5.0.0",
+    "dayjs": "1.11.23",
     "fastify": "5.12.7",
     "remark-frontmatter": "5.0.0",
     "remark-gfm": "4.0.1",

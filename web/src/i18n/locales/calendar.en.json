@@ -1,0 +1,52 @@
+{
+  "monthTitleFormat": "MMMM YYYY",
+  "navLabel": "Choose a month",
+  "previousMonth": "Previous month",
+  "today": "Today",
+  "nextMonth": "Next month",
+  "includeArchive": "Include Archive",
+  "longDateFormat": "dddd, MMMM D, YYYY",
+  "loadError": "Couldn't load this month yet. Check that the server is running, then press Try again.",
+  "retry": "Try again",
+  "weekdays": {
+    "mon": { "short": "Mon", "long": "Monday" },
+    "tue": { "short": "Tue", "long": "Tuesday" },
+    "wed": { "short": "Wed", "long": "Wednesday" },
+    "thu": { "short": "Thu", "long": "Thursday" },
+    "fri": { "short": "Fri", "long": "Friday" },
+    "sat": { "short": "Sat", "long": "Saturday" },
+    "sun": { "short": "Sun", "long": "Sunday" }
+  },
+  "cell": {
+    "today": "today",
+    "items_one": "{{count}} item: {{list}}",
+    "items_other": "{{count}} items: {{list}}",
+    "doneItem": "{{title}} (done)",
+    "empty": "nothing due yet",
+    "itemsCapped_one": "{{count}} item: {{list}} and {{rest}} more",
+    "itemsCapped_other": "{{count}} items: {{list}} and {{rest}} more"
+  },
+  "panel": {
+    "today": "Today",
+    "loading": "Loading…",
+    "loadError": "Couldn't load this day's items yet.",
+    "empty": "Nothing due on this day yet.",
+    "items": "Items on this day",
+    "emptyHint": "Drag an item onto this day in the calendar, or choose “Move to another day…” on an item."
+  },
+  "daily": {
+    "title": "Daily note",
+    "open": "Open daily note",
+    "missing": "This day has no note yet.",
+    "write": "Write"
+  },
+  "itemMenu": {
+    "button": "Actions for “{{title}}”",
+    "label": "Actions for “{{title}}”",
+    "reschedule": "Move to another day…"
+  },
+  "reschedule": {
+    "title": "Move “{{title}}” to",
+    "confirm": "Move"
+  }
+}

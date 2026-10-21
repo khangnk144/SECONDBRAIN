@@ -73,6 +73,33 @@ const ROUTES: {
   { method: 'GET', url: '/api/sample-data' },
   { method: 'POST', url: '/api/sample-data' },
   { method: 'DELETE', url: '/api/sample-data' },
+  {
+    method: 'PATCH',
+    url: '/api/note/task',
+    payload: {
+      path: '0 Inbox/a.md',
+      expectedRevision: REV,
+      line: 1,
+      expectedText: 'x',
+      done: true,
+    },
+  },
+  {
+    method: 'POST',
+    url: '/api/note/reschedule',
+    payload: {
+      path: '0 Inbox/a.md',
+      expectedRevision: REV,
+      target: { kind: 'note' },
+      date: '2026-10-20',
+    },
+  },
+  { method: 'POST', url: '/api/capture', payload: { text: 'Ghi nhanh' } },
+  { method: 'GET', url: '/api/daily?date=2026-10-20' },
+  { method: 'POST', url: '/api/daily', payload: { date: '2026-10-20' } },
+  { method: 'GET', url: '/api/daily/neighbors?date=2026-10-20' },
+  { method: 'GET', url: '/api/graph' },
+  { method: 'GET', url: `/api/graph/local?${NOTE}&depth=2` },
 ];
 
 const label = (route: (typeof ROUTES)[number]) => `${route.method} ${route.url.split('?')[0]}`;
@@ -132,6 +159,8 @@ describe('security on every vault route (SPEC §11)', () => {
       present: false,
     });
     expect((await t.call('GET', `/api/note?${NOTE}`)).statusCode).toBe(404);
+    expect((await t.call('GET', '/api/daily?date=2026-10-20')).statusCode).toBe(404);
+    expect((await t.call('GET', '/api/tree')).json().inboxCount).toBe(0);
   });
 
   it('health needs no token and reports the vault id', async () => {

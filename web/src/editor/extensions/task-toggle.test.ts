@@ -60,13 +60,58 @@ describe('toggleTask: done token on the first source line', () => {
     );
   });
 
-  it('adds no second token to a task whose first line already ends with one', () => {
+  it('adds no second token to a task whose first line already has one: its date becomes today', () => {
     const { doc, snapshot } = loadMarkdown('- [ ] task ✅ 2026-10-01\n  more\n');
-    expect(saveMarkdown(toggle(doc, 0, true), snapshot)).toBe('- [x] task ✅ 2026-10-01\n  more\n');
+    expect(saveMarkdown(toggle(doc, 0, true), snapshot)).toBe('- [x] task ✅ 2026-10-19\n  more\n');
   });
 
   it('writes the token as plain text after marked text', () => {
     const { ticked } = tickAndUntick('- [ ] **bold** and `code`\n');
     expect(ticked.text).toBe('- [x] **bold** and `code` ✅ 2026-10-19\n');
+  });
+});
+
+describe('toggleTask: the server’s token rules', () => {
+  /** Toggles task 0 of `source` and saves; `exact` must hold (a one-line text patch). */
+  const write = (source: string, checked: boolean) => {
+    const { doc, snapshot } = loadMarkdown(source);
+    const saved = saveMarkdownWithSnapshot(toggle(doc, 0, checked), snapshot);
+    expect(saved.exact).toBe(true);
+    return saved.text;
+  };
+
+  it('a tick sets the first ✅ token in place, U+FE0F and blanks normalised', () => {
+    expect(write('- [ ] a ✅ 2026-01-01 more\n', true)).toBe('- [x] a ✅ 2026-10-19 more\n');
+    expect(write('- [ ] a ✅️  2026-01-01\n', true)).toBe('- [x] a ✅ 2026-10-19\n');
+    expect(write('- [ ] a ✅ 2026-01-01 ✅ 2026-01-02\n', true)).toBe(
+      '- [x] a ✅ 2026-10-19 ✅ 2026-01-02\n',
+    );
+    expect(write('- [ ] a **✅ 2026-01-01** b\n', true)).toBe('- [x] a **✅ 2026-10-19** b\n');
+  });
+
+  it('an untick removes every ✅ token of the first line with the blanks before it', () => {
+    expect(write('- [x] a ✅ 2026-10-18 more ✅️ 2026-10-19\n', false)).toBe('- [ ] a more\n');
+    expect(write('- [x] a  ✅ 2026-10-19 📅 2026-10-22\n', false)).toBe('- [ ] a 📅 2026-10-22\n');
+    expect(write('- [x] ✅ 2026-10-19 rồi\n', false)).toBe('- [ ] rồi\n');
+  });
+
+  it('a ✅ in inline code or link text is no token', () => {
+    expect(write('- [x] a `✅ 2026-10-19`\n', false)).toBe('- [ ] a `✅ 2026-10-19`\n');
+    expect(write('- [ ] [✅ 2026-01-01](https://example.com)\n', true)).toBe(
+      '- [x] [✅ 2026-01-01](https://example.com) ✅ 2026-10-19\n',
+    );
+  });
+
+  it('ticking a ticked task changes nothing; unticking an open one still removes its token', () => {
+    const { doc } = loadMarkdown('- [x] a ✅ 2026-10-01\n');
+    const task = findTasks(doc)[0]!;
+    expect(toggleTask(EditorState.create({ doc }).tr, task.pos, true, TODAY).docChanged).toBe(
+      false,
+    );
+    expect(write('- [ ] a ✅ 2026-01-01\n', false)).toBe('- [ ] a\n');
+  });
+
+  it('keeps the token when it is all the task says (no empty task exists in Markdown)', () => {
+    expect(write('- [x] ✅ 2026-10-19\n', false)).toBe('- [ ] ✅ 2026-10-19\n');
   });
 });

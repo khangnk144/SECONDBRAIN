@@ -5,7 +5,9 @@ import { classifyPath, noteTitleFromPath } from '../markdown/content-classes.js'
 import type { ContentClass } from '../markdown/markdown-types.js';
 import { parseNote } from '../markdown/parse-note.js';
 import { VaultError, type NoteRead, type VaultPath } from '../vault/vault-types.js';
-import { newNoteContent, templateVariablesAt } from './new-note-content.js';
+import { toLocalDate } from '../lib/local-date.js';
+import type { TemplateLanguage } from '../templates/template-variables.js';
+import { newNoteContent } from './new-note-content.js';
 import {
   guardNotePath,
   pathQuerySchema,
@@ -51,7 +53,11 @@ function noteMetadata(context: AppContext, note: NoteRead) {
   };
 }
 
-export function registerNoteRoutes(app: FastifyInstance, context: AppContext): void {
+export function registerNoteRoutes(
+  app: FastifyInstance,
+  context: AppContext,
+  uiLanguage: () => TemplateLanguage,
+): void {
   const { vault, index } = context;
 
   app.get<{ Querystring: PathQuery }>(
@@ -130,13 +136,22 @@ export function registerNoteRoutes(app: FastifyInstance, context: AppContext): v
         });
       }
       const title = request.body.title ?? noteTitleFromPath(path);
-      const content =
-        exact ?? (await newNoteContent(vault, template, templateVariablesAt(title, context.now())));
+      const now = context.now();
+      // Template variables in the UI language; `cursor` = where `{{cursor}}` was (F14.2).
+      const { content, cursor } =
+        exact !== undefined
+          ? { content: exact, cursor: null }
+          : await newNoteContent(vault, template, {
+              title,
+              date: toLocalDate(now),
+              now,
+              language: uiLanguage(),
+            });
       const result = unique
         ? await vault.createUnique(path, content)
         : await vault.create(path, content);
       await context.settled();
-      return reply.code(201).send({ path: result.path, revision: result.revision });
+      return reply.code(201).send({ path: result.path, revision: result.revision, cursor });
     },
   );
 }

@@ -1,17 +1,36 @@
 {
   "dialogLabel": "Tìm ghi chú",
   "inputLabel": "Tìm ghi chú",
-  "placeholder": "Tìm theo tên hoặc nội dung, ví dụ tag:đồ-án",
+  "placeholder": "Tìm ghi chú, hoặc gõ > để chạy lệnh",
+  "filterHint": "Lọc bằng tag:, folder:, type:, due:7d, due:30d, due:overdue hoặc class:archive (gồm cả ghi chú đã lưu trữ).",
+  "commandHint": "Gõ tên lệnh để lọc, Enter để chạy.",
   "resultsLabel": "Kết quả tìm kiếm",
-  "recentLabel": "Ghi chú gần đây",
+  "recentLabel": "Ghi chú mở gần đây",
+  "commandsLabel": "Lệnh",
   "searching": "Đang tìm…",
   "error": "Không tìm được lúc này. Kiểm tra máy chủ rồi thử lại.",
   "noResults": "Không có ghi chú nào khớp '{{query}}'.",
+  "noCommands": "Không có lệnh nào khớp '{{query}}'.",
   "noRecent": "Chưa có ghi chú nào. Gõ tên để tạo ghi chú đầu tiên.",
   "create": "Tạo '{{query}}'",
   "resultCount_one": "{{count}} kết quả",
   "resultCount_other": "{{count}} kết quả",
+  "commandCount_one": "{{count}} lệnh",
+  "commandCount_other": "{{count}} lệnh",
   "hintOpen": "mở",
   "hintNewTab": "mở trong thẻ mới",
-  "hintClose": "đóng"
+  "hintRun": "chạy lệnh",
+  "hintClose": "đóng",
+  "filters": {
+    "tagCount_one": "{{count}} ghi chú",
+    "tagCount_other": "{{count}} ghi chú",
+    "due": {
+      "7d": "hạn trong 7 ngày tới",
+      "30d": "hạn trong 30 ngày tới",
+      "overdue": "đã quá hạn"
+    },
+    "class": {
+      "archive": "gồm cả ghi chú trong Archive"
+    }
+  }
 }

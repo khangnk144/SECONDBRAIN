@@ -7,6 +7,7 @@ import {
   type AppContextOptions,
 } from '../../src/app-context/create-app-context.js';
 import type { VaultRouteOptions } from '../../src/api/register-vault-routes.js';
+import type { GlobalSettings } from '../../src/config/global-settings.js';
 import { buildApp } from '../../src/http/build-app.js';
 import { createSilentLogger, type AppLogger } from '../../src/logging/rotating-file-logger.js';
 import { authHeaders, makeSettings, makeTempDir, removeDir } from '../helpers/test-environment.js';
@@ -15,6 +16,8 @@ export interface VaultTestApp {
   home: string;
   vaultRoot: string;
   port: number;
+  /** The live settings object the app reads (tests may change `ui.language`). */
+  settings: GlobalSettings;
   context: AppContext;
   app: FastifyInstance;
   /** Authenticated request with the canonical Origin (what the UI sends). */
@@ -75,6 +78,7 @@ export async function createVaultTestApp(
     home,
     vaultRoot: context.vault.root,
     port,
+    settings,
     context,
     app,
     call: (method, url, payload) =>

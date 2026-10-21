@@ -16,27 +16,64 @@ export interface TaskTokens {
   invalidDates: string[];
 }
 
-const DATE_TOKEN = /[ \t]*(\u{1F4C5}|✅)\uFE0F?[ \t]*(\d{4}-\d{2}-\d{2})(?!\d)/gu;
+/** One date token, with offsets into the text it was found in. */
+export interface DateToken {
+  kind: 'due' | 'done';
+  date: string;
+  valid: boolean;
+  /** Start of the token including the spaces/tabs before its emoji. */
+  start: number;
+  emojiStart: number;
+  dateStart: number;
+  /** End of the date. */
+  end: number;
+}
+
+const DATE_TOKEN = /(\u{1F4C5}|✅)️?[ \t]*(\d{4}-\d{2}-\d{2})(?!\d)/gu;
 const DUE_EMOJI = '\u{1F4C5}';
 
+const isBlank = (char: string | undefined) => char === ' ' || char === '\t';
+
 /**
- * Parses the part of a task line after its checkbox. The first valid token of a kind wins.
- * Tokens are looked for in `masked` (same text with code and HTML blanked out), so a `📅` in
- * inline code or an HTML comment is not a date; they are removed from `afterCheckbox`.
+ * Date tokens of `text`, looked for in `masked` (the same text with the `taskTokenMask` spans
+ * blanked out), so a `📅` in inline code, an HTML comment or a link is not a date. The spaces before a token belong to
+ * it, but only real ones: the blanked-out end of `` `code` `` or `</u>` right before the emoji
+ * stays part of the text.
  */
+export function scanDateTokens(text: string, masked = text): DateToken[] {
+  const tokens: DateToken[] = [];
+  for (const match of masked.matchAll(DATE_TOKEN)) {
+    const [whole, emoji, date] = match as unknown as [string, string, string];
+    const emojiStart = match.index;
+    let start = emojiStart;
+    while (start > 0 && isBlank(text[start - 1])) start -= 1;
+    const end = emojiStart + whole.length;
+    tokens.push({
+      kind: emoji === DUE_EMOJI ? 'due' : 'done',
+      date,
+      valid: isValidCalendarDate(date),
+      start,
+      emojiStart,
+      dateStart: end - date.length,
+      end,
+    });
+  }
+  return tokens;
+}
+
+/** Parses the part of a task line after its checkbox. The first valid token of a kind wins. */
 export function parseTaskTokens(afterCheckbox: string, masked = afterCheckbox): TaskTokens {
   let due: string | null = null;
   let completed: string | null = null;
   const invalidDates: string[] = [];
   let text = '';
   let last = 0;
-  for (const match of masked.matchAll(DATE_TOKEN)) {
-    const [whole, emoji, date] = match as unknown as [string, string, string];
-    if (!isValidCalendarDate(date)) invalidDates.push(date);
-    else if (emoji === DUE_EMOJI) due ??= date;
-    else completed ??= date;
-    text += afterCheckbox.slice(last, match.index);
-    last = match.index + whole.length;
+  for (const token of scanDateTokens(afterCheckbox, masked)) {
+    if (!token.valid) invalidDates.push(token.date);
+    else if (token.kind === 'due') due ??= token.date;
+    else completed ??= token.date;
+    text += afterCheckbox.slice(last, token.start);
+    last = token.end;
   }
   text += afterCheckbox.slice(last);
   return { text: text.trim(), due, completed, invalidDates };
@@ -46,6 +83,7 @@ export function parseTaskTokens(afterCheckbox: string, masked = afterCheckbox): 
 export function taskAtCheckbox(
   content: string,
   lineStarts: readonly number[],
+  /** Where tokens are not read (`taskTokenMask`). */
   excluded: readonly TextSpan[],
   checkbox: number,
   done: boolean,
@@ -59,12 +97,12 @@ export function taskAtCheckbox(
     line,
     lineText,
     done,
-    ...parseTaskTokens(afterCheckbox, mask(afterCheckbox, from, excluded)),
+    ...parseTaskTokens(afterCheckbox, maskExcluded(afterCheckbox, from, excluded)),
   };
 }
 
 /** `text` (starting at file offset `from`) with every excluded span replaced by spaces. */
-function mask(text: string, from: number, excluded: readonly TextSpan[]): string {
+export function maskExcluded(text: string, from: number, excluded: readonly TextSpan[]): string {
   let lo = 0;
   let hi = excluded.length;
   while (lo < hi) {

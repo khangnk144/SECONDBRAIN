@@ -1,0 +1,66 @@
+/* Right pane of the calendar: the opened day's items and Daily note. Tokens only. */
+.calendar-day-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.calendar-day-panel__title {
+  margin: 0;
+  font-size: 1.0625rem;
+  border-radius: var(--radius-s);
+}
+
+.calendar-day-panel__title:focus {
+  outline: none;
+}
+
+.calendar-day-panel__title:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.calendar-day-panel__subheading {
+  margin: 0 0 var(--space-2);
+  color: var(--ink-2);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.calendar-day-panel__muted,
+.calendar-day-panel__empty {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 0.875rem;
+}
+
+.calendar-day-panel__empty {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.calendar-item-menu {
+  width: 28px;
+  height: 28px;
+}
+
+.calendar-day-panel__daily {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line);
+}
+
+.calendar-day-panel__daily-missing {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+@media (pointer: coarse) {
+  .calendar-item-menu {
+    width: 40px;
+    height: 40px;
+  }
+}

@@ -115,7 +115,12 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
     version,
     context ? { hub: context.hub, onConnect: (send) => context.greet(send) } : {},
   );
-  if (context) registerVaultRoutes(app, context, options.vaultRoutes);
+  if (context) {
+    registerVaultRoutes(app, context, {
+      uiLanguage: () => options.getSettings().ui.language,
+      ...options.vaultRoutes,
+    });
+  }
   if (options.requestShutdown) await registerShutdownRoute(app, options.requestShutdown);
 
   if (options.serveUi === false) {

@@ -1,0 +1,11 @@
+{
+  "title": "Quick capture to Inbox",
+  "inputLabel": "Quick capture",
+  "placeholder": "Type anything, Enter saves it to Inbox",
+  "save": "Save to Inbox",
+  "keySave": "save",
+  "keyNewLine": "new line",
+  "keyCancel": "cancel",
+  "failed": "Couldn't save to Inbox. Your text is still here: check the server, then press Enter to try again.",
+  "tooLong": "A quick capture can hold at most {{max}} characters. Shorten it, or create a regular note for long text."
+}

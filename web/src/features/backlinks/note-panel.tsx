@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
+import { LocalGraphSection } from '../graph/local-graph-section';
 import { MentionsSection } from '../mentions/mentions-section';
 import { OutlineSection } from '../outline/outline-section';
 import { BacklinksSection } from './backlinks-section';
@@ -62,6 +63,7 @@ export function NotePanel() {
         onToggle={toggle('mentions')}
         onLinked={() => void reload()}
       />
+      <LocalGraphSection path={path} />
     </div>
   );
 }

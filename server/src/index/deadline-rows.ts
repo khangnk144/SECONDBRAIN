@@ -32,7 +32,7 @@ export function toIndexedTask({ invalid, done, ...rest }: TaskRow): IndexedTask 
 
 export function createDeadlineRowsQuery(db: Database.Database): () => DeadlineRows {
   const notes = db.prepare(
-    `SELECT path, title, class, type, status, deadline FROM notes n
+    `SELECT path, title, class, type, status, deadline, revision FROM notes n
      WHERE class IN (${ITEM_CLASSES})
        AND (deadline IS NOT NULL OR lower(trim(type)) = 'project'
             OR EXISTS (SELECT 1 FROM tasks t WHERE t.note_id = n.id))`,

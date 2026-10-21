@@ -43,6 +43,15 @@ export interface TemplatePickerOptions {
   templates: TemplateInfo[];
 }
 
+export interface PickDateDialogOptions {
+  title: string;
+  /** `YYYY-MM-DD` the picker starts on (the item's current date); today when absent or invalid. */
+  initial?: string | null;
+  /** Defaults to "Chọn ngày". */
+  confirmLabel?: string;
+  cancelLabel?: string;
+}
+
 /** `template: null` = blank note ("Trống"). */
 export interface TemplateChoice {
   template: VaultPath | null;
@@ -67,6 +76,12 @@ export type DialogRequest =
       kind: 'template';
       options: TemplatePickerOptions;
       resolve: (v: TemplateChoice | null) => void;
+    }
+  | {
+      id: number;
+      kind: 'pick-date';
+      options: PickDateDialogOptions;
+      resolve: (v: string | null) => void;
     };
 
 /** `Omit` applied to each member of the union, so `kind` still narrows `options`/`resolve`. */
@@ -114,6 +129,16 @@ export function templatePickerDialog(
 ): Promise<TemplateChoice | null> {
   return new Promise((resolve) =>
     useDialogStore.getState().open({ kind: 'template', options, resolve }),
+  );
+}
+
+/**
+ * Month grid plus a typed `dd/mm/yyyy` field, fully keyboard-operable (SPEC F11.3). Resolves with
+ * the picked `YYYY-MM-DD`, or null when cancelled.
+ */
+export function pickDateDialog(options: PickDateDialogOptions): Promise<string | null> {
+  return new Promise((resolve) =>
+    useDialogStore.getState().open({ kind: 'pick-date', options, resolve }),
   );
 }
 

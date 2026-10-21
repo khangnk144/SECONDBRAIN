@@ -5,7 +5,9 @@
  */
 import type Database from 'better-sqlite3';
 
-export const INDEX_SCHEMA_VERSION = '3';
+// 4: tags right after `<u>` count; task text keeps a closing `</u>` or code span before a date.
+// 5: date tokens inside wikilinks, embeds and Markdown links are not task dates.
+export const INDEX_SCHEMA_VERSION = '5';
 
 const SCHEMA_SQL = `
 CREATE TABLE notes(

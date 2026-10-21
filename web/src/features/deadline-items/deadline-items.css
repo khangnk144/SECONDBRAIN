@@ -1,0 +1,256 @@
+/* Deadline/task rows shared by Today, Tasks, Calendar and the strip popover. Tokens only. */
+.deadline-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.deadline-row {
+  /* Rows query their own width: narrow rows put the due text and actions under the title. */
+  container: deadline-row / inline-size;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  min-height: 32px;
+  padding: 2px 0;
+  font-size: 0.9375rem;
+  line-height: 1.4;
+}
+
+/* A row's own tooltip stays above the rows after it (each row is a container). */
+.deadline-row.has-tooltip {
+  z-index: 21;
+}
+
+/* Round checkbox (design.md §5): 16 px glyph, 24 px hit area, the real input on top. */
+.deadline-check {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.deadline-check__input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.deadline-check__box {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--ink-2);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.deadline-check__input:checked + .deadline-check__box {
+  border-color: var(--accent);
+  background: var(--accent);
+  animation: deadline-tick 150ms var(--ease);
+}
+
+.deadline-check__input:checked + .deadline-check__box::after {
+  content: '';
+  position: absolute;
+  left: 4.5px;
+  top: 1.5px;
+  width: 4px;
+  height: 8px;
+  border: solid var(--on-accent);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.deadline-check__input:focus-visible + .deadline-check__box {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/*
+ * Wide rows: title (and note under it) | due text | actions, on one band. The title is the "open
+ * note" control and may take two lines; the full text is in the tooltip when it is cut.
+ */
+.deadline-row__body {
+  display: grid;
+  flex: 1;
+  grid-template-areas:
+    'open due actions'
+    'note due actions';
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: start;
+  min-width: 0;
+}
+
+.deadline-row__open {
+  grid-area: open;
+  justify-self: start;
+  max-width: 100%;
+  min-height: 24px;
+  padding: 1px 0;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.deadline-row__open:hover {
+  color: var(--accent);
+}
+
+.deadline-row__open:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.deadline-row__title {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow-wrap: anywhere;
+}
+
+.deadline-row__note {
+  grid-area: note;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink-2);
+  font-size: max(12px, 0.78125rem);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.deadline-row__actions {
+  display: inline-flex;
+  grid-area: actions;
+  align-items: center;
+  gap: var(--space-1);
+  margin-inline-start: var(--space-2);
+}
+
+/* As wide as its text, up to the row's width (480 px at most): it never leaves the list. */
+.deadline-row__tooltip {
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  left: 0;
+  z-index: 20;
+  width: max-content;
+  max-width: min(480px, 100%);
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 0.875rem;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  pointer-events: none;
+}
+
+.deadline-row__tooltip--above {
+  top: auto;
+  bottom: calc(100% + var(--space-1));
+}
+
+.deadline-row__due {
+  display: inline-flex;
+  grid-area: due;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 24px;
+  margin-inline-start: var(--space-2);
+  font-size: max(12px, 0.8125rem);
+  white-space: nowrap;
+}
+
+.deadline-row__due--urgent {
+  color: var(--urgent-text);
+}
+
+.deadline-row__due--soon {
+  color: var(--soon-text);
+}
+
+.deadline-row__due--ok {
+  color: var(--ok-text);
+}
+
+.deadline-dot {
+  display: inline-block;
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--done);
+}
+
+.deadline-dot--urgent {
+  background: var(--urgent);
+}
+
+.deadline-dot--soon {
+  background: var(--soon);
+}
+
+.deadline-dot--ok {
+  background: var(--ok);
+}
+
+/* Narrow rows: the title gets the whole first band; due text, note and actions share the next. */
+@container deadline-row (max-width: 26rem) {
+  .deadline-row__body {
+    grid-template-areas:
+      'open open open'
+      'due note actions';
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+  }
+
+  .deadline-row__due {
+    margin-inline: 0 var(--space-2);
+  }
+}
+
+/* Done rows dim their text to 50 %, never struck through (design.md §5); focus rings stay full. */
+.deadline-row.is-done .deadline-row__title,
+.deadline-row.is-done .deadline-row__note {
+  opacity: 0.5;
+}
+
+@media (pointer: coarse) {
+  .deadline-check {
+    width: 40px;
+    height: 40px;
+  }
+
+  .deadline-row__open {
+    min-height: 40px;
+  }
+}
+
+@keyframes deadline-tick {
+  from {
+    transform: scale(0.8);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .deadline-check__input:checked + .deadline-check__box {
+    animation: none;
+  }
+}

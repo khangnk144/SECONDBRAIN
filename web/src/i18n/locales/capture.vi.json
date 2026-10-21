@@ -1,0 +1,11 @@
+{
+  "title": "Ghi nhanh vào Inbox",
+  "inputLabel": "Ghi nhanh",
+  "placeholder": "Gõ gì đó, Enter để lưu vào Inbox",
+  "save": "Lưu vào Inbox",
+  "keySave": "lưu",
+  "keyNewLine": "xuống dòng",
+  "keyCancel": "hủy",
+  "failed": "Chưa lưu được vào Inbox. Chữ bạn gõ vẫn còn đây: kiểm tra máy chủ rồi nhấn Enter để thử lại.",
+  "tooLong": "Ghi nhanh dài quá {{max}} ký tự. Hãy rút ngắn, hoặc tạo một ghi chú thường cho nội dung dài."
+}

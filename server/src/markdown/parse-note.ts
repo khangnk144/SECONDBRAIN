@@ -12,9 +12,9 @@ import type { ParsedLink, ParsedNote, ParsedTag } from './markdown-types.js';
 import { noteStructure } from './note-structure.js';
 import { mergeSpans, type NoteStructure, type TextSpan } from './note-structure-types.js';
 import { buildLineStarts, dominantLineEnding, lineOfOffset } from './source-lines.js';
+import { forEachBodyWikilink, taskTokenMask } from './task-token-mask.js';
 import { taskAtCheckbox } from './task-tokens.js';
 import { countWords } from './unicode-classes.js';
-import { scanWikilinks } from './wikilink-scan.js';
 
 export type StructureProducer = (content: string, bodyStart: number) => NoteStructure;
 
@@ -40,6 +40,9 @@ export function parseNoteUsing(content: string, produceStructure: StructureProdu
     ...scanInlineTags(content, bodyStart, withWikilinks(structure.excluded, links), lineStarts),
   ];
 
+  // Date tokens inside code, HTML, wikilinks and Markdown links are not task dates.
+  const taskMask =
+    structure.tasks.length > 0 ? taskTokenMask(content, structure, bodyWikilinks(links)) : [];
   const plainText = structure.blocks
     .map((block) => block.trim())
     .filter((block) => block !== '')
@@ -50,7 +53,7 @@ export function parseNoteUsing(content: string, produceStructure: StructureProdu
     links,
     tags,
     tasks: structure.tasks.map((task) =>
-      taskAtCheckbox(content, lineStarts, structure.excluded, task.checkbox, task.checked),
+      taskAtCheckbox(content, lineStarts, taskMask, task.checkbox, task.checked),
     ),
     headings: structure.headings.map((heading) => ({
       depth: heading.depth,
@@ -70,37 +73,33 @@ function collectBodyWikilinks(
   lineStarts: readonly number[],
   out: ParsedLink[],
 ): void {
-  let from = bodyStart;
-  const segments: TextSpan[] = [];
-  for (const span of excluded) {
-    if (span.start > from) segments.push({ start: from, end: span.start });
-    from = Math.max(from, span.end);
-  }
-  if (from < content.length) segments.push({ start: from, end: content.length });
-  for (const segment of segments) {
-    scanWikilinks(content, segment.start, segment.end, (hit) => {
-      out.push({
-        kind: hit.kind,
-        raw: content.slice(hit.start, hit.end),
-        target: hit.target,
-        heading: hit.heading,
-        alias: hit.alias,
-        start: hit.start,
-        end: hit.end,
-        line: lineOfOffset(lineStarts, hit.start),
-        frontmatterKey: null,
-      });
+  forEachBodyWikilink(content, bodyStart, excluded, (hit) => {
+    out.push({
+      kind: hit.kind,
+      raw: content.slice(hit.start, hit.end),
+      target: hit.target,
+      heading: hit.heading,
+      alias: hit.alias,
+      start: hit.start,
+      end: hit.end,
+      line: lineOfOffset(lineStarts, hit.start),
+      frontmatterKey: null,
     });
-  }
+  });
+}
+
+const isBodyWikilink = (link: ParsedLink) =>
+  link.kind !== 'markdown' && link.frontmatterKey === null;
+
+function bodyWikilinks(links: readonly ParsedLink[]): ParsedLink[] {
+  return links.filter(isBodyWikilink);
 }
 
 /** Excluded spans plus every body wikilink: `[[B| #x]]` holds no tag. */
 function withWikilinks(excluded: readonly TextSpan[], links: readonly ParsedLink[]): TextSpan[] {
   const spans = excluded.map((span) => ({ start: span.start, end: span.end }));
   for (const link of links) {
-    if (link.kind !== 'markdown' && link.frontmatterKey === null) {
-      spans.push({ start: link.start, end: link.end });
-    }
+    if (isBodyWikilink(link)) spans.push({ start: link.start, end: link.end });
   }
   return mergeSpans(spans);
 }

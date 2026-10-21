@@ -79,7 +79,7 @@ describe('path guard through the API (F1.5)', () => {
   );
 
   it.each(BAD_PATHS)(
-    '%s → 400 INVALID_PATH for properties, mentions, folder operations and reveal',
+    '%s → 400 INVALID_PATH for properties, mentions, folders, reveal, tasks, reschedule and graph',
     async (_l, bad) => {
       const rev = { expectedRevision: revision };
       for (const [method, url, payload] of [
@@ -100,6 +100,13 @@ describe('path guard through the API (F1.5)', () => {
         ['POST', '/api/folder/trash', { path: bad }],
         ['POST', '/api/reveal', { path: bad }],
         ['POST', '/api/note/rename', { path: '0 Inbox/a.md', newPath: bad, ...rev, dryRun: true }],
+        ['PATCH', '/api/note/task', { path: bad, ...rev, line: 1, expectedText: 'x', done: true }],
+        [
+          'POST',
+          '/api/note/reschedule',
+          { path: bad, ...rev, target: { kind: 'note' }, date: '2026-10-20' },
+        ],
+        ['GET', `/api/graph/local?${q(bad)}`, undefined],
       ] as const) {
         await expectInvalidPath(await t.call(method, url, payload));
       }
@@ -128,6 +135,23 @@ describe('path guard through the API (F1.5)', () => {
       }),
     );
     await expectInvalidPath(await t.call('POST', '/api/reveal', { path: 'linked folder' }));
+    await expectInvalidPath(
+      await t.call('PATCH', '/api/note/task', {
+        path: 'link.md',
+        expectedRevision: REV,
+        line: 1,
+        expectedText: 'secret',
+        done: true,
+      }),
+    );
+    await expectInvalidPath(
+      await t.call('POST', '/api/note/reschedule', {
+        path: 'linked folder/secret.md',
+        expectedRevision: REV,
+        target: { kind: 'note' },
+        date: '2026-10-20',
+      }),
+    );
     await expectInvalidPath(await t.call('POST', '/api/folder/trash', { path: 'linked folder' }));
     await expectInvalidPath(
       await t.call('POST', '/api/folder/rename', {

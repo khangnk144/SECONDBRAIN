@@ -1,0 +1,94 @@
+{
+  "dateFormat": "dddd, D [tháng] M",
+  "greeting": {
+    "morning": "Chào buổi sáng, {{name}}.",
+    "noon": "Chào buổi trưa, {{name}}.",
+    "afternoon": "Chào buổi chiều, {{name}}.",
+    "evening": "Chào buổi tối, {{name}}.",
+    "late": "Chào khuya, {{name}}."
+  },
+  "summary": {
+    "nothingUrgent": "Hôm nay không có gì gấp. Viết gì đó nhé?",
+    "overdue_one": "Có {{count}} việc quá hạn.",
+    "overdue_other": "Có {{count}} việc quá hạn.",
+    "week_one": "Tuần này có {{count}} deadline.",
+    "week_other": "Tuần này có {{count}} deadline.",
+    "openToday_one": "Hôm nay còn {{count}} việc.",
+    "openToday_other": "Hôm nay còn {{count}} việc.",
+    "loading": "Đang tải việc hôm nay…"
+  },
+  "loadError": "Không tải được việc hôm nay. Bạn thử lại nhé.",
+  "retry": "Thử lại",
+  "strip": {
+    "caption": "14 ngày tới",
+    "label": "Các ngày tới",
+    "weekday": {
+      "mon": "T2",
+      "tue": "T3",
+      "wed": "T4",
+      "thu": "T5",
+      "fri": "T6",
+      "sat": "T7",
+      "sun": "CN"
+    },
+    "monthStart": "D/M",
+    "overdue": "Quá hạn ({{count}})",
+    "more": "+{{count}}",
+    "todayDate": "Hôm nay, {{date}}",
+    "cell_one": "{{date}}: {{count}} việc",
+    "cell_other": "{{date}}: {{count}} việc",
+    "cellEmpty": "{{date}}: chưa có việc nào",
+    "overdueCell_one": "Quá hạn: {{count}} việc",
+    "overdueCell_other": "Quá hạn: {{count}} việc",
+    "legend": {
+      "urgent": "gấp (≤ 2 ngày)",
+      "soon": "sắp (3–7 ngày)",
+      "ok": "còn xa",
+      "today": "hôm nay"
+    },
+    "popover": {
+      "close": "Đóng",
+      "empty": "Ngày này chưa có việc nào."
+    },
+    "range": "{{from}} – {{to}}",
+    "rangeFromSameMonth": "D",
+    "rangeToSameMonth": "D [tháng] M",
+    "rangeDay": "D [tháng] M"
+  },
+  "tasks": {
+    "title": "Hôm nay",
+    "empty": "Hôm nay chưa có việc nào.",
+    "allOverdue_one": "Xem tất cả {{count}} việc quá hạn",
+    "allOverdue_other": "Xem tất cả {{count}} việc quá hạn"
+  },
+  "capture": {
+    "title": "Ghi nhanh",
+    "placeholder": "Gõ gì đó rồi Enter…",
+    "hint": "Enter để lưu vào Inbox, Shift+Enter để xuống dòng. <kbd>{{keys}}</kbd> mở ghi nhanh ở mọi màn hình.",
+    "saving": "Đang lưu…"
+  },
+  "projects": {
+    "title": "Đồ án đang làm",
+    "empty": "Chưa có đồ án nào. Tạo một cái từ mẫu Đồ án?",
+    "create": "Tạo",
+    "newTitle": "Đồ án mới",
+    "progress": "{{done}}/{{total}} việc",
+    "progressLabel": "Tiến độ {{title}}",
+    "noTasks": "chưa có việc",
+    "donePrompt": "Xong hết việc rồi. Đánh dấu dự án xong?",
+    "markDone": "Đánh dấu xong",
+    "later": "Để sau",
+    "percent": "{{percent}}%",
+    "showMore_one": "Xem thêm {{count}} đồ án",
+    "showMore_other": "Xem thêm {{count}} đồ án",
+    "markedDone": "Đã đánh dấu “{{title}}” xong."
+  },
+  "sample": {
+    "question": "Tạo dữ liệu mẫu để xem thử?",
+    "body": "Vài môn học, đồ án, deadline và ghi chú mẫu, để bạn thấy app chạy thế nào trước khi viết của riêng mình.",
+    "create": "Tạo dữ liệu mẫu",
+    "creating": "Đang tạo…",
+    "decline": "Không, cảm ơn",
+    "created": "Đã tạo dữ liệu mẫu."
+  }
+}

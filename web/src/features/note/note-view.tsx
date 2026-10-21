@@ -1,6 +1,6 @@
-import { Code } from '@phosphor-icons/react';
-import { useEffect, useId, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
+import type { Editor } from '@tiptap/core';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { FormattingToolbar } from '../../editor/formatting/formatting-toolbar';
 import type { MarkdownEditorHandle } from '../../editor/markdown-editor';
 import { navigateTo, noteRoute } from '../../lib/app-navigation';
 import { confirmDialog } from '../../lib/dialogs/dialog-requests';
@@ -8,6 +8,7 @@ import { i18n } from '../../i18n';
 import { useShortcut } from '../../lib/shortcuts/use-shortcut';
 import { noteTitleFromPath } from '../../lib/vault-paths';
 import { ConflictScreen } from '../conflict/conflict-screen';
+import { DailyNavRow } from '../daily/daily-nav-row';
 import type { NoteSession } from '../note-session/note-session';
 import type { SessionView } from '../note-session/note-session-types';
 import { PropertyBar } from '../properties/property-bar';
@@ -17,6 +18,7 @@ import { NoteTitle } from './note-title';
 import { retitleFirstHeading } from './retitle-first-heading';
 import { SaveIndicator } from './save-indicator';
 import { SourceModeEditor } from './source-mode-editor';
+import { useCursorRequest } from './use-cursor-request';
 
 interface NoteViewProps {
   session: NoteSession;
@@ -24,21 +26,33 @@ interface NoteViewProps {
   isNew: boolean;
   line: number | null;
   lineRequest: string;
+  /** `&cursor=N`: UTF-16 offset in the file where the caret goes (template `{{cursor}}`). */
+  cursor?: number | null;
 }
 
 /** Note screen layout (design.md screen 2): title and save state, banners, properties, body. */
-export function NoteView({ session, view, isNew, line, lineRequest }: NoteViewProps) {
-  const { t } = useTranslation();
+export function NoteView(props: NoteViewProps) {
+  const { session, view, isNew, line, lineRequest, cursor = null } = props;
   const titleId = useId();
   const editor = useRef<MarkdownEditorHandle | null>(null);
+  const [handle, setHandle] = useState<MarkdownEditorHandle | null>(null);
+  const tiptap: Editor | null = handle?.editor ?? null;
+  const caretToCursor = useCursorRequest({
+    session,
+    view,
+    handle,
+    cursor,
+    request: lineRequest,
+    isNew,
+  });
   const sourceField = useRef<HTMLTextAreaElement>(null);
   const inSource = view.source !== null;
   const conflict = view.conflict;
 
-  const toggleSource = () => {
+  const toggleSource = useCallback(() => {
     if (session.getView().conflict) return;
     void session.toggleSourceMode();
-  };
+  }, [session]);
   useShortcut({
     id: 'source-mode',
     keys: 'Alt+S',
@@ -80,6 +94,14 @@ export function NoteView({ session, view, isNew, line, lineRequest }: NoteViewPr
 
   return (
     <article className="note-screen" aria-labelledby={titleId}>
+      <FormattingToolbar
+        editor={tiptap}
+        sourceMode={inSource}
+        canToggleSource={conflict === null}
+        onToggleSource={toggleSource}
+        sourceField={sourceField}
+      />
+      <DailyNavRow path={view.path} />
       <header className="note-screen__header">
         <NoteTitle
           id={titleId}
@@ -91,20 +113,11 @@ export function NoteView({ session, view, isNew, line, lineRequest }: NoteViewPr
           onRename={rename}
           // `{ block: 0 }` moves the caret synchronously, while the title still has focus;
           // a deferred focus could land after the user already clicked into the body.
-          onEnter={() => editor.current?.focus({ block: 0 })}
+          onEnter={() => {
+            if (!caretToCursor()) editor.current?.focus({ block: 0 });
+          }}
         />
         <div className="note-screen__tools">
-          <button
-            type="button"
-            className="note-screen__source-toggle"
-            aria-pressed={inSource}
-            disabled={conflict !== null}
-            title={t('note.source.toggleWithKeys')}
-            onClick={toggleSource}
-          >
-            <Code size={18} aria-hidden="true" />
-            <span>{t('note.source.toggle')}</span>
-          </button>
           <SaveIndicator status={view.status} onRetry={() => session.retry()} />
         </div>
       </header>
@@ -137,6 +150,7 @@ export function NoteView({ session, view, isNew, line, lineRequest }: NoteViewPr
             line={line}
             lineRequest={lineRequest}
             handleRef={editor}
+            onHandle={setHandle}
           />
         </div>
         {view.source ? (

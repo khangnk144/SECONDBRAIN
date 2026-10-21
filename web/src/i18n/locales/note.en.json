@@ -38,8 +38,6 @@
     "reviewKept": "View"
   },
   "source": {
-    "toggle": "Source",
-    "toggleWithKeys": "Source mode (Alt+S)",
     "shortcut": "Turn source mode on or off",
     "label": "Markdown of the note (source mode)"
   },

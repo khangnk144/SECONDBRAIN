@@ -1,17 +1,36 @@
 {
   "dialogLabel": "Search notes",
   "inputLabel": "Search notes",
-  "placeholder": "Search titles or text, for example tag:project",
+  "placeholder": "Search notes, or type > to run a command",
+  "filterHint": "Filter with tag:, folder:, type:, due:7d, due:30d, due:overdue or class:archive (includes archived notes).",
+  "commandHint": "Type a command name to filter it, Enter to run it.",
   "resultsLabel": "Search results",
-  "recentLabel": "Recent notes",
+  "recentLabel": "Recently opened notes",
+  "commandsLabel": "Commands",
   "searching": "Searching…",
   "error": "Search isn't available right now. Check the server and try again.",
   "noResults": "No note matches '{{query}}'.",
+  "noCommands": "No command matches '{{query}}'.",
   "noRecent": "No notes yet. Type a name to create your first note.",
   "create": "Create '{{query}}'",
   "resultCount_one": "{{count}} result",
   "resultCount_other": "{{count}} results",
+  "commandCount_one": "{{count}} command",
+  "commandCount_other": "{{count}} commands",
   "hintOpen": "open",
   "hintNewTab": "open in a new tab",
-  "hintClose": "close"
+  "hintRun": "run",
+  "hintClose": "close",
+  "filters": {
+    "tagCount_one": "{{count}} note",
+    "tagCount_other": "{{count}} notes",
+    "due": {
+      "7d": "due in the next 7 days",
+      "30d": "due in the next 30 days",
+      "overdue": "overdue"
+    },
+    "class": {
+      "archive": "include notes in Archive"
+    }
+  }
 }

@@ -15,6 +15,8 @@ export type {
   ConflictCopyResult,
   FolderRenameResult,
   FolderTrashResult,
+  JournaledRewrite,
+  JournaledRewriteOp,
   PatchedNote,
   PatchPlanner,
   RenamePreview,

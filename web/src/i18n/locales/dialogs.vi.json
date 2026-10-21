@@ -8,5 +8,16 @@
     "hint": "Chọn một mẫu, hoặc bắt đầu với trang trống.",
     "blank": "Trống",
     "create": "Tạo ghi chú"
+  },
+  "pickDate": {
+    "confirm": "Chọn ngày",
+    "previousMonth": "Tháng trước",
+    "nextMonth": "Tháng sau",
+    "today": "Hôm nay",
+    "gridHint": "Dùng phím mũi tên để đổi ngày, Page Up hoặc Page Down để đổi tháng, Enter để chọn.",
+    "typedLabel": "Hoặc gõ ngày (dd/mm/yyyy)",
+    "invalid": "Ngày này không có thật. Hãy gõ theo dạng dd/mm/yyyy, ví dụ 05/11/2026.",
+    "dayFormat": "dddd, DD/MM/YYYY",
+    "monthFormat": "[Tháng] M, YYYY"
   }
 }

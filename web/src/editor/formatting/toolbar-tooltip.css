@@ -1,0 +1,30 @@
+/*
+ * Tooltip of a formatting toolbar control: the same quiet surface as the app's other tooltips
+ * (paper, line border, small text), fixed below the control and kept inside the viewport by
+ * toolbar-tooltip.tsx.
+ */
+.toolbar-tooltip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 50;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  max-width: calc(100vw - 2 * var(--space-2));
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.toolbar-tooltip__keys {
+  color: var(--ink-2);
+  font-family: var(--font);
+  font-variant-numeric: tabular-nums;
+}

@@ -1,0 +1,39 @@
+{
+  "title": "Keyboard shortcuts",
+  "intro": "Shortcuts work while the app window is focused. Ctrl also means ⌘ on a Mac.",
+  "listLabel": "List of shortcuts",
+  "close": "Close",
+  "or": "or",
+  "groups": {
+    "app": "Anywhere in the app",
+    "editor": "While writing a note",
+    "today": "On Today",
+    "calendar": "In the calendar",
+    "graph": "On the brain map",
+    "local": "Elsewhere"
+  },
+  "local": {
+    "treeRename": "Rename the selected item in the folder tree",
+    "treeTrash": "Delete the selected item in the folder tree (to the trash)",
+    "openNewTab": "Open the selected note in a new tab (folder tree, search)",
+    "captureNewLine": "New line in quick capture",
+    "closeOverlay": "Close the open panel or dialog"
+  },
+  "editor": {
+    "tickTask": "Tick or untick the task at the caret (on a note link: open it in a new tab; on a #tag: search for that tag)"
+  },
+  "screens": {
+    "stripDay": "Previous or next day in the strip",
+    "stripEnds": "First or last day of the strip",
+    "stripOpen": "Open the selected day's list",
+    "calendarDay": "Previous or next day",
+    "calendarWeek": "Same day in the previous or next week",
+    "calendarWeekEnds": "Start or end of the week",
+    "calendarMonth": "Previous or next month",
+    "calendarOpen": "Open the selected day in the side pane",
+    "graphReset": "Back to the whole map",
+    "graphZoomIn": "Zoom in",
+    "graphZoomOut": "Zoom out",
+    "graphClear": "Clear the selection"
+  }
+}

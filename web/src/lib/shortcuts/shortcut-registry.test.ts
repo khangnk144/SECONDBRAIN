@@ -66,10 +66,13 @@ describe('shortcut registry (F22)', () => {
     expect(plain).toHaveBeenCalledTimes(1);
 
     const resume = suspendShortcuts();
-    press({ key: 'n', code: 'KeyN', altKey: true });
-    press({ key: 'k', code: 'KeyK', ctrlKey: true });
+    const blockedAlt = press({ key: 'n', code: 'KeyN', altKey: true });
+    const blockedCtrl = press({ key: 'k', code: 'KeyK', ctrlKey: true });
     expect(plain).toHaveBeenCalledTimes(1);
     expect(allowed).toHaveBeenCalledTimes(1);
+    // A suspended Ctrl shortcut still keeps the browser's own Ctrl+K away; Alt keys pass through.
+    expect(blockedCtrl.defaultPrevented).toBe(true);
+    expect(blockedAlt.defaultPrevented).toBe(false);
     resume();
     press({ key: 'n', code: 'KeyN', altKey: true });
     expect(plain).toHaveBeenCalledTimes(2);

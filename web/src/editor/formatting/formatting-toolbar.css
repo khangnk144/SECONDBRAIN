@@ -1,0 +1,103 @@
+/*
+ * Formatting toolbar: one sticky row above the note title. Sizes in rem mirror SIZES_REM in
+ * toolbar-layout.ts (the overflow into "Thêm" is computed from them). Colors only from tokens.
+ */
+.formatting-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  min-height: 44px;
+  padding: var(--space-1) 0;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+  transition: opacity var(--dur) var(--ease);
+}
+
+/* Writing focus: fades like the side panes, back at once when the mouse moves or a key reaches it. */
+.formatting-toolbar[data-faded='true']:not(:focus-within) {
+  opacity: 0.6;
+}
+
+.formatting-toolbar__button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: transparent;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+
+.formatting-toolbar__button:hover:not([aria-disabled='true']) {
+  color: var(--ink);
+}
+
+.formatting-toolbar__button[aria-pressed='true'],
+.formatting-toolbar__button[aria-expanded='true'] {
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+
+.formatting-toolbar__button[aria-disabled='true'] {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.formatting-toolbar__button:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+.formatting-toolbar__style {
+  justify-content: space-between;
+  gap: var(--space-1);
+  width: 6.25rem;
+  padding: 0 var(--space-2);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 0.875rem;
+}
+
+.formatting-toolbar__style-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.formatting-toolbar__separator {
+  flex: 0 0 auto;
+  width: 1px;
+  height: 20px;
+  margin: 0 calc((0.3125rem - 1px) / 2);
+  background: var(--line);
+}
+
+.formatting-toolbar__spacer {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+@media (pointer: coarse) {
+  .formatting-toolbar__button {
+    width: 2.5rem;
+    height: 40px;
+  }
+
+  .formatting-toolbar__style {
+    width: 6.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .formatting-toolbar {
+    transition: none;
+  }
+}

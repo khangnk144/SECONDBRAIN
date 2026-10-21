@@ -2,48 +2,17 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createDeadlineService } from '../../src/index/deadline-service.js';
 import type { DeadlineService } from '../../src/index/index-types.js';
 import {
-  createIndexedVault,
-  fixtureFiles,
-  makeClock,
-  type IndexedVault,
-} from './helpers/index-test-vault.js';
+  FIXTURE_FILES as FILES,
+  FIXTURE_NOW,
+  FIXTURE_PROJECT as P,
+  FIXTURE_TODAY as today,
+  QUIET_FILES,
+  sortedIds as ids,
+  visibleItems as visible,
+} from './helpers/content-class-expectations.js';
+import { createIndexedVault, makeClock, type IndexedVault } from './helpers/index-test-vault.js';
 
-// Wednesday 21 Oct 2026, 10:00 local. The week is Mon 19 – Sun 25.
-const clock = makeClock(new Date(2026, 9, 21, 10, 0));
-const today = '2026-10-21';
-const FILES = fixtureFiles('content-classes');
-const P = '1 Projects/Đồ án Giải tích.md';
-
-/** `task:<path>#<line>` for the fixture line holding `text`. */
-function taskId(path: string, text: string): string {
-  const line = (FILES[path]?.toString('utf8') ?? '').split('\n').findIndex((l) => l.includes(text));
-  if (line === -1) throw new Error(`no line ${text}`);
-  return `task:${path}#${line + 1}`;
-}
-
-/**
- * The expectation table (SPEC §4.2/§4.7): every item the fixture must produce. Templates,
- * sources, wiki pages, control docs and attachments contribute none; archived ones only on request.
- */
-const TABLE = (
-  [
-    [`note:${P}`, '2026-11-02', false, 'ok', false],
-    [taskId(P, 'Viết báo cáo'), '2026-10-22', false, 'urgent', false],
-    [taskId(P, 'Làm slide'), '2026-10-26', false, 'soon', false],
-    [taskId(P, 'Nộp bài'), '2026-10-19', false, 'urgent', false],
-    ['note:1 Projects/Đồ án xong.md', '2026-10-22', true, 'done', false],
-    [taskId('1 Projects/Đồ án xong.md', 'Still open'), '2026-10-21', true, 'done', false],
-    ['note:1 Projects/Đồ án trống.md', '2026-10-31', false, 'ok', false],
-    ['note:1 Projects/Hai mục.md', '2026-10-25', false, 'soon', false],
-    [taskId('1 Projects/Hai mục.md', 'Cùng ngày'), '2026-10-25', false, 'soon', false],
-    [taskId('Daily/2026-10-21.md', 'Có hạn hôm nay'), today, false, 'urgent', false],
-    ['note:4 Archive/Đồ án cũ.md', '2026-10-24', false, 'soon', true],
-    [taskId('4 Archive/Đồ án cũ.md', 'Archived task'), '2026-10-23', false, 'urgent', true],
-  ] as const
-).map(([id, date, done, urgency, archived]) => ({ id, date, done, urgency, archived }));
-
-const visible = (includeArchive: boolean) => TABLE.filter((r) => includeArchive || !r.archived);
-const ids = (rows: { id: string }[]) => rows.map((r) => r.id).sort();
+const clock = makeClock(FIXTURE_NOW);
 
 let v: IndexedVault;
 let service: DeadlineService;
@@ -67,14 +36,7 @@ describe('deadline items respect content classes (F9.4)', () => {
   });
 
   it('templates, sources, wiki pages, control docs and attachments yield nothing, even with a deadline', () => {
-    const quiet = [
-      'Templates/Mẫu có hạn.md',
-      '3 Resources/web/Bài viết.md',
-      'wiki/concepts/Đạo hàm.md',
-      'wiki/index.md',
-      'CLAUDE.md',
-      'Attachments/ghi chú.md',
-    ];
+    const quiet = QUIET_FILES;
     // The fixture gives the first three a `deadline:` in front matter on purpose.
     expect(v.index.getNote('Templates/Mẫu có hạn.md')?.deadline).toBe('2026-10-22');
     expect(v.index.getNote('wiki/concepts/Đạo hàm.md')?.deadline).toBe('2026-10-23');
@@ -98,8 +60,11 @@ describe('deadline items respect content classes (F9.4)', () => {
     expect(ids(view.strip.overdue)).toEqual(ids(open.filter((r) => r.date < today)));
     for (const day of view.strip.days) for (const i of day.items) expect(i.date).toBe(day.date);
     expect(view.strip.days).toHaveLength(60);
-    const thisWeek = open.filter((r) => r.date >= '2026-10-19' && r.date <= '2026-10-25');
-    expect(view.summary).toEqual({ deadlinesThisWeek: thisWeek.length, overdue: 1, openToday: 3 });
+    // Each open item counts once: the overdue one only as overdue, not again in the week (which
+    // runs from today to Sunday) or in today's count (open tasks due today or undated).
+    const thisWeek = open.filter((r) => r.date >= today && r.date <= '2026-10-25');
+    expect(thisWeek).toHaveLength(4);
+    expect(view.summary).toEqual({ deadlinesThisWeek: thisWeek.length, overdue: 1, openToday: 2 });
   });
 
   it("today's tasks: due today or overdue, plus undated tasks of today's Daily note only", () => {
@@ -121,6 +86,7 @@ describe('deadline items respect content classes (F9.4)', () => {
         daysLeft: 10,
         urgency: 'ok',
         progress: null,
+        revision: v.index.getNote(empty)!.revision,
       },
       {
         path: P,
@@ -129,6 +95,7 @@ describe('deadline items respect content classes (F9.4)', () => {
         daysLeft: 12,
         urgency: 'ok',
         progress: { done: 1, total: 6 },
+        revision: v.index.getNote(P)!.revision,
       },
     ]);
   });
@@ -161,12 +128,16 @@ describe('deadline items respect content classes (F9.4)', () => {
     expect(titlesOf(withArchive.noDate)).toContain('Archived undated');
   });
 
-  it('task items carry the line text needed to patch them', () => {
+  it('task items carry the line text and note revision needed to patch them', () => {
+    const revision = v.index.getNote(P)!.revision;
     expect(service.items().find((i) => i.title === 'Viết báo cáo')).toMatchObject({
       kind: 'task',
       line: 7,
       lineText: '- [ ] Viết báo cáo 📅 2026-10-22',
       noteTitle: 'Đồ án Giải tích',
+      revision,
     });
+    expect(service.items().find((i) => i.id === `note:${P}`)?.revision).toBe(revision);
+    expect(service.tasks().noDate.find((t) => t.title === 'Không có hạn')?.revision).toBe(revision);
   });
 });

@@ -1,13 +1,17 @@
 /** Test helper: puts every app-wide store back to a clean state for vault `vaultId`. */
+import { resetOwnWriteRevisions } from '../../features/deadline-items/own-write-revisions';
 import { resetNoteSessions } from '../../features/note-session/session-registry';
 import { vi } from 'vitest';
 import { initI18n, i18n } from '../../i18n';
 import { setAppNavigator, type Navigator } from '../app-navigation';
+import { useCaptureUi } from '../capture-ui-store';
 import { resetDialogs } from '../dialogs/dialog-requests';
 import { buildLinkCatalog } from '../link-resolution';
 import { useLinkTargetsStore } from '../link-targets-store';
 import { usePanesStore } from '../panes-store';
+import { useRecentNotes } from '../recent-notes-store';
 import { useSearchUi } from '../search-ui-store';
+import { useShortcutSheetUi } from '../shortcut-sheet-store';
 import { resetShortcuts } from '../shortcuts/shortcut-registry';
 import { useTabsStore } from '../tabs-store';
 import { resetToasts } from '../toast-store';
@@ -26,6 +30,7 @@ export async function resetAppState(vaultId: string | null = 'vault-a'): Promise
     // Some tests replace storage with one that throws.
   }
   resetNoteSessions();
+  resetOwnWriteRevisions();
   resetToasts();
   resetDialogs();
   resetShortcuts();
@@ -39,7 +44,18 @@ export async function resetAppState(vaultId: string | null = 'vault-a'): Promise
     catalog: buildLinkCatalog([]),
     status: 'idle',
   });
-  usePanesStore.setState({ leftCollapsed: false, rightCollapsed: false });
+  usePanesStore.setState({
+    leftCollapsed: false,
+    rightCollapsed: false,
+    hydrated: true,
+    earlyToggles: {},
+    immersive: false,
+    immersiveShowLeft: false,
+    immersiveShowRight: false,
+  });
+  useRecentNotes.setState({ paths: [] });
+  useCaptureUi.setState({ isOpen: false, returnFocus: null });
+  useShortcutSheetUi.setState({ isOpen: false });
   useConnectionStore.setState({ state: 'connecting', closedSince: null });
   useSearchUi.setState({ open: false, query: '' });
   useWritingFocus.setState({ focused: false });

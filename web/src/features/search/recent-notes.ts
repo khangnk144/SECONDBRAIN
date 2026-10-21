@@ -21,9 +21,17 @@ export const toNoteHit = (result: SearchResult): NoteHit => ({
   matchedIn: result.matchedIn,
 });
 
+/** A recently opened note (from the per-vault history) as a palette row. */
+export const recentHit = (path: VaultPath): NoteHit => ({
+  path,
+  title: noteTitleFromPath(path),
+  snippet: null,
+  matchedIn: 'recent',
+});
+
 /**
- * Recently opened notes: the open tabs by last activation (the app's own memory of what was
- * opened), then the server's recently modified notes to fill up to the limit, without repeats.
+ * Fallback while the history of opened notes is still empty (first run, new vault): the open tabs
+ * by last activation, then the server's recently modified notes up to the limit, without repeats.
  */
 export function mergeRecentNotes(
   tabs: readonly NoteTab[],
@@ -32,12 +40,7 @@ export function mergeRecentNotes(
 ): NoteHit[] {
   const hits: NoteHit[] = [...tabs]
     .sort((a, b) => b.lastActive - a.lastActive)
-    .map((tab) => ({
-      path: tab.path,
-      title: noteTitleFromPath(tab.path),
-      snippet: null,
-      matchedIn: 'recent' as const,
-    }));
+    .map((tab) => recentHit(tab.path));
   for (const result of serverRecents) hits.push(toNoteHit(result));
   const unique: NoteHit[] = [];
   for (const hit of hits) {

@@ -1,0 +1,222 @@
+/* Month calendar (design.md screen 3): a light grid with --line borders. Tokens only. */
+.calendar-screen {
+  container: calendar / inline-size;
+}
+
+.calendar-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.calendar-header__title {
+  margin: 0;
+}
+
+.calendar-header__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+}
+
+.calendar-header__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.calendar-header__nav .button {
+  gap: var(--space-1);
+  padding: 0 var(--space-3);
+}
+
+.calendar-archive-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 32px;
+  color: var(--ink-2);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.calendar-archive-toggle__input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.calendar-screen__error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  color: var(--urgent-text);
+}
+
+.calendar-screen__error p {
+  margin: 0;
+}
+
+.calendar-grid {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.calendar-grid__weekday {
+  padding: 0 var(--space-2) var(--space-2);
+  color: var(--ink-2);
+  font-size: max(12px, 0.78125rem);
+  font-weight: 500;
+  text-align: left;
+}
+
+.calendar-cell {
+  height: 104px;
+  padding: var(--space-1);
+  border: 1px solid var(--line);
+  vertical-align: top;
+  cursor: pointer;
+  transition: background-color var(--dur) var(--ease);
+}
+
+.calendar-cell:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+.calendar-cell.is-selected {
+  background: var(--accent-soft);
+}
+
+.calendar-cell__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+/* The day number; today gets an accent ring around it, never a filled cell. */
+.calendar-cell__number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  color: var(--ink);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.calendar-cell.is-today .calendar-cell__number {
+  box-shadow: inset 0 0 0 2px var(--accent);
+  font-weight: 600;
+}
+
+/*
+ * Days of the neighbouring months are quieter: muted text that still reads at 4.5:1 (no opacity on
+ * text), and dimmed dots (the title next to them carries the item).
+ */
+.calendar-cell.is-outside .calendar-cell__number,
+.calendar-cell.is-outside .calendar-item__title {
+  color: var(--ink-2);
+}
+
+.calendar-cell.is-outside .deadline-dot {
+  opacity: 0.5;
+}
+
+.calendar-cell__items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.calendar-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+  padding: 0 2px;
+  border-radius: var(--radius-s);
+  font-size: max(12px, 0.75rem);
+  line-height: 1.4;
+}
+
+.calendar-item .deadline-dot {
+  flex: none;
+}
+
+.calendar-item__title {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Done items: struck through and muted (SPEC §4.7). */
+.calendar-item.is-done .calendar-item__title {
+  color: var(--ink-2);
+  text-decoration: line-through;
+}
+
+.calendar-item[draggable='true'] {
+  cursor: grab;
+}
+
+.calendar-item[draggable='true']:hover {
+  background: var(--paper);
+}
+
+.calendar-item[draggable='true']:active,
+.calendar-grid.is-dragging {
+  cursor: grabbing;
+}
+
+.calendar-item.is-dragging {
+  opacity: 0.4;
+}
+
+/* The day under a dragged item that will take it: dashed accent frame plus a soft fill. */
+.calendar-cell.is-drop-target {
+  background: var(--accent-soft);
+  outline: 2px dashed var(--accent);
+  outline-offset: -3px;
+}
+
+.calendar-cell__more,
+.calendar-cell__count {
+  padding: 0 2px;
+  color: var(--ink-2);
+  font-size: max(12px, 0.75rem);
+}
+
+.calendar-cell__count {
+  display: none;
+}
+
+/* On the opened day's soft fill, muted text would drop below 4.5:1 in the light theme. */
+.calendar-cell.is-selected .calendar-cell__number,
+.calendar-cell.is-selected .calendar-item__title,
+.calendar-cell.is-selected .calendar-cell__more,
+.calendar-cell.is-selected .calendar-cell__count {
+  color: var(--ink);
+}
+
+@media (pointer: coarse) {
+  .calendar-archive-toggle {
+    min-height: 40px;
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "newNote": "New note",
+  "dailyNote": "Open today's note",
+  "quickCapture": "Quick capture",
+  "openToday": "Open Today",
+  "openTasks": "Open Tasks",
+  "openCalendar": "Open Calendar",
+  "openGraph": "Open Brain map",
+  "openTags": "Open Tags",
+  "shortcutSheet": "Keyboard shortcuts",
+  "toggleLeftPane": "Show/hide left pane",
+  "toggleRightPane": "Show/hide right pane",
+  "sourceMode": "Source mode",
+  "closeTab": "Close tab",
+  "previousTab": "Previous tab",
+  "nextTab": "Next tab",
+  "rebuildIndex": "Rebuild the index",
+  "rebuildStarted": "Rebuilding the index. You can keep searching meanwhile.",
+  "rebuildRunning": "The index is already being rebuilt. Give it a moment.",
+  "rebuildDone": "The index is rebuilt."
+}

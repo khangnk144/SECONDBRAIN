@@ -23,9 +23,9 @@ export const LIST_NODE_NAMES = ['bulletList', 'orderedList', 'taskList'] as cons
  * popups and node views is added on top; what a node means must stay as defined here.
  */
 export function createSchemaExtensions(): AnyExtension[] {
+  // Underline is stored as `<u>…</u>` (inline HTML Markdown readers render as underline).
   const starterKit = StarterKit.configure({
     document: false,
-    underline: false,
     heading: { levels: [1, 2, 3] },
     link: { openOnClick: false, autolink: false, linkOnPaste: false },
   });

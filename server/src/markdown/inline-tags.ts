@@ -3,7 +3,8 @@
  * letters (with combining marks, so NFD text keeps whole words), digits, `_`, `-` and `/`;
  * a tag needs at least one letter (`#1` is not a tag) and a trailing `/` is dropped. Inline
  * tags start after a line start, whitespace or `(` — but not after `](`, which is a link
- * destination such as `[x](#section)` (a URL fragment, not a tag).
+ * destination such as `[x](#section)` (a URL fragment, not a tag). Underline tags (`<u>`, `</u>`)
+ * right before the `#` are looked through.
  */
 import type { ParsedTag } from './markdown-types.js';
 import { normalizeForIndex } from './normalize-text.js';
@@ -59,7 +60,21 @@ export function scanInlineTags(
   return tags;
 }
 
-function startsTag(content: string, at: number): boolean {
+/**
+ * Where the text before `at` really ends: the editor's underline tags `<u>`/`</u>` are a mark,
+ * not characters, so `<u>#tag</u>` reads like `#tag` there and must count here too.
+ */
+function beforeUnderlineTags(content: string, at: number): number {
+  let i = at;
+  for (;;) {
+    if (i >= 3 && content.startsWith('<u>', i - 3)) i -= 3;
+    else if (i >= 4 && content.startsWith('</u>', i - 4)) i -= 4;
+    else return i;
+  }
+}
+
+function startsTag(content: string, hash: number): boolean {
+  const at = beforeUnderlineTags(content, hash);
   if (at === 0) return true;
   const before = content.charCodeAt(at - 1);
   if (before === 40) return at < 2 || content.charCodeAt(at - 2) !== 93; // `(` but not `](`

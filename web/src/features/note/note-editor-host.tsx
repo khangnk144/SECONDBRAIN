@@ -13,6 +13,8 @@ interface NoteEditorHostProps {
   /** Changes on every navigation, so the same line asked twice scrolls twice. */
   lineRequest: string;
   handleRef: MutableRefObject<MarkdownEditorHandle | null>;
+  /** The editor is ready (or replaced); the toolbar follows it. */
+  onHandle?: (handle: MarkdownEditorHandle) => void;
 }
 
 /**
@@ -25,6 +27,7 @@ export function NoteEditorHost({
   line,
   lineRequest,
   handleRef,
+  onHandle,
 }: NoteEditorHostProps) {
   const { t } = useTranslation();
   const [handle, setHandle] = useState<MarkdownEditorHandle | null>(null);
@@ -57,6 +60,7 @@ export function NoteEditorHost({
       onReady={(ready) => {
         handleRef.current = ready;
         setHandle(ready);
+        onHandle?.(ready);
       }}
     />
   );

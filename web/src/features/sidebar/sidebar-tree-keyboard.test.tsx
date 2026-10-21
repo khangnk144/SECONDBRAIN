@@ -13,6 +13,7 @@ import {
   REV,
   setupSidebarTest,
   teardownSidebarTest,
+  toastStatus,
 } from './sidebar-tree-test-kit';
 import { canDropInto } from './tree-drag-drop';
 
@@ -92,7 +93,7 @@ describe('sidebar tree keyboard, menu, rename, trash, drag (F2.2, F2.4)', () => 
     await waitFor(() => expect(labels()).toContain('Bài tập mới'));
     await waitFor(() => expect(item('Bài tập mới')).toHaveFocus());
     expect(mock.callsTo('POST /api/note/rename')).toHaveLength(2);
-    expect(screen.getByRole('status')).toHaveTextContent('Đã đổi tên thành “Bài tập mới”.');
+    expect(toastStatus()).toHaveTextContent('Đã đổi tên thành “Bài tập mới”.');
   });
 
   it('opens the context menu with Shift+F10 or the menu key and works without a mouse', async () => {

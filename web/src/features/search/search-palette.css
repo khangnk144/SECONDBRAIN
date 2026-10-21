@@ -44,6 +44,13 @@
   color: var(--ink-2);
 }
 
+.search-palette__hint {
+  padding: var(--space-2) var(--space-4) 0;
+  color: var(--ink-2);
+  font-size: max(12px, 0.78125rem);
+  line-height: 1.5;
+}
+
 .search-palette__status {
   padding: var(--space-3) var(--space-4) 0;
   color: var(--ink-2);
@@ -122,6 +129,10 @@
   white-space: nowrap;
 }
 
+.palette-option__keys {
+  flex: 0 0 auto;
+}
+
 .palette-option__snippet {
   display: -webkit-box;
   overflow: hidden;
@@ -135,6 +146,7 @@
 
 /* On the active row the soft accent is the background: keep secondary text and marks readable. */
 .palette-option.is-active .palette-option__folder,
+.palette-option.is-active .palette-option__keys,
 .palette-option.is-active .palette-option__snippet,
 .palette-option.is-active .palette-option__icon {
   color: var(--ink);

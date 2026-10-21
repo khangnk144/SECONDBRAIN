@@ -4,7 +4,30 @@
  */
 import type { ContentClass } from '../markdown/markdown-types.js';
 import type { VaultPath } from '../vault/vault-types.js';
-import type { DeadlineItem, Urgency } from './index-types.js';
+export type Urgency = 'done' | 'urgent' | 'soon' | 'ok';
+
+/** SPEC §4.7. Only user notes produce items (archived ones only when explicitly included). */
+export interface DeadlineItem {
+  /** `note:<path>` or `task:<path>#<line>`. */
+  id: string;
+  kind: 'note' | 'task';
+  /** Note title, or task text without tokens. */
+  title: string;
+  /** Due calendar date YYYY-MM-DD (local). */
+  date: string;
+  path: VaultPath;
+  noteTitle: string;
+  line: number | null;
+  /** Expected line text for task patches (tasks only). */
+  lineText: string | null;
+  /** The note's revision as indexed: the `expectedRevision` of a tick or reschedule. */
+  revision: string;
+  done: boolean;
+  urgency: Urgency;
+  /** Calendar days from today (negative = overdue). */
+  daysLeft: number;
+  class: ContentClass;
+}
 
 /** A task as listed by Today and the Tasks view (dated or not). */
 export interface TaskEntry {
@@ -16,6 +39,8 @@ export interface TaskEntry {
   noteTitle: string;
   line: number;
   lineText: string;
+  /** The note's revision as indexed (`expectedRevision` of `PATCH /note/task`). */
+  revision: string;
   done: boolean;
   /** Due date, null for undated tasks. */
   date: string | null;
@@ -28,6 +53,8 @@ export interface TaskEntry {
 export interface ProjectSummary {
   path: VaultPath;
   title: string;
+  /** The note's revision as indexed. */
+  revision: string;
   deadline: string | null;
   daysLeft: number | null;
   urgency: Urgency | null;
@@ -40,6 +67,10 @@ export interface TodayView {
   date: string;
   /** Monday–Sunday week containing today. */
   week: { start: string; end: string };
+  /**
+   * Open items, each counted once: `overdue` before today; `deadlinesThisWeek` from today to
+   * Sunday; `openToday` open tasks due today or undated in today's Daily note.
+   */
   summary: { deadlinesThisWeek: number; openToday: number; overdue: number };
   /** Open items only: today … today+59 (one entry per day, possibly empty) and the overdue ones. */
   strip: { days: { date: string; items: DeadlineItem[] }[]; overdue: DeadlineItem[] };

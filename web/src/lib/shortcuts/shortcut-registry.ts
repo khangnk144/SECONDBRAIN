@@ -72,7 +72,13 @@ export function handleShortcutKeydown(event: KeyboardEvent): boolean {
   // Later registrations win, so a screen can override an app-wide binding.
   for (const entry of [...entries.values()].reverse()) {
     if (!matchesKeys(event, entry.parsed)) continue;
-    if (suspended > 0 || (typing && !entry.allowInInputs)) return false;
+    if (suspended > 0 || (typing && !entry.allowInInputs)) {
+      // The app owns this key even while it is not acting on it: a blocked Ctrl combination
+      // (Ctrl+K, Ctrl+/) must not fall through to the browser (Ctrl+K jumps to Chrome's address
+      // bar). Alt combinations are left alone – on Windows AltGr (Ctrl+Alt) types characters.
+      if (entry.parsed.ctrl && !entry.parsed.alt) event.preventDefault();
+      return false;
+    }
     event.preventDefault();
     entry.run(event);
     return true;

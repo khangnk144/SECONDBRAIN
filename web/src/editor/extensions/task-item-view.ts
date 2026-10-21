@@ -7,7 +7,8 @@ import { toggleTask } from './task-toggle';
 
 /**
  * Task item with a real, round `<input type="checkbox">` (design.md §5) in front of its content.
- * Ticking appends ` ✅ <today>` and unticking removes it, in one undoable transaction.
+ * Ticking writes ` ✅ <today>` and unticking removes the ✅ token (see `toggleTask`), in one
+ * undoable transaction.
  */
 export function createTaskItemView({ node, getPos, editor }: NodeViewRendererProps): NodeView {
   let current = node;

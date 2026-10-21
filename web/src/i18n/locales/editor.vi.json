@@ -79,5 +79,43 @@
   },
   "paste": {
     "imageLater": "Dán ảnh sẽ có ở bản sau"
+  },
+  "toolbar": {
+    "label": "Định dạng",
+    "undo": "Hoàn tác chỉnh sửa",
+    "redo": "Làm lại chỉnh sửa",
+    "textStyle": "Kiểu chữ",
+    "textStyleNow": "Kiểu chữ: {{style}}",
+    "paragraph": "Đoạn văn",
+    "heading1": "Tiêu đề 1",
+    "heading2": "Tiêu đề 2",
+    "heading3": "Tiêu đề 3",
+    "bold": "Đậm",
+    "italic": "Nghiêng",
+    "underline": "Gạch chân",
+    "strike": "Gạch ngang",
+    "code": "Code",
+    "bulletList": "Danh sách chấm",
+    "orderedList": "Danh sách số",
+    "taskList": "Việc cần làm",
+    "blockquote": "Trích dẫn",
+    "codeBlock": "Khối code",
+    "divider": "Đường kẻ",
+    "table": "Bảng",
+    "webLink": "Liên kết web",
+    "noteLink": "Liên kết ghi chú",
+    "clearFormatting": "Xóa định dạng",
+    "sourceMode": "Chế độ nguồn",
+    "more": "Thêm",
+    "moreMenu": "Các lệnh định dạng khác",
+    "linkDialog": {
+      "title": "Liên kết web",
+      "label": "Địa chỉ web",
+      "editLabel": "Địa chỉ web (để trống rồi bấm Lưu để bỏ liên kết)",
+      "add": "Thêm liên kết",
+      "save": "Lưu liên kết",
+      "spaces": "Địa chỉ web không có dấu cách. Kiểm tra lại giúp mình nhé.",
+      "empty": "Nhập địa chỉ web, ví dụ https://vi.wikipedia.org"
+    }
   }
 }

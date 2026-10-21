@@ -20,18 +20,6 @@
   "panel": {
     "label": "Ngăn bên phải"
   },
-  "today": {
-    "dateFormat": "dddd, D [tháng] M",
-    "greeting": {
-      "morning": "Chào buổi sáng, {{name}}.",
-      "noon": "Chào buổi trưa, {{name}}.",
-      "afternoon": "Chào buổi chiều, {{name}}.",
-      "evening": "Chào buổi tối, {{name}}.",
-      "late": "Chào khuya, {{name}}."
-    },
-    "summaryNothingUrgent": "Hôm nay không có gì gấp. Viết gì đó nhé?",
-    "emptyHint": "Khi bạn có ghi chú, dải 14 ngày, việc hôm nay và đồ án đang làm sẽ hiện ở đây."
-  },
   "placeholder": {
     "tasks": {
       "title": "Việc cần làm",
@@ -49,6 +37,10 @@
       "title": "Không tìm thấy trang này",
       "body": "Có thể đường dẫn đã cũ.",
       "back": "Về trang Hôm nay"
+    },
+    "calendarDay": {
+      "title": "Ngày bạn chọn",
+      "body": "Bấm vào một ngày trên lịch để xem deadline và ghi chú hằng ngày của ngày đó."
     }
   },
   "panes": {
@@ -57,14 +49,5 @@
     "hideRight": "Thu gọn ngăn phải",
     "showRight": "Mở ngăn phải",
     "withShortcut": "{{label}} ({{keys}})"
-  },
-  "shortcuts": {
-    "toggleLeftPane": "Thu gọn hoặc mở ngăn trái",
-    "toggleRightPane": "Thu gọn hoặc mở ngăn phải",
-    "newNote": "Ghi chú mới",
-    "closeTab": "Đóng thẻ đang mở",
-    "previousTab": "Thẻ trước",
-    "nextTab": "Thẻ sau",
-    "search": "Tìm ghi chú và lệnh"
   }
 }

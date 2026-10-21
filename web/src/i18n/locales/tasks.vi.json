@@ -1,0 +1,17 @@
+{
+  "title": "Việc cần làm",
+  "includeArchive": "Bao gồm Archive",
+  "groups": {
+    "overdue": "Quá hạn",
+    "today": "Hôm nay",
+    "next7": "7 ngày tới",
+    "later": "Sau",
+    "noDate": "Không có hạn"
+  },
+  "count_one": "{{count}} việc",
+  "count_other": "{{count}} việc",
+  "empty": "Không còn việc nào. Nhẹ cả người!",
+  "loading": "Đang tải danh sách việc…",
+  "loadError": "Không tải được danh sách việc. Bạn thử lại nhé.",
+  "retry": "Thử lại"
+}

@@ -34,7 +34,12 @@ export async function createNote(options: CreateNoteOptions = {}): Promise<Opera
       unique: true,
       ...(options.template ? { template: options.template } : {}),
     });
-    useTabsStore.getState().openNote(created.path, { newTab: options.newTab, isNew: true });
+    // The server reports where a template's `{{cursor}}` was; the note screen puts the caret there.
+    useTabsStore.getState().openNote(created.path, {
+      newTab: options.newTab,
+      isNew: true,
+      cursor: created.cursor,
+    });
     useTreeStore.getState().scheduleRefresh();
     showUndoToast(
       i18n.t('operations.created', { title: noteTitleFromPath(created.path) }),

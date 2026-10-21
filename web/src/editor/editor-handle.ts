@@ -7,10 +7,16 @@ import {
   TextSelection,
   type Transaction,
 } from '@tiptap/pm/state';
+import type { CaretTarget } from './markdown/source-offset-caret';
 
 /** Imperative API of `<MarkdownEditor>` for the note session. */
 export interface MarkdownEditorHandle {
-  /** `{ block }` = index of a top-level node: caret at its start, scrolled into view. */
+  /** The Tiptap editor itself, for UI built around it (the formatting toolbar). */
+  readonly editor?: Editor;
+  /**
+   * `{ block }` = index of a top-level node: caret at its start, scrolled into view.
+   * `{ caret }` = a place from `caretForSourceOffset` (a template's `{{cursor}}`).
+   */
   focus(position?: FocusPosition): void;
   /** Loads another document (outside edits, source mode); starts a fresh undo history. */
   replaceDoc(doc: ProseMirrorNode, opts?: { keepSelection?: boolean }): void;
@@ -22,10 +28,11 @@ export interface MarkdownEditorHandle {
   edit(build: (state: EditorState) => Transaction | null): boolean;
 }
 
-export type FocusPosition = 'start' | 'end' | { block: number };
+export type FocusPosition = 'start' | 'end' | { block: number } | { caret: CaretTarget };
 
 export function createEditorHandle(editor: Editor): MarkdownEditorHandle {
   return {
+    editor,
     focus: (position) => focusEditor(editor, position),
     replaceDoc: (doc, opts) => replaceEditorDoc(editor, doc, opts?.keepSelection === true),
     getDoc: () => editor.state.doc,
@@ -45,8 +52,13 @@ function focusEditor(editor: Editor, position: FocusPosition | undefined): void 
     editor.commands.focus(position ?? null);
     return;
   }
+  if ('caret' in position && position.caret.kind !== 'block') {
+    placeCaret(editor, position.caret);
+    return;
+  }
+  const block = 'caret' in position ? (position.caret as { index: number }).index : position.block;
   const { doc } = editor.state;
-  const index = Math.max(0, Math.min(position.block, doc.childCount - 1));
+  const index = Math.max(0, Math.min(block, doc.childCount - 1));
   let pos = 0;
   for (let i = 0; i < index; i += 1) pos += doc.child(i).nodeSize;
   const node = doc.child(index);
@@ -56,6 +68,25 @@ function focusEditor(editor: Editor, position: FocusPosition | undefined): void 
       ? NodeSelection.create(doc, pos)
       : Selection.near(doc.resolve(Math.min(pos + 1, doc.content.size)));
   editor.view.dispatch(editor.state.tr.setSelection(selection).scrollIntoView());
+  editor.view.focus();
+}
+
+/**
+ * A text caret, or an empty paragraph with the caret in it. The paragraph is left out of the undo
+ * history (undo would only remove an empty line) and writes nothing until text is typed into it.
+ */
+function placeCaret(editor: Editor, target: Exclude<CaretTarget, { kind: 'block' }>): void {
+  const { state } = editor;
+  const pos = Math.max(0, Math.min(target.pos, state.doc.content.size));
+  const tr = state.tr;
+  if (target.kind === 'new-paragraph') {
+    const paragraph = state.schema.nodes['paragraph']!.create();
+    tr.insert(pos, paragraph).setMeta('addToHistory', false);
+    tr.setSelection(TextSelection.create(tr.doc, pos + 1));
+  } else {
+    tr.setSelection(Selection.near(tr.doc.resolve(pos)));
+  }
+  editor.view.dispatch(tr.scrollIntoView());
   editor.view.focus();
 }
 

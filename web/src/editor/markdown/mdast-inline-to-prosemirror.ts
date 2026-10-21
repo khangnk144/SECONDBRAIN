@@ -2,8 +2,11 @@
  * mdast phrasing content → ProseMirror inline nodes. Wikilinks are cut out of `text` nodes at the
  * places where the server's raw-text scan finds them; a wikilink anywhere else (inside a link,
  * an image description, or across emphasis) cannot be represented and rejects the block.
+ * Underline is the one piece of inline HTML the editor holds: an exact `<u>` … `</u>` pair of
+ * sibling HTML nodes around supported content (see `underlineEnd`); any other HTML rejects the
+ * block, which then stays verbatim.
  */
-import type { PhrasingContent, Text } from 'mdast';
+import type { Html, PhrasingContent, Text } from 'mdast';
 import type { Mark, Node as ProseMirrorNode, Schema } from '@tiptap/pm/model';
 import { alignRawToValue } from './text-alignment';
 import { UnsupportedConstruct } from './unsupported-constructs';
@@ -28,7 +31,8 @@ export function convertInline(
   const { schema } = context;
   const mark = (name: string, attrs?: Record<string, unknown>): readonly Mark[] =>
     markType(schema, name).create(attrs).addToSet(marks);
-  for (const child of children) {
+  for (let index = 0; index < children.length; index += 1) {
+    const child = children[index] as PhrasingContent;
     switch (child.type) {
       case 'text':
         convertText(child, context, marks, inLink, out);
@@ -65,6 +69,13 @@ export function convertInline(
       case 'break':
         out.push(nodeType(schema, 'hardBreak').create(null, null, marks));
         break;
+      case 'html': {
+        const end = underlineEnd(children, index, marks);
+        const inside = children.slice(index + 1, end);
+        out.push(...convertInline(inside, context, mark('underline'), inLink));
+        index = end;
+        break;
+      }
       default:
         throw new UnsupportedConstruct(child.type);
     }
@@ -107,6 +118,31 @@ function convertText(
     context.claimed.add(hit);
   }
   push(node.value.slice(valuePos));
+}
+
+const UNDERLINE_OPEN = '<u>';
+const UNDERLINE_CLOSE = '</u>';
+
+/**
+ * Index of the `</u>` that closes the `<u>` at `start`: the next HTML sibling, exactly `</u>`,
+ * with content in between. Anything else – other or uppercase tags, attributes, an unpaired or
+ * empty pair, `<u>` inside underlined content – has no editor form and rejects the block.
+ */
+function underlineEnd(
+  children: readonly PhrasingContent[],
+  start: number,
+  marks: readonly Mark[],
+): number {
+  const open = children[start] as Html;
+  if (open.value !== UNDERLINE_OPEN || marks.some((mark) => mark.type.name === 'underline')) {
+    throw new UnsupportedConstruct('inline HTML');
+  }
+  const end = children.findIndex((child, index) => index > start && child.type === 'html');
+  if (end === -1 || (children[end] as Html).value !== UNDERLINE_CLOSE) {
+    throw new UnsupportedConstruct('unpaired underline');
+  }
+  if (end === start + 1) throw new UnsupportedConstruct('empty underline');
+  return end;
 }
 
 function markType(schema: Schema, name: string) {

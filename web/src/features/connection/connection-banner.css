@@ -15,3 +15,8 @@
 .connection-banner strong {
   font-weight: 600;
 }
+
+/* Inside a screen's own flow (Today's summary line): the screen sets the spacing. */
+.connection-banner--inline {
+  margin-bottom: 0;
+}

@@ -8,7 +8,7 @@ import { loadMarkdown } from '../markdown/markdown-document';
 
 const BLOCK_SYNTAX = /^(#{1,6}\s|[-*+]\s|\d{1,9}[.)]\s|>|```|~~~|\|.*\|\s*$|(-{3,}|\*{3,})\s*$)/m;
 const INLINE_SYNTAX =
-  /\*\*[^*\n]+\*\*|~~[^~\n]+~~|`[^`\n]+`|\[\[[^\]\n]+\]\]|\[[^\]\n]+\]\([^)\n]+\)|(^|\s)[*_][^*_\s][^*_\n]*[*_](?=\s|$|[.,!?])/;
+  /\*\*[^*\n]+\*\*|~~[^~\n]+~~|`[^`\n]+`|\[\[[^\]\n]+\]\]|\[[^\]\n]+\]\([^)\n]+\)|<u>[^<\n]+<\/u>|(^|\s)[*_][^*_\s][^*_\n]*[*_](?=\s|$|[.,!?])/;
 
 /** Plain text that carries Markdown syntax (as copied from another Markdown editor or a file). */
 export function looksLikeMarkdown(text: string): boolean {
@@ -16,8 +16,9 @@ export function looksLikeMarkdown(text: string): boolean {
 }
 
 /**
- * Paste: Markdown-looking plain text is parsed with the converter and inserted as content (one
- * line stays inline); HTML is limited to the schema (ProseMirror's parser); pasted images are
+ * Paste: Markdown-looking plain text (`<u>…</u>` included) is parsed with the converter and
+ * inserted as content (one line stays inline); HTML is limited to the schema (ProseMirror's
+ * parser, which keeps `<u>` and `text-decoration: underline` as underline); pasted images are
  * left out with a toast until attachments exist.
  */
 export const MarkdownPaste = Extension.create({

@@ -4,7 +4,9 @@
  * note (SPEC §4.10: each request carries the revision the previous one produced).
  */
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model';
+import { caretForSourceOffset, type CaretTarget } from '../../editor/markdown/source-offset-caret';
 import type { VaultPath } from '../../lib/api/vault-types';
+import { sameWithoutEmptyParagraphs } from './empty-paragraphs';
 import type { OperationResult } from '../../lib/operation-result';
 import { subscribeServerEvent } from '../../lib/ws/server-event-bus';
 import { blockIndexForLine } from './line-to-block';
@@ -51,6 +53,8 @@ export interface NoteSession {
   flushDraft(): void;
   /** Top-level block for a 1-based file line, when the document still matches its snapshot. */
   blockForLine(line: number): number | null;
+  /** Where the caret goes for a UTF-16 offset in the file (a template's `{{cursor}}`). */
+  caretForOffset(offset: number): CaretTarget | null;
   onPathChange(listener: (oldPath: VaultPath, newPath: VaultPath) => void): void;
   dispose(): void;
 }
@@ -95,8 +99,11 @@ export function createNoteSession(
     docChanged(doc) {
       if (core.phase !== 'ready' || core.readOnly || core.conflict || core.source) return;
       if (doc === core.doc) return;
+      // Adding or removing empty paragraphs writes no byte (Markdown has no empty paragraph):
+      // the note stays as saved, without a "Bản nháp" flash.
+      const unchanged = core.doc !== null && sameWithoutEmptyParagraphs(doc, core.doc);
       core.doc = doc;
-      core.markChanged();
+      if (!unchanged) core.markChanged();
     },
     flush: () => run(() => saveInQueue(core)),
     retry: retrySave,
@@ -132,6 +139,8 @@ export function createNoteSession(
       // Exact right after a load or save; after unsaved edits it is the nearest block.
       return Math.min(blockIndexForLine(core.snapshot, line), core.doc.childCount - 1);
     },
+    caretForOffset: (offset) =>
+      core.doc && core.snapshot ? caretForSourceOffset(core.doc, core.snapshot, offset) : null,
     onPathChange: (listener) => {
       core.onPathChange = listener;
     },

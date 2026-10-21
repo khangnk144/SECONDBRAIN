@@ -1,0 +1,14 @@
+{
+  "openItemNamed": "Open note {{title}}",
+  "due": {
+    "today": "today",
+    "tomorrow": "tomorrow",
+    "daysLeft_one": "{{count}} day left",
+    "daysLeft_other": "{{count}} days left",
+    "overdue_one": "{{count}} day overdue",
+    "overdue_other": "{{count}} days overdue"
+  },
+  "tickConflict": "“{{note}}” just changed. I reloaded the list, please tick it again.",
+  "changedConflict": "“{{note}}” just changed. I reloaded the list, please try again.",
+  "rescheduled": "Moved “{{title}}” to {{date}}."
+}

@@ -65,6 +65,11 @@ export interface CreateNoteRequest {
 export interface CreateNoteResponse {
   path: VaultPath;
   revision: string;
+  /**
+   * UTF-16 offset of the template's `{{cursor}}` in the written file; null (or absent) when there
+   * is none. The note route passes it on as `&cursor=`.
+   */
+  cursor?: number | null;
 }
 
 /** `PATCH /api/note/frontmatter`; a `null` value in `set` removes the key. */

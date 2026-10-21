@@ -8,5 +8,16 @@
     "hint": "Pick a template, or start with a blank page.",
     "blank": "Blank",
     "create": "Create note"
+  },
+  "pickDate": {
+    "confirm": "Choose date",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "today": "Today",
+    "gridHint": "Use the arrow keys to change the day, Page Up or Page Down to change the month, Enter to choose.",
+    "typedLabel": "Or type a date (dd/mm/yyyy)",
+    "invalid": "That is not a real date. Type it as dd/mm/yyyy, for example 05/11/2026.",
+    "dayFormat": "dddd, D MMMM YYYY",
+    "monthFormat": "MMMM YYYY"
   }
 }

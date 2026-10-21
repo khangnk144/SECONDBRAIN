@@ -38,8 +38,6 @@
     "reviewKept": "Xem"
   },
   "source": {
-    "toggle": "Nguồn",
-    "toggleWithKeys": "Chế độ nguồn (Alt+S)",
     "shortcut": "Bật hoặc tắt chế độ nguồn",
     "label": "Markdown của ghi chú (chế độ nguồn)"
   },

@@ -1,0 +1,135 @@
+/*
+ * Quick capture (design.md screen 4): one field floating in the middle of the screen on the blush
+ * surface, radius 14. No dimmed backdrop: it is a quick note, not a dialog to read. Text on blush
+ * uses --ink (the checked pair, design.md §2.5); quieter text is --ink with opacity (≥ 5.4:1).
+ */
+.capture-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 46;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+}
+
+.capture-box {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: min(560px, 100%);
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-l);
+  background: var(--blush);
+  color: var(--ink);
+  animation: capture-in 150ms var(--ease);
+}
+
+.capture-box:focus {
+  outline: none;
+}
+
+/* design.md §5: a focused input shows a 2 px --focus line; here the whole box carries it. */
+.capture-box:has(.capture-box__input:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: -1px;
+}
+
+.capture-box__input {
+  width: 100%;
+  min-height: 72px;
+  max-height: 40vh;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 1.0625rem;
+  line-height: 1.5;
+  resize: none;
+}
+
+.capture-box__input:focus,
+.capture-box__input:focus-visible {
+  outline: none;
+}
+
+.capture-box__input::placeholder {
+  color: var(--ink);
+  opacity: 0.72;
+}
+
+.capture-box__problem {
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.capture-box__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+
+.capture-box__hints {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  font-size: max(12px, 0.78125rem);
+  opacity: 0.72;
+}
+
+.capture-box__hint {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.capture-box__hint kbd {
+  color: var(--ink);
+}
+
+/* After a save: a copy shrinks toward the bottom-right corner, where the toast appears. */
+.capture-layer--leaving {
+  pointer-events: none;
+}
+
+.capture-box--leaving {
+  transform-origin: bottom right;
+  animation: capture-leave 250ms var(--ease) forwards;
+}
+
+.capture-box__ghost {
+  max-height: 72px;
+  overflow: hidden;
+  white-space: pre-wrap;
+}
+
+@keyframes capture-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes capture-leave {
+  to {
+    transform: translate(calc(50vw - 50% - var(--space-4)), calc(50vh - 50% - var(--space-4)))
+      scale(0.2);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .capture-box {
+    animation: none;
+  }
+}
+
+@media (pointer: coarse) {
+  .capture-box__hints {
+    display: none;
+  }
+}

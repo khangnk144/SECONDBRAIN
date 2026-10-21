@@ -17,6 +17,7 @@ export interface DeadlineNote {
   type: string | null;
   status: string | null;
   deadline: string | null;
+  revision: string;
 }
 
 export interface DeadlineSources {
@@ -85,6 +86,7 @@ export function collectItems(
       noteTitle: note.title,
       line: null,
       lineText: null,
+      revision: note.revision,
       done,
       urgency: urgencyFor(daysLeft, done),
       daysLeft,
@@ -104,6 +106,7 @@ export function collectItems(
       noteTitle: note.title,
       line: task.line,
       lineText: task.lineText,
+      revision: note.revision,
       done: entry.done,
       urgency: entry.urgency ?? 'ok',
       daysLeft: entry.daysLeft ?? 0,
@@ -124,6 +127,7 @@ export function taskEntry(task: IndexedTask, note: DeadlineNote, today: string):
     noteTitle: note.title,
     line: task.line,
     lineText: task.lineText,
+    revision: note.revision,
     done,
     date: task.due,
     urgency: daysLeft === null ? null : urgencyFor(daysLeft, done),

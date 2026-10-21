@@ -155,6 +155,13 @@
   text-underline-offset: 2px;
 }
 
+/* Underline (`<u>`) keeps the text colour, so it never reads as a link. */
+.markdown-editor__content u {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
 .markdown-editor__content ul,
 .markdown-editor__content ol {
   margin: 0;

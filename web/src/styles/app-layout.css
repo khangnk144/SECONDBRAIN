@@ -56,6 +56,27 @@
   max-width: 720px;
 }
 
+/*
+ * Immersive route (the graph): both panes hidden, the screen gets the whole window. The inner
+ * region fills the remaining height so a canvas can size itself with `height: 100%`.
+ */
+.app-shell--immersive .app-main {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: var(--space-4);
+}
+
+.app-shell--immersive .main-toolbar {
+  margin-bottom: var(--space-2);
+}
+
+.app-shell--immersive .app-main__inner {
+  flex: 1;
+  min-height: 0;
+  max-width: none;
+}
+
 .right-panel {
   position: sticky;
   top: 0;

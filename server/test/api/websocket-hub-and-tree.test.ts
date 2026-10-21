@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import { buildVaultTree } from '../../src/api/build-vault-tree.js';
-import { fillTemplateVariables, templateVariablesAt } from '../../src/api/new-note-content.js';
 import type { ServerEvent } from '../../src/ws/server-events.js';
 import { createWebSocketHub, type HubSocket } from '../../src/ws/websocket-hub.js';
 
@@ -128,17 +127,5 @@ describe('vault tree', () => {
       isNote: false,
     });
     expect(tree.root.noteCount).toBe(8);
-  });
-});
-
-describe('template variables', () => {
-  it('substitutes title, date and time and removes the cursor marker', () => {
-    const vars = templateVariablesAt('Bài $1 & co', new Date(2026, 9, 18, 9, 5));
-    expect(
-      fillTemplateVariables(
-        '# {{title}}\ncreated: {{date}} {{time}}\n{{cursor}}\n{{tomorrow}}',
-        vars,
-      ),
-    ).toBe('# Bài $1 & co\ncreated: 2026-10-18 09:05\n\n{{tomorrow}}');
   });
 });

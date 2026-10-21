@@ -4,7 +4,13 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { useDialogStore } from '../../lib/dialogs/dialog-requests';
 import type { FetchMock } from '../../lib/testing/fetch-mock';
 import { useTreeStore } from '../../lib/tree-store';
-import { item, renderApp, setupSidebarTest, teardownSidebarTest } from './sidebar-tree-test-kit';
+import {
+  item,
+  renderApp,
+  setupSidebarTest,
+  teardownSidebarTest,
+  toastStatus,
+} from './sidebar-tree-test-kit';
 
 const menuLabels = () =>
   within(screen.getByRole('menu'))
@@ -60,9 +66,7 @@ describe('sidebar context menus and row names (F2)', () => {
       newPath: '4 Archive/Đồ án Giải tích',
       relink: true,
     });
-    expect(screen.getByRole('status')).toHaveTextContent(
-      'Đã chuyển thư mục “Đồ án Giải tích” vào Archive.',
-    );
+    expect(toastStatus()).toHaveTextContent('Đã chuyển thư mục “Đồ án Giải tích” vào Archive.');
   });
 
   it('rows read their name first, then the urgent hint', () => {

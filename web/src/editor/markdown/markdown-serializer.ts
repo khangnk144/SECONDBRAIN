@@ -1,9 +1,9 @@
 /**
  * Canonical Markdown for edited blocks (SPEC §4.9 P3): `-` bullets, `1.` numbers, `**bold**`,
  * `*italic*`, `~~strike~~`, fenced code, `---` rules, ATX headings (setext only for a multi-line
- * heading), GFM tables. Escaping comes from mdast-util-to-markdown, with two adjustments so that
- * the server reads the same tags: `#tag` at a line start is not escaped (only a real heading
- * marker is), and wikilinks are written raw.
+ * heading), GFM tables, `<u>…</u>` for underline. Escaping comes from mdast-util-to-markdown, with
+ * two adjustments so that the server reads the same tags: `#tag` at a line start is not escaped
+ * (only a real heading marker is), and wikilinks are written raw.
  */
 import type { Parents, Root, RootContent } from 'mdast';
 import { gfmToMarkdown } from 'mdast-util-gfm';
@@ -11,12 +11,14 @@ import {
   defaultHandlers,
   toMarkdown,
   type Handle,
+  type Info,
   type Options,
+  type State,
   type Unsafe,
 } from 'mdast-util-to-markdown';
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model';
 import { toMdastBlock } from './prosemirror-to-mdast';
-import type { MdastLiteral, MdastWikilink } from './prosemirror-inline-to-mdast';
+import type { MdastLiteral, MdastUnderline, MdastWikilink } from './prosemirror-inline-to-mdast';
 import { formatWikilink } from './wikilink-syntax';
 
 export interface MarkerOptions {
@@ -36,6 +38,24 @@ const literal = Object.assign((node: MdastLiteral) => node.value, {
 });
 
 const literalBlock: Handle = (node: MdastLiteral) => node.value;
+
+// The tags are punctuation on both sides, so the content is escaped as if it sat between `>`
+// and `<` (an emphasis run inside always flanks correctly), and text around it sees a `<`.
+const underline = Object.assign(
+  (node: MdastUnderline, _parent: unknown, state: State, info: Info) => {
+    const tracker = state.createTracker(info);
+    let value = tracker.move('<u>');
+    value += tracker.move(
+      state.containerPhrasing(node as unknown as Parents, {
+        ...tracker.current(),
+        before: '>',
+        after: '<',
+      }),
+    );
+    return value + tracker.move('</u>');
+  },
+  { peek: () => '<' },
+);
 
 // `#` only starts an ATX heading when one to six of them are followed by a space or line end.
 const HEADING_HASH: Unsafe = { atBreak: true, character: '#', after: '#{0,5}(?:[ \\t\\r\\n]|$)' };
@@ -110,7 +130,15 @@ const BASE_OPTIONS: Options = {
   resourceLink: false,
   quote: '"',
   extensions: [gfmToMarkdown()],
-  handlers: { root, link, thematicBreak, wikilink, literal, literalBlock } as Options['handlers'],
+  handlers: {
+    root,
+    link,
+    thematicBreak,
+    wikilink,
+    literal,
+    literalBlock,
+    underline,
+  } as Options['handlers'],
 };
 
 /** Serialises mdast flow content with `\n` line ends and no final line ending. */

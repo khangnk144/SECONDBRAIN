@@ -10,6 +10,14 @@ One entry per milestone (newest first). Format:
 - Known gaps: …
 ```
 
+## [M3] 2026-10-21 — Today, calendar, search, capture, daily notes, brain graph
+- Added: Today (greeting, one-sentence summary, 14-day strip over 60 days with overdue cell, popovers and keyboard path, today's tasks, inline capture, projects in progress, sample-data prompt, inline offline banner), "Việc cần làm" view, month calendar with day pane and rescheduling by drag or date picker (journaled, 10 s undo).
+- Added: brain map (d3-force on canvas, token colours, source nodes, intro/drift with reduced-motion support, hover/click/double-click, keyboard side panel, legend, hub names, local graph in the note pane).
+- Added: `>` commands from one registry, filter suggestions, recently opened notes, `Alt+Q` capture overlay, `Alt+T` daily notes with navigation, `Ctrl+/` shortcut sheet; Word-like formatting toolbar with Word shortcuts and `<u>…</u>` underline (owner request); caret at `{{cursor}}`.
+- Added (server): revisions on deadline items, `PATCH /note/task` (paragraph-aware, byte-identical to the editor tick), journaled `POST /note/reschedule`, `POST /capture`, daily routes, template variables in the UI language with `cursor`, `GET /graph`, `GET /graph/local`, index schema 5.
+- Fixed (review round): tick rendering inside quotes/HTML, own-write revision chain after undo, emoji caret offset, editor/server tick parity, 📅 tokens in links, capture name characters, non-UTF-8 templates, Daily template fallback; strip labels, row layout, tooltips, palette ranking, kept ticked rows, summary counting, long lists, load jump, shortcut sheet, graph labels, toolbar hints, weekday casing, focus loss and startup races.
+- Known gaps: see `MILESTONE-3.md` (Today render p95 on the dense 5k vault, PWA shortcut column and reference-machine fps are manual Windows checks, no calendar week view).
+
 ## [M2] 2026-10-19 — Editor, links and notes
 - Added: block-preserving Markdown ⇄ Tiptap converter (unchanged blocks byte-identical, item-level list preservation, ticks as one-line patches, verbatim blocks for unsupported constructs, every changed region re-parsed before writing) – the M2 gate, passed first.
 - Added: writing surface (input rules, slash menu, `[[` / `#` / date popups, wikilinks with ghost/ambiguous states, task checkboxes, list nesting, paste, focus mode); note screen (title rename with relink, autosave with truthful states, per-window IndexedDB drafts, three-version conflict screen, property bar, source mode).

@@ -1,0 +1,52 @@
+{
+  "monthTitleFormat": "[Tháng] M, YYYY",
+  "navLabel": "Chọn tháng",
+  "previousMonth": "Tháng trước",
+  "today": "Hôm nay",
+  "nextMonth": "Tháng sau",
+  "includeArchive": "Bao gồm Archive",
+  "longDateFormat": "dddd, D [tháng] M, YYYY",
+  "loadError": "Chưa tải được lịch tháng này. Kiểm tra máy chủ đang chạy rồi bấm Thử lại.",
+  "retry": "Thử lại",
+  "weekdays": {
+    "mon": { "short": "T2", "long": "Thứ hai" },
+    "tue": { "short": "T3", "long": "Thứ ba" },
+    "wed": { "short": "T4", "long": "Thứ tư" },
+    "thu": { "short": "T5", "long": "Thứ năm" },
+    "fri": { "short": "T6", "long": "Thứ sáu" },
+    "sat": { "short": "T7", "long": "Thứ bảy" },
+    "sun": { "short": "CN", "long": "Chủ nhật" }
+  },
+  "cell": {
+    "today": "hôm nay",
+    "items_one": "{{count}} việc: {{list}}",
+    "items_other": "{{count}} việc: {{list}}",
+    "doneItem": "{{title}} (đã xong)",
+    "empty": "chưa có việc nào",
+    "itemsCapped_one": "{{count}} việc: {{list}} và {{rest}} việc khác",
+    "itemsCapped_other": "{{count}} việc: {{list}} và {{rest}} việc khác"
+  },
+  "panel": {
+    "today": "Hôm nay",
+    "loading": "Đang tải…",
+    "loadError": "Chưa tải được việc của ngày này.",
+    "empty": "Ngày này chưa có việc nào.",
+    "items": "Việc trong ngày",
+    "emptyHint": "Kéo một việc trên lịch thả vào ngày này, hoặc chọn “Dời ngày…” ở một việc."
+  },
+  "daily": {
+    "title": "Ghi chú ngày",
+    "open": "Mở ghi chú ngày",
+    "missing": "Ngày này chưa có ghi chú.",
+    "write": "Viết"
+  },
+  "itemMenu": {
+    "button": "Thao tác với “{{title}}”",
+    "label": "Thao tác với “{{title}}”",
+    "reschedule": "Dời ngày…"
+  },
+  "reschedule": {
+    "title": "Dời “{{title}}” sang ngày",
+    "confirm": "Dời ngày"
+  }
+}

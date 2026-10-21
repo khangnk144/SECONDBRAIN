@@ -1,0 +1,21 @@
+{
+  "newNote": "Ghi chú mới",
+  "dailyNote": "Mở ghi chú hôm nay",
+  "quickCapture": "Ghi nhanh",
+  "openToday": "Mở Hôm nay",
+  "openTasks": "Mở Việc cần làm",
+  "openCalendar": "Mở Lịch",
+  "openGraph": "Mở Bản đồ não",
+  "openTags": "Mở Thẻ",
+  "shortcutSheet": "Bảng phím tắt",
+  "toggleLeftPane": "Ẩn/hiện ngăn trái",
+  "toggleRightPane": "Ẩn/hiện ngăn phải",
+  "sourceMode": "Chế độ nguồn",
+  "closeTab": "Đóng thẻ",
+  "previousTab": "Thẻ trước",
+  "nextTab": "Thẻ sau",
+  "rebuildIndex": "Xây lại chỉ mục",
+  "rebuildStarted": "Đang xây lại chỉ mục. Bạn vẫn tìm kiếm được trong lúc chờ.",
+  "rebuildRunning": "Chỉ mục đang được xây lại rồi. Đợi một chút nhé.",
+  "rebuildDone": "Đã xây lại chỉ mục."
+}

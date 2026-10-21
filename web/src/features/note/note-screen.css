@@ -47,35 +47,6 @@
   min-height: 39px; /* the title's first line: tools sit beside it */
 }
 
-.note-screen__source-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  min-height: 32px;
-  padding: 0 var(--space-2);
-  border: 1px solid transparent;
-  border-radius: var(--radius-m);
-  background: transparent;
-  color: var(--ink-2);
-  font-size: 0.875rem;
-  cursor: pointer;
-}
-
-.note-screen__source-toggle:hover {
-  color: var(--ink);
-}
-
-.note-screen__source-toggle[aria-pressed='true'] {
-  border-color: var(--line);
-  background: var(--accent-soft);
-  color: var(--ink);
-}
-
-.note-screen__source-toggle:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-
 .save-indicator {
   display: inline-flex;
   align-items: center;

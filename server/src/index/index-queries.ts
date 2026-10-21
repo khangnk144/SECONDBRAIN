@@ -15,11 +15,13 @@ import { buildLinkTargets, type LinkTargets } from './link-target-list.js';
 import { PathCatalog, pathTargetKey } from './link-targets.js';
 import { phraseMatchExpression } from './fts-query.js';
 import { runSearch } from './search-service.js';
+import { createViewRowQueries } from './view-row-queries.js';
 
 export interface LiveIndex {
   db: Database.Database;
   reader: IndexReader;
   writer: IndexWriter;
+  views: ReturnType<typeof createViewRowQueries>;
 }
 
 export abstract class IndexQueries {
@@ -29,7 +31,12 @@ export abstract class IndexQueries {
   constructor(protected readonly now: () => Date) {}
 
   protected attach(db: Database.Database): void {
-    this.live = { db, reader: createIndexReader(db), writer: createIndexWriter(db) };
+    this.live = {
+      db,
+      reader: createIndexReader(db),
+      writer: createIndexWriter(db),
+      views: createViewRowQueries(db),
+    };
   }
 
   protected get current(): LiveIndex {
@@ -55,6 +62,8 @@ export abstract class IndexQueries {
     return expression === null ? [] : this.current.reader.matchingNotes(expression);
   };
   deadlineRows = () => this.current.reader.deadlineRows();
+  graphRows = () => this.current.views.graphRows();
+  dailyNotePaths = () => this.current.views.dailyNotePaths();
 
   search(query: SearchQuery): SearchResult[] {
     const today = () => toLocalDate(this.now());

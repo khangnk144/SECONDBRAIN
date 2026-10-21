@@ -49,6 +49,18 @@ export interface ConflictCopyResult extends WriteResult {
  */
 export type PatchPlanner = (content: string) => TextRangePatch[];
 
+/** Journal op kinds of single-file content rewrites. */
+export type JournaledRewriteOp = 'reschedule';
+
+export interface JournaledRewrite {
+  path: VaultPath;
+  revision: string;
+  /** The full content now on disk. */
+  content: string;
+  /** Journal entry to undo the rewrite; null when nothing changed (no entry, no write). */
+  journalId: string | null;
+}
+
 /** Operations of the VaultService added for the editor: previews, patches, folders, reveal. */
 export interface VaultEditingOperations {
   /** An existing file or folder with its guarded absolute path (reveal); NOT_FOUND otherwise. */
@@ -66,6 +78,13 @@ export interface VaultEditingOperations {
   ): Promise<RenamePreview>;
   /** Text patches computed from the content at `expectedRevision`, applied atomically. */
   patchWith(path: VaultPath, expectedRevision: string, plan: PatchPlanner): Promise<PatchedNote>;
+  /** Like patchWith, recorded as a one-step journal entry so it can be undone. */
+  rewriteJournaled(
+    path: VaultPath,
+    expectedRevision: string,
+    plan: PatchPlanner,
+    op: JournaledRewriteOp,
+  ): Promise<JournaledRewrite>;
   /**
    * Full replace at the CURRENT revision after copying the bytes on disk into a trash entry with
    * `reason: 'conflict'` ("keep mine" of the conflict UI, SPEC §4.10).

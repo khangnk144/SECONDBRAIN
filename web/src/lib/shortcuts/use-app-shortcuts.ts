@@ -1,11 +1,19 @@
 import { useEffect } from 'react';
+import { GRAPH_ROUTE, navigateTo } from '../app-navigation';
+import { useCaptureUi } from '../capture-ui-store';
+import { openDailyNote } from '../daily-flow';
 import { startNewNote } from '../new-note-flow';
 import { usePanesStore } from '../panes-store';
 import { useSearchUi } from '../search-ui-store';
+import { useShortcutSheetUi } from '../shortcut-sheet-store';
 import { useTabsStore } from '../tabs-store';
 import { installShortcutListener, registerShortcut } from './shortcut-registry';
 
-/** App-wide shortcuts of M2 (SPEC F22). `Alt+S` belongs to the editor. */
+/**
+ * App-wide shortcuts (SPEC F22). `Alt+S` and the formatting keys belong to the editor; `Esc` to
+ * each overlay; `Alt+,` (settings) arrives with the settings screen. While an overlay is open the
+ * registry is suspended, so none of these fire there.
+ */
 export const APP_SHORTCUTS = [
   {
     id: 'toggle-left-pane',
@@ -24,6 +32,26 @@ export const APP_SHORTCUTS = [
     keys: 'Alt+N',
     labelKey: 'shortcuts.newNote',
     run: () => void startNewNote(),
+  },
+  {
+    id: 'daily-note',
+    keys: 'Alt+T',
+    labelKey: 'shortcuts.dailyNote',
+    run: () => void openDailyNote(),
+  },
+  {
+    id: 'quick-capture',
+    keys: 'Alt+Q',
+    labelKey: 'shortcuts.quickCapture',
+    // From anywhere, including a form field (F12.1); never while an overlay is open.
+    allowInInputs: true,
+    run: () => useCaptureUi.getState().open(),
+  },
+  {
+    id: 'graph',
+    keys: 'Alt+G',
+    labelKey: 'shortcuts.graph',
+    run: () => navigateTo(GRAPH_ROUTE),
   },
   {
     id: 'close-tab',
@@ -49,6 +77,13 @@ export const APP_SHORTCUTS = [
     labelKey: 'shortcuts.search',
     allowInInputs: true,
     run: () => useSearchUi.getState().openSearch(),
+  },
+  {
+    id: 'shortcut-sheet',
+    keys: 'Ctrl+/',
+    labelKey: 'shortcuts.shortcutSheet',
+    allowInInputs: true,
+    run: () => useShortcutSheetUi.getState().open(),
   },
 ] as const;
 

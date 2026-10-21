@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { parseNote } from '../../src/markdown/parse-note.js';
+import { mdastNoteStructure } from '../../src/markdown/mdast-note-structure.js';
+import { parseNote, parseNoteUsing } from '../../src/markdown/parse-note.js';
 import { readFixture } from './helpers/markdown-fixtures.js';
 
 const inlineTags = (content: string) =>
@@ -141,6 +142,23 @@ describe('parseNote tasks (F9.2, F9.3 tokens)', () => {
       completed: null,
       text: 'thật `✅ 2026-10-22`',
     });
+  });
+
+  it('ignores date tokens inside wikilinks, embeds and Markdown links on the task line', () => {
+    const content = [
+      '- [ ] xem [[Họp 📅 2026-10-22]] nhé',
+      '- [ ] ảnh ![[Bảng ✅ 2026-10-01.png]]',
+      '- [ ] [hạn 📅 2026-10-22](<Đồ án.md>) và ![alt 📅 2026-10-23](a.png)',
+      '- [ ] [[Họp 📅 2026-10-22]] thật 📅 2026-10-24',
+      '',
+    ].join('\n');
+    for (const parse of [parseNote, (c: string) => parseNoteUsing(c, mdastNoteStructure)]) {
+      const [wikilink, embed, links, real] = parse(content).tasks;
+      expect(wikilink).toMatchObject({ due: null, text: 'xem [[Họp 📅 2026-10-22]] nhé' });
+      expect(embed).toMatchObject({ completed: null, text: 'ảnh ![[Bảng ✅ 2026-10-01.png]]' });
+      expect(links).toMatchObject({ due: null, invalidDates: [] });
+      expect(real).toMatchObject({ due: '2026-10-24', text: '[[Họp 📅 2026-10-22]] thật' });
+    }
   });
 
   it('reads task lines with CRLF endings without the line ending', () => {

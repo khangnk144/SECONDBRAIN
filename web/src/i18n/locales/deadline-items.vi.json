@@ -1,0 +1,14 @@
+{
+  "openItemNamed": "Mở ghi chú {{title}}",
+  "due": {
+    "today": "hôm nay",
+    "tomorrow": "ngày mai",
+    "daysLeft_one": "còn {{count}} ngày",
+    "daysLeft_other": "còn {{count}} ngày",
+    "overdue_one": "quá hạn {{count}} ngày",
+    "overdue_other": "quá hạn {{count}} ngày"
+  },
+  "tickConflict": "“{{note}}” vừa thay đổi. Mình đã tải lại danh sách, bạn tick lại nhé.",
+  "changedConflict": "“{{note}}” vừa thay đổi. Mình đã tải lại danh sách, bạn thử lại nhé.",
+  "rescheduled": "Đã dời “{{title}}” sang {{date}}."
+}

@@ -71,7 +71,7 @@ describe('search palette (F8 overlay, F23 new tab)', () => {
     ];
     const { dialog, input } = await openPalette();
     expect(input).toHaveFocus();
-    const list = within(dialog).getByRole('listbox', { name: 'Ghi chú gần đây' });
+    const list = within(dialog).getByRole('listbox', { name: 'Ghi chú mở gần đây' });
     await waitFor(() => expect(within(list).getAllByRole('option')).toHaveLength(3));
     expect(
       within(list)

@@ -79,8 +79,11 @@ test('S3a: write a lecture with Markdown shortcuts and a [[ link, then see it in
   // The course note lists the lecture under "Liên kết đến đây".
   await page.goto(noteUrl('2 Areas/Giải tích 1.md'));
   const panel = page.getByRole('complementary', { name: 'Ngăn bên phải' });
-  await expect(panel.getByText('Liên kết đến đây')).toBeVisible();
-  const backlink = panel.getByRole('button', { name: /Bài 1 Đạo hàm/ });
+  // Scoped to the backlinks section: its empty text also says "liên kết đến đây" until the
+  // lecture is indexed, and the local graph below lists the same note.
+  const backlinks = panel.getByRole('region', { name: /^Liên kết đến đây/ });
+  await expect(backlinks).toBeVisible();
+  const backlink = backlinks.getByRole('button', { name: /Bài 1 Đạo hàm/ });
   await expect(backlink).toBeVisible({ timeout: 5_000 });
   await expect(backlink.locator('mark')).toHaveText('[[Giải tích 1]]');
 });
@@ -120,8 +123,12 @@ test('renaming from the title lists the linking notes, rewrites their links and 
   );
   expect(await api.tryRead('2 Areas/Xác suất.md')).toBeNull();
 
-  // The toast offers undo for 10 s; undo puts the file name and both links back.
-  await page.getByRole('button', { name: 'Hoàn tác' }).click();
+  // The toast offers undo for 10 s; undo puts the file name and both links back. (Scoped to the
+  // toasts: the formatting toolbar has its own "Hoàn tác" for the editor.)
+  await page
+    .getByRole('region', { name: 'Thông báo' })
+    .getByRole('button', { name: 'Hoàn tác' })
+    .click();
   await expect
     .poll(async () => (await api.tryRead('2 Areas/Xác suất.md'))?.content ?? null)
     .toBe('# Xác suất\n');

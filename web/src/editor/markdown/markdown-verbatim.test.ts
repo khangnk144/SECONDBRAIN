@@ -29,6 +29,22 @@ const UNSUPPORTED: Array<{ file: string; construct: string; source: string }> = 
     construct: 'inline HTML',
     source: 'Text with <span title="[[Trong HTML]]">[[Ngoài HTML]]</span> inline HTML.',
   },
+  // `<u>…</u>` pairs are supported (underline); every other inline HTML stays verbatim.
+  ...[
+    ['uppercase underline tag', 'Chữ hoa <U>không phải gạch chân</U> giữ nguyên.'],
+    ['underline tag with an attribute', 'Thuộc tính <u class="x">vẫn là HTML</u> giữ nguyên.'],
+    ['other inline tags', 'Thẻ khác <span>span</span> và <b>đậm HTML</b> giữ nguyên.'],
+    ['unclosed underline', 'Mở mà không đóng <u>gạch chân dở dang.'],
+    ['unopened underline', 'Đóng mà không mở gạch chân</u> ở đây.'],
+    ['empty underline', 'Rỗng <u></u> giữ nguyên.'],
+    ['nested underline', 'Lồng <u>ngoài <u>trong</u></u> giữ nguyên.'],
+    ['underline across emphasis', 'Cắt ngang <u>gạch **đậm</u> lẫn** giữ nguyên.'],
+    ['underline tag with a space', 'Có khoảng trắng <u >lạ</u> giữ nguyên.'],
+  ].map(([construct, source]) => ({
+    file: '59-underline-lookalikes.md',
+    construct: construct as string,
+    source: source as string,
+  })),
   {
     file: '34-html-comments.md',
     construct: 'HTML comment',

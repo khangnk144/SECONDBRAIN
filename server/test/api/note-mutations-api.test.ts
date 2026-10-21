@@ -34,6 +34,7 @@ describe('note mutations through the API', () => {
     expect(res.json()).toEqual({
       path: '0 Inbox/Ý tưởng mới.md',
       revision: expect.stringMatching(/^[0-9a-f]{64}$/),
+      cursor: null,
     });
     const note = await read('0 Inbox/Ý tưởng mới.md');
     expect(note.content).toBe('---\ntype: note\ncreated: 2026-10-18\n---\n\n');

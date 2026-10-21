@@ -1,6 +1,7 @@
 import { writeKeepingConflictCopy } from './conflict-copy-ops.js';
 import { previewRenameFolder, renameFolder, trashFolder } from './folder-ops.js';
 import { completeJournal, pendingJournal, undoJournal } from './journal-runner.js';
+import { rewriteJournaled } from './journaled-rewrite-ops.js';
 import {
   moveFileToFolder,
   previewMoveToFolder,
@@ -96,6 +97,8 @@ export function createVaultService(options: VaultServiceOptions): VaultService {
     previewRename: (path, newPath, opts) => previewRenameFile(core, path, newPath, opts, 'rename'),
     previewMove: (path, folder, opts) => open(() => previewMoveToFolder(core, path, folder, opts)),
     patchWith: (path, expectedRevision, plan) => patchFileWith(core, path, expectedRevision, plan),
+    rewriteJournaled: (path, expectedRevision, plan, op) =>
+      rewriteJournaled(core, path, expectedRevision, plan, op),
     writeKeepingConflictCopy: (path, content, expectedRevision) =>
       writeKeepingConflictCopy(core, path, content, expectedRevision),
     renameFolder: (path, newPath, opts) => renameFolder(core, path, newPath, opts),

@@ -1,6 +1,6 @@
 /**
  * Seeded random Markdown for property tests. `supportedDocument` builds notes from the supported
- * grammar (with the characters that need escaping), `adversarialDocument` mixes container
+ * grammar (with the characters that need escaping; underline as `<u>…</u>`), `adversarialDocument` mixes container
  * prefixes, block starts and inline fragments the way the server's differential fuzzer does.
  * The same seed always gives the same document.
  */
@@ -49,8 +49,9 @@ function inline(random: Random, depth = 0): string {
     if (roll < 0.45) parts.push(pick(random, WORDS));
     else if (roll < 0.7) parts.push(pick(random, ATOMS));
     else if (depth < 2) {
-      const marker = pick(random, ['*', '_', '**', '__', '~~', '***']);
-      parts.push(`${marker}${inline(random, depth + 1)}${marker}`);
+      const marker = pick(random, ['*', '_', '**', '__', '~~', '***', '<u>']);
+      const close = marker === '<u>' ? '</u>' : marker;
+      parts.push(`${marker}${inline(random, depth + 1)}${close}`);
     } else parts.push(pick(random, WORDS));
   }
   return parts.join(random() < 0.9 ? ' ' : '');
@@ -140,7 +141,7 @@ const BLOCK_STARTS = [
 // prettier-ignore
 const FRAGMENTS = [
   ...WORDS, ...ATOMS, '$5', '[[x', 'y]]', '\\[[esc]]', '[x][d]', '[^n]', '<span>', '<!-- c -->', '$x$',
-  '`', '*', '_', '[', ']', '(', ')', '  ',
+  '`', '*', '_', '[', ']', '(', ')', '  ', '<u>', '</u>', '<u>gạch</u>', '<U>', '<u class="a">',
 ];
 
 /** Adversarial lines: container prefixes, block starts and inline fragments in random order. */

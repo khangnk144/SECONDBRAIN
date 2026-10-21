@@ -1,13 +1,18 @@
 // Measures the index numbers of SPEC §5 on a freshly generated vault (default 5,000 notes):
 // cold full index, incremental update of one file, the "open note" service path, search server
-// query and Today. Prints a JSON report and a Markdown table with the machine it ran on.
+// query, Today, and the HTTP answers of Today, Calendar and the graph (Fastify inject on a real
+// app context, warm index). Prints a JSON report and a Markdown table with the machine it ran on.
 // Never touches the real vault: the vault is generated into a new temp folder and removed after.
 // Usage: npx tsx scripts/bench-index.ts [--notes 5000] [--seed 42] [--keep] [--strict]
 import { appendFileSync, mkdtempSync, rmSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
+import { createAppContext } from '../server/src/app-context/create-app-context.js';
+import { normalizeSettings } from '../server/src/config/global-settings.js';
+import { buildApp } from '../server/src/http/build-app.js';
 import { createDeadlineService } from '../server/src/index/deadline-service.js';
+import { createSilentLogger } from '../server/src/logging/rotating-file-logger.js';
 import { openIndex } from '../server/src/index/open-index.js';
 import { toLocalDate } from '../server/src/lib/local-date.js';
 import { openVault } from '../server/src/vault/open-vault.js';
@@ -22,7 +27,11 @@ const BUDGETS = {
   openNoteP95: 150,
   searchP95: 50,
   todayP95: 200,
+  todayApiP95: 200,
+  graphApiP95: 300,
 };
+/** Only the Host header of injected requests: nothing listens on it. */
+const BENCH_PORT = 4850;
 
 /** Realistic palette queries: unaccented Vietnamese, prefixes as typed, filters, noise. */
 const QUERIES = [
@@ -49,6 +58,56 @@ async function samples(n: number, fn: (i: number) => unknown): Promise<number[]>
   const out: number[] = [];
   for (let i = 0; i < n; i += 1) out.push(await time(() => fn(i)));
   return out;
+}
+
+/**
+ * The screens' HTTP answers on a real app context over the already indexed vault (warm index,
+ * no watcher), through Fastify inject: what the browser waits for, minus the socket.
+ */
+async function apiBench(home: string, root: string) {
+  const settings = normalizeSettings({ vaultPath: root });
+  const logger = createSilentLogger();
+  const context = await createAppContext({ home, settings, logger, watcher: false });
+  const app = await buildApp({
+    getSettings: () => settings,
+    port: BENCH_PORT,
+    mode: 'production',
+    webDir: home,
+    webDistDir: home,
+    serveUi: false,
+    context,
+  });
+  const headers = { host: `localhost:${BENCH_PORT}`, 'x-sb-token': settings.sessionToken };
+  const get = async (url: string) => {
+    const res = await app.inject({ method: 'GET', url, headers });
+    if (res.statusCode !== 200) throw new Error(`${url} answered ${res.statusCode}`);
+    return res.body;
+  };
+  // p95 of `n` requests after one warm-up; any answer other than 200 fails the bench.
+  const p95 = async (url: string, n: number) => {
+    await get(url);
+    return percentile(await samples(n, () => get(url)), 95);
+  };
+  try {
+    const graph = JSON.parse(await get('/api/graph')) as {
+      nodes: { id: string; degree: number }[];
+      edges: unknown[];
+    };
+    const hub = graph.nodes.reduce((a, b) => (b.degree > a.degree ? b : a));
+    return {
+      todayApiP95: await p95('/api/today', 50),
+      calendarApiP95: await p95(`/api/calendar?month=${toLocalDate(new Date()).slice(0, 7)}`, 50),
+      graphApiP95: await p95('/api/graph', 20),
+      graphLocalApiP95: await p95(
+        `/api/graph/local?path=${encodeURIComponent(hub.id)}&depth=2`,
+        20,
+      ),
+      graph: { nodes: graph.nodes.length, edges: graph.edges.length },
+    };
+  } finally {
+    await app.close();
+    await context.close();
+  }
 }
 
 const machine = () => ({
@@ -117,6 +176,7 @@ export async function runBench(options: { notes: number; seed: number; keep: boo
     const todayRuns = await samples(50, () => deadlines.today());
     index.close();
     await vault.close();
+    const api = await apiBench(base, root);
 
     const ms = (n: number) => Math.round(n * 10) / 10;
     const results = {
@@ -126,6 +186,10 @@ export async function runBench(options: { notes: number; seed: number; keep: boo
       openNoteP95: ms(percentile(openNote, 95)),
       searchP95: ms(percentile(search, 95)),
       todayP95: ms(percentile(todayRuns, 95)),
+      todayApiP95: ms(api.todayApiP95),
+      calendarApiP95: ms(api.calendarApiP95),
+      graphApiP95: ms(api.graphApiP95),
+      graphLocalApiP95: ms(api.graphLocalApiP95),
     };
     const slowestQueries = Object.entries(perQuery)
       .sort((a, b) => b[1] - a[1])
@@ -141,6 +205,7 @@ export async function runBench(options: { notes: number; seed: number; keep: boo
       machine: machine(),
       vault: vaultInfo,
       results,
+      graph: api.graph,
       budgets: BUDGETS,
       slowestQueries,
       parseWarnings: warnings.length,
@@ -164,7 +229,15 @@ export function markdownTable(report: Report): string {
       report.results.searchP95,
       BUDGETS.searchP95,
     ],
-    ['Today, p95 (50 runs)', report.results.todayP95, BUDGETS.todayP95],
+    ['Today service, p95 (50 runs)', report.results.todayP95, BUDGETS.todayP95],
+    ['GET /api/today, p95 (50 runs)', report.results.todayApiP95, BUDGETS.todayApiP95],
+    ['GET /api/calendar (this month), p95 (50 runs)', report.results.calendarApiP95, null],
+    [
+      `GET /api/graph (${report.graph.nodes} nodes, ${report.graph.edges} edges), p95 (20 runs)`,
+      report.results.graphApiP95,
+      BUDGETS.graphApiP95,
+    ],
+    ['GET /api/graph/local depth 2 (busiest note), p95', report.results.graphLocalApiP95, null],
   ];
   const m = report.machine;
   return [

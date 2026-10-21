@@ -1,6 +1,8 @@
 /**
  * ProseMirror inline content (flat text with marks) → nested mdast phrasing. Marks that stay
- * open across the next nodes are kept as the outer containers. Things Markdown cannot express are
+ * open across the next nodes are kept as the outer containers; on a tie the canonical nesting is
+ * link, underline, strike, bold, italic (outside in), so `<u>` sits outside emphasis and its tags
+ * never touch a `*` run from the inside. Things Markdown cannot express are
  * dropped here and by `normalizeForMarkdown` alike: a code mark on an image or a hard break, a
  * code or link mark on a wikilink, and hard breaks at the end of a paragraph, heading or cell.
  */
@@ -23,15 +25,21 @@ export interface MdastLiteral {
   value: string;
 }
 
-type Phrasing = PhrasingContent | MdastWikilink | MdastLiteral;
+/** Underlined phrasing, written `<u>…</u>` by the serializer. */
+export interface MdastUnderline {
+  type: 'underline';
+  children: Phrasing[];
+}
+
+type Phrasing = PhrasingContent | MdastWikilink | MdastLiteral | MdastUnderline;
 type Container = { children: Phrasing[] };
-const ORDER = ['link', 'strike', 'bold', 'italic'];
+const ORDER = ['link', 'underline', 'strike', 'bold', 'italic'];
 
 /** The marks a Markdown serialisation keeps for this inline node. */
 export function keptMarks(node: ProseMirrorNode): readonly Mark[] {
   const allowed =
     node.type.name === 'wikilink'
-      ? ['strike', 'bold', 'italic']
+      ? ['underline', 'strike', 'bold', 'italic']
       : node.isText
         ? [...ORDER, 'code']
         : ORDER;
@@ -124,8 +132,12 @@ function appendLeaf(target: Container, node: ProseMirrorNode): void {
   }
 }
 
-function markContainer(mark: Mark): (Emphasis | Strong | Delete | Link) & Container {
+function markContainer(
+  mark: Mark,
+): ((Emphasis | Strong | Delete | Link) & Container) | MdastUnderline {
   switch (mark.type.name) {
+    case 'underline':
+      return { type: 'underline', children: [] };
     case 'bold':
       return { type: 'strong', children: [] } as Strong & Container;
     case 'strike':

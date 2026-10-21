@@ -9,7 +9,8 @@ import './note-screen.css';
 
 /**
  * `#/note?path=<encoded>` (`&new=1` after creation selects the title, `&line=N` scrolls to that
- * file line). The note's session lives outside React; this screen shows it.
+ * file line, `&cursor=N` puts the caret at that file offset). The note's session lives outside
+ * React; this screen shows it.
  */
 export function NoteScreen() {
   const { t } = useTranslation();
@@ -58,6 +59,13 @@ export function NoteScreen() {
       isNew={params.get('new') === '1'}
       line={Number(params.get('line')) || null}
       lineRequest={location.key}
+      cursor={cursorParam(params.get('cursor'))}
     />
   );
+}
+
+function cursorParam(value: string | null): number | null {
+  if (value === null || !/^\d+$/.test(value)) return null;
+  const offset = Number(value);
+  return Number.isSafeInteger(offset) ? offset : null;
 }

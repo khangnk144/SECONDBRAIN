@@ -44,6 +44,7 @@ describe('paste', () => {
     ['- [ ] việc', true],
     ['đoạn có **đậm**', true],
     ['xem [[Giải tích 1]]', true],
+    ['chữ <u>gạch chân</u> ở đây', true],
     ['một câu bình thường, không có gì đặc biệt.', false],
     ['giá 5*3 = 15', false],
   ])('looksLikeMarkdown(%s) = %s', (text, expected) => {
@@ -73,6 +74,17 @@ describe('paste', () => {
     expect(current.editor.state.doc.childCount).toBe(1);
     expect(paragraph.textContent).toBe('Trước đậm và  sau');
     expect(saved(current)).toBe('Trước **đậm** và [[Ghi chú]] sau\n');
+  });
+
+  it('underline survives a paste as plain Markdown text and as HTML', () => {
+    current = createTestEditor('A\n');
+    placeCaret(current.editor, 'A');
+    pasteText(current, ' và <u>gạch chân</u>');
+    expect(saved(current)).toBe('A và <u>gạch chân</u>\n');
+    newLineAtEnd(current.editor);
+    const html = '<p>Chữ <u>gạch</u> và <span style="text-decoration: underline">kẻ</span></p>';
+    current.view.pasteHTML(html, clipboard({ 'text/html': html }));
+    expect(saved(current)).toBe('A và <u>gạch chân</u>\n\nChữ <u>gạch</u> và <u>kẻ</u>\n');
   });
 
   it('plain text without Markdown is left to the default paste', () => {

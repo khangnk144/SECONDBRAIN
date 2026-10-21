@@ -1,0 +1,55 @@
+/*
+ * Compact day cells (tokens only): in narrow windows, or a narrow main column beside both panes,
+ * a cell shows dots and a count only. The titles stay in each day's accessible name.
+ */
+@media (max-width: 720px) {
+  .calendar-cell {
+    height: 64px;
+  }
+
+  .calendar-cell__items {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 3px;
+    padding: 0 2px;
+  }
+
+  .calendar-item {
+    padding: 0;
+  }
+
+  .calendar-item__title,
+  .calendar-cell__more {
+    display: none;
+  }
+
+  .calendar-cell.has-items .calendar-cell__count {
+    display: block;
+  }
+}
+
+@container calendar (max-width: 520px) {
+  .calendar-cell {
+    height: 64px;
+  }
+
+  .calendar-cell__items {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 3px;
+    padding: 0 2px;
+  }
+
+  .calendar-item {
+    padding: 0;
+  }
+
+  .calendar-item__title,
+  .calendar-cell__more {
+    display: none;
+  }
+
+  .calendar-cell.has-items .calendar-cell__count {
+    display: block;
+  }
+}

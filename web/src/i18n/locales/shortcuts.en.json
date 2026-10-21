@@ -1,0 +1,13 @@
+{
+  "toggleLeftPane": "Collapse or open the left pane",
+  "toggleRightPane": "Collapse or open the right pane",
+  "newNote": "New note",
+  "closeTab": "Close the current tab",
+  "previousTab": "Previous tab",
+  "nextTab": "Next tab",
+  "search": "Search notes and commands",
+  "dailyNote": "Open today's daily note",
+  "quickCapture": "Quick capture to Inbox",
+  "graph": "Open the brain map",
+  "shortcutSheet": "Show keyboard shortcuts"
+}

@@ -14,6 +14,8 @@ export interface OpenNoteOptions {
   newTab?: boolean;
   /** Freshly created note: the note screen focuses and selects the title. */
   isNew?: boolean;
+  /** Caret position from a template's `{{cursor}}` (UTF-16 offset in the file). */
+  cursor?: number | null;
 }
 
 interface TabsState {
@@ -156,7 +158,7 @@ export const useTabsStore = create<TabsState>((set, get) => {
     },
     openNote: (path, options = {}) => {
       place(path, options.newTab === true);
-      navigateTo(noteRoute(path, { isNew: options.isNew }));
+      navigateTo(noteRoute(path, { isNew: options.isNew, cursor: options.cursor }));
     },
     syncFromRoute: (path) => {
       const active = activeTab(get());

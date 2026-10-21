@@ -1,0 +1,39 @@
+{
+  "title": "Phím tắt",
+  "intro": "Phím tắt chỉ chạy khi cửa sổ app đang được chọn. Ctrl cũng là ⌘ trên máy Mac.",
+  "listLabel": "Danh sách phím tắt",
+  "close": "Đóng",
+  "or": "hoặc",
+  "groups": {
+    "app": "Trong cả app",
+    "editor": "Khi viết ghi chú",
+    "today": "Trên trang Hôm nay",
+    "calendar": "Trong Lịch",
+    "graph": "Trên Bản đồ não",
+    "local": "Ở các phần khác"
+  },
+  "local": {
+    "treeRename": "Đổi tên mục đang chọn trong cây thư mục",
+    "treeTrash": "Xóa mục đang chọn trong cây thư mục (vào thùng rác)",
+    "openNewTab": "Mở ghi chú đang chọn trong thẻ mới (cây thư mục, bảng tìm kiếm)",
+    "captureNewLine": "Xuống dòng khi ghi nhanh",
+    "closeOverlay": "Đóng bảng hoặc hộp thoại đang mở"
+  },
+  "editor": {
+    "tickTask": "Đánh dấu việc ở con trỏ là xong hoặc chưa xong (trên liên kết ghi chú thì mở trong thẻ mới, trên một thẻ #… thì tìm theo thẻ đó)"
+  },
+  "screens": {
+    "stripDay": "Sang ngày trước hoặc ngày sau trong dải ngày",
+    "stripEnds": "Về ngày đầu hoặc ngày cuối của dải ngày",
+    "stripOpen": "Mở danh sách việc của ngày đang chọn",
+    "calendarDay": "Sang ngày trước hoặc ngày sau",
+    "calendarWeek": "Lên tuần trước hoặc xuống tuần sau",
+    "calendarWeekEnds": "Về đầu tuần hoặc cuối tuần",
+    "calendarMonth": "Sang tháng trước hoặc tháng sau",
+    "calendarOpen": "Mở ngày đang chọn ở ngăn bên phải",
+    "graphReset": "Về khung nhìn ban đầu",
+    "graphZoomIn": "Phóng to",
+    "graphZoomOut": "Thu nhỏ",
+    "graphClear": "Bỏ chọn ghi chú"
+  }
+}

@@ -1,0 +1,34 @@
+/* The slim row above a daily note: previous day, the long date, next day (design.md §5). */
+.daily-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: 36px;
+}
+
+.daily-nav__date {
+  flex: 1 1 auto;
+  min-width: 0;
+  color: var(--ink-2);
+  font-size: 0.875rem;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.daily-nav__step {
+  flex: 0 0 auto;
+  gap: var(--space-2);
+  padding: 0 var(--space-3);
+}
+
+@media (max-width: 480px) {
+  .daily-nav {
+    flex-wrap: wrap;
+  }
+
+  .daily-nav__date {
+    flex-basis: 100%;
+    order: -2;
+  }
+}

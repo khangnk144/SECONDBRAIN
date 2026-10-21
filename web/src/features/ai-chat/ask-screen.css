@@ -1,0 +1,40 @@
+/* "Hỏi ghi chú của bạn": one calm column, left aligned like the other screens. Tokens only. */
+.ask-screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 720px;
+}
+
+.ask-screen__intro {
+  max-width: var(--measure);
+  color: var(--ink-2);
+}
+
+.ask-screen__starters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.ask-screen__starter {
+  min-height: 32px;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.875rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ask-screen__starter:hover {
+  background: var(--paper);
+}
+
+@media (pointer: coarse) {
+  .ask-screen__starter {
+    min-height: 40px;
+  }
+}

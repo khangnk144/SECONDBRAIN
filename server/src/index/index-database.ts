@@ -50,6 +50,13 @@ const CHECKED_TABLES = [
   'notes_fts_content',
   'notes_fts_docsize',
   'notes_fts_config',
+  'source_docs',
+  'source_pages',
+  'sources_fts_data',
+  'sources_fts_idx',
+  'sources_fts_content',
+  'sources_fts_docsize',
+  'sources_fts_config',
 ];
 
 function passesQuickCheck(db: Database.Database): boolean {

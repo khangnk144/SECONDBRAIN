@@ -12,18 +12,28 @@ import { appReady, cursorSettled, expectFocus } from './helpers/keyboard.js';
 test.afterEach(async ({ page }) => resetVault(await appApi(page)));
 
 const webSrc = path.join(process.cwd(), 'web', 'src');
-/** `{ id, keys }` of APP_SHORTCUTS plus the note screen's own registration (Alt+S). */
-function registry(): { id: string; keys: string }[] {
-  const pairs = (file: string) =>
-    [
-      ...readFileSync(path.join(webSrc, file), 'utf8').matchAll(
-        /id: '([^']+)',\s*keys: '([^']+)'/g,
-      ),
-    ].map((m) => ({ id: m[1]!, keys: m[2]! }));
-  return [...pairs('lib/shortcuts/use-app-shortcuts.ts'), ...pairs('features/note/note-view.tsx')];
+/**
+ * `{ id, keys }` of every `useShortcut` registration in `file`; `keys` may be a string or a
+ * constant exported from the same file (`keys: AI_MENU_KEYS`).
+ */
+function pairs(file: string): { id: string; keys: string }[] {
+  const source = readFileSync(path.join(webSrc, file), 'utf8');
+  const constants = new Map(
+    [...source.matchAll(/export const ([A-Z_]+) = '([^']+)'/g)].map((m) => [m[1]!, m[2]!]),
+  );
+  return [...source.matchAll(/id: '([^']+)',\s*keys: (?:'([^']+)'|([A-Z_]+))/g)].map((m) => ({
+    id: m[1]!,
+    keys: m[2] ?? constants.get(m[3]!) ?? `unknown constant ${m[3]}`,
+  }));
 }
-const APP_KEYS = registry().filter((s) => s.id !== 'source-mode');
-const NOTE_KEYS = registry();
+/** APP_SHORTCUTS: registered on every screen. */
+const APP_KEYS = pairs('lib/shortcuts/use-app-shortcuts.ts');
+/** Plus the note screen's own registrations: Alt+S and the AI menu's Alt+A (M6). */
+const NOTE_KEYS = [
+  ...APP_KEYS,
+  ...pairs('features/note/note-view.tsx'),
+  ...pairs('features/ai-actions/ai-toolbar-button.tsx'),
+];
 
 /** Playwright key name for a registry combination (`Ctrl+K` → `Control+k`). */
 const pwKeys = (keys: string) =>
@@ -144,6 +154,15 @@ test('every app shortcut fires on its screen (F22.1, browser tab)', async ({ pag
     await expect(rightPane).toHaveCount(0);
     await page.keyboard.press(keysOf('toggle-right-pane'));
     await expect(rightPane).toBeVisible();
+  });
+  await run('ai-actions-menu', async () => {
+    // AI is off on the shared server: Alt+A puts focus on the disabled "AI" button, whose
+    // description says why (with AI ready it opens the menu: ai-keyboard.spec.ts).
+    const button = page.getByRole('button', { name: 'AI cho đoạn đã chọn' });
+    await expect(button).toHaveAttribute('aria-disabled', 'true');
+    await page.keyboard.press(keysOf('ai-actions-menu'));
+    await expect(button).toBeFocused();
+    await expect(button).toHaveAccessibleDescription('Bật AI trong Cài đặt để dùng');
   });
   await run('source-mode', async () => {
     await page.keyboard.press(keysOf('source-mode'));

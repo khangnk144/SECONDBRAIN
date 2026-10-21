@@ -3,6 +3,7 @@ import type { RequestGate } from '../app-context/request-gate.js';
 import {
   decodedRequestPath,
   isApiPath,
+  isMcpPath,
   isWebSocketPath,
 } from '../security/host-and-origin-rules.js';
 import { sendApiError } from './api-errors.js';
@@ -36,7 +37,8 @@ export function registerRequestGate(
       await gate.pass();
       return;
     }
-    if (!isApiPath(path) || UNGATED.has(path.toLowerCase())) return;
+    // MCP calls reach the vault like API calls: they wait and are counted the same way.
+    if (!(isApiPath(path) || isMcpPath(path)) || UNGATED.has(path.toLowerCase())) return;
     const release = await gate.enter();
     releases.set(request, release);
     reply.raw.once('close', release);

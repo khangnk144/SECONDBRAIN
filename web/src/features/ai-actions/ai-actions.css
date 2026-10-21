@@ -1,0 +1,183 @@
+/*
+ * AI on a selection: the toolbar's "AI" menu button and the result panel (a non-modal popover
+ * below the selection; a sheet at the bottom on narrow screens). Colors only from tokens.css.
+ */
+.ai-toolbar-button {
+  gap: var(--space-1);
+  width: 3.5rem;
+  font-family: var(--font);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.ai-panel {
+  position: fixed;
+  z-index: 40;
+  /* Default place (no selection coordinates): top right of the writing area. */
+  top: 96px;
+  right: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: min(28rem, calc(100vw - 2 * var(--space-4)));
+  max-height: min(70vh, 34rem);
+  overflow-y: auto;
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-l);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.ai-panel[data-anchored] {
+  right: auto;
+}
+
+.ai-panel__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.ai-panel__icon {
+  flex: 0 0 auto;
+  color: var(--ink-2);
+}
+
+.ai-panel__title {
+  flex: 1;
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.ai-panel__proposal {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+  color: var(--ink-2);
+  font-size: max(12px, 0.78125rem);
+}
+
+.ai-panel__text {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.ai-panel__removed {
+  color: var(--ink-2);
+  text-decoration: line-through;
+}
+
+.ai-panel__added {
+  border-radius: var(--radius-s);
+  background: var(--accent-soft);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.ai-panel__status,
+.ai-panel__message,
+.ai-panel__notice {
+  margin: 0;
+}
+
+.ai-panel__hint {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: max(12px, 0.78125rem);
+}
+
+.ai-panel__notice {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-m);
+  background: var(--blush);
+  color: var(--ink);
+}
+
+.ai-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.ai-panel__choices {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ai-panel__choice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  min-height: 24px;
+  padding: var(--space-1) 0;
+  cursor: pointer;
+}
+
+.ai-panel__choice input {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  margin: 4px 0 0;
+  accent-color: var(--accent);
+}
+
+.ai-panel__choice-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ai-panel__choice-title {
+  font-weight: 500;
+}
+
+.ai-panel__choice-meta,
+.ai-panel__choice-reason {
+  color: var(--ink-2);
+  font-size: max(12px, 0.78125rem);
+}
+
+.ai-panel__tag {
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-s);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: max(12px, 0.78125rem);
+  line-height: 24px;
+}
+
+.ai-panel__new {
+  color: var(--ink-2);
+  font-size: max(12px, 0.78125rem);
+  line-height: 24px;
+}
+
+/* Narrow screens: a sheet along the bottom instead of a popover at the selection. */
+@media (max-width: 40rem) {
+  .ai-panel,
+  .ai-panel[data-anchored] {
+    top: auto !important;
+    right: var(--space-4);
+    bottom: var(--space-4);
+    left: var(--space-4) !important;
+    width: auto;
+  }
+}
+
+@media (pointer: coarse) {
+  .ai-panel__choice {
+    min-height: 40px;
+  }
+}

@@ -6,12 +6,13 @@ import { noteTitleFromPath, samePath } from '../../lib/vault-paths';
 /** SPEC F8: an empty query shows this many recently opened notes. */
 export const RECENT_NOTES_LIMIT = 8;
 
-/** A note row of the palette (search hit or recent note). */
+/** A note row of the palette (search hit or recent note); a PDF hit names its page. */
 export interface NoteHit {
   path: VaultPath;
   title: string;
   snippet: SearchResult['snippet'];
   matchedIn: SearchResult['matchedIn'];
+  page?: number;
 }
 
 export const toNoteHit = (result: SearchResult): NoteHit => ({
@@ -19,6 +20,7 @@ export const toNoteHit = (result: SearchResult): NoteHit => ({
   title: result.title,
   snippet: result.snippet,
   matchedIn: result.matchedIn,
+  ...(typeof result.page === 'number' ? { page: result.page } : {}),
 });
 
 /** A recently opened note (from the per-vault history) as a palette row. */

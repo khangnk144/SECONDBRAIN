@@ -32,5 +32,11 @@
     "class": {
       "archive": "include notes in Archive"
     }
+  },
+  "page": "p. {{page}}",
+  "meaningLabel": "By meaning",
+  "mode": {
+    "bm25": "Keyword search (BM25)",
+    "hybrid": "Keywords and meaning"
   }
 }

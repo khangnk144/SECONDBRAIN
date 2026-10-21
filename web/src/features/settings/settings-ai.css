@@ -1,0 +1,162 @@
+/* Settings AI, MCP and template updates (design.md §4, §5). Tokens only, no cards. */
+.settings-ai-status {
+  max-width: var(--measure);
+  font-size: 0.875rem;
+  color: var(--ink);
+}
+
+.settings-input--budget {
+  width: 12rem;
+}
+
+.settings-ai-progress {
+  max-width: 22rem;
+}
+
+/* "Tìm theo nghĩa" sits inside the AI section: an H3 and a thin rule, no box. */
+.settings-subsection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--line);
+}
+
+.settings-subsection__title {
+  font-size: 1.0625rem;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+.settings-subsection__intro {
+  margin-top: calc(-1 * var(--space-4));
+  font-size: 0.875rem;
+}
+
+.settings-steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  max-width: var(--measure);
+  margin: 0;
+  padding-left: var(--space-6);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+/* A read-only snippet: monospace only inside code (design.md §3); long lines scroll. */
+.settings-snippet {
+  max-width: 100%;
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  white-space: pre;
+}
+
+.settings-snippet:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.settings-details {
+  max-width: 100%;
+}
+
+.settings-details > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 32px;
+  list-style: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.settings-details > summary::-webkit-details-marker {
+  display: none;
+}
+
+/* The caret points right when closed and down when open. */
+.settings-details__caret {
+  flex: 0 0 auto;
+  color: var(--ink-2);
+}
+
+.settings-details[open] > summary .settings-details__caret {
+  transform: rotate(90deg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .settings-details__caret {
+    transition: transform var(--dur) var(--ease);
+  }
+}
+
+.settings-details > summary:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-s);
+}
+
+.settings-details__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+}
+
+/* Consent dialogs: a little wider than a confirm, plain lists, the lead in ink (it matters). */
+.consent-dialog {
+  width: min(560px, 100%);
+}
+
+.consent-dialog__lead {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+.consent-dialog__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.consent-dialog__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.consent-dialog__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding-left: var(--space-6);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.consent-dialog__note {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+@media (pointer: coarse) {
+  .settings-details > summary {
+    min-height: 40px;
+  }
+}

@@ -5,6 +5,7 @@ import type { SettingsPatch, SettingsResponse } from '../../lib/api/settings-typ
 import type { FetchMock } from '../../lib/testing/fetch-mock';
 import { DEFAULT_UI_PREFS } from '../../lib/ui-prefs';
 import { DialogHost } from '../dialogs/dialog-host';
+import { applyAiPatch, installAiRoutes, type StatusExtras } from './ai-settings-test-kit';
 import { SettingsScreen } from './settings-screen';
 
 export function settingsResponse(overrides: Partial<SettingsResponse> = {}): SettingsResponse {
@@ -33,16 +34,26 @@ export function settingsResponse(overrides: Partial<SettingsResponse> = {}): Set
       folders: null,
       enabled: false,
       embeddings: false,
+      consent: null,
+      embeddingsConsent: null,
+      embeddingProvider: 'openai',
+      monthlyTokenLimit: 2_000_000,
     },
+    mcp: { allowNoteEdits: false },
     ...overrides,
   };
 }
 
 /**
  * A settings "server": GET answers `state`, PUT merges the patch into it like the real route (a
- * key is never echoed, only its last 4 characters).
+ * key is never echoed, only its last 4 characters; AI consent rules as on the server). The AI
+ * status, MCP config and template routes answer from the same state.
  */
-export function installSettingsRoutes(mock: FetchMock, initial: SettingsResponse) {
+export function installSettingsRoutes(
+  mock: FetchMock,
+  initial: SettingsResponse,
+  statusExtras?: () => StatusExtras,
+) {
   const state = { current: initial };
   mock.on('GET /api/settings', () => ({ body: state.current }));
   mock.on('PUT /api/settings', (call) => {
@@ -55,18 +66,16 @@ export function installSettingsRoutes(mock: FetchMock, initial: SettingsResponse
       next.configuredPort = patch.port;
       next.restartRequired = patch.port !== next.port;
     }
+    if (patch.mcp?.allowNoteEdits !== undefined) next.mcp.allowNoteEdits = patch.mcp.allowNoteEdits;
     if (patch.ai) {
-      const { apiKey, ...rest } = patch.ai;
-      next.ai = { ...next.ai, ...rest };
-      if (apiKey) {
-        next.ai.keys[apiKey.provider] = apiKey.value
-          ? { set: true, last4: `…${apiKey.value.slice(-4)}` }
-          : { set: false, last4: null };
-      }
+      const ai = applyAiPatch(next.ai, patch.ai);
+      if (!('provider' in ai)) return ai; // refused: nothing changes
+      next.ai = ai;
     }
     state.current = next;
     return { body: next };
   });
+  installAiRoutes(mock, state, statusExtras);
   mock.on('GET /api/sample-data', { body: { offered: false, present: false } });
   mock.on('GET /api/tree', {
     body: {

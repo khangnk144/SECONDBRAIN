@@ -38,6 +38,11 @@ export function setVaultSwitchedHandler(handler: ((vaultId: string | null) => vo
   vaultSwitchedHandler = handler;
 }
 
+/** For requests made without the client: the server said another vault is open now. */
+export function notifyVaultSwitched(vaultId: string | null): void {
+  vaultSwitchedHandler?.(vaultId);
+}
+
 /** Headers for a request made without the client (token and vault id). */
 export function apiAuthHeaders(): Record<string, string> {
   const headers: Record<string, string> = {};

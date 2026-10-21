@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
+import { AskSection } from '../ai-chat/ask-section';
 import { LocalGraphSection } from '../graph/local-graph-section';
 import { HistorySection } from '../history/history-section';
 import { MentionsSection } from '../mentions/mentions-section';
@@ -44,6 +45,7 @@ export function NotePanel() {
           )}
         </div>
       ) : null}
+      <AskSection path={path} />
       <OutlineSection
         path={path}
         content={note?.content ?? null}

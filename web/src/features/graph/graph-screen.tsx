@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router';
+import { GraphAiTouchPanel } from './graph-ai-touch-panel';
 import { GraphCanvas, type GraphCanvasHandle } from './graph-canvas';
 import { GraphLegend } from './graph-legend';
 import { indexOfPath } from './graph-model';
@@ -10,6 +11,7 @@ import { GraphSidePanel } from './graph-side-panel';
 import { GraphViewControls } from './graph-view-controls';
 import { KEY_ZOOM_FACTOR } from './graph-viewport';
 import { openGraphNode } from './open-graph-node';
+import { useAiTouchPlayback } from './use-ai-touch-playback';
 import { useGraphData } from './use-graph-data';
 import { useGraphScene } from './use-graph-scene';
 import { useGraphViewKeys } from './use-graph-view-keys';
@@ -25,11 +27,12 @@ export function GraphScreen() {
   const [params] = useSearchParams();
   const focus = params.get('focus');
   const debugFps = params.get('debug') === 'fps';
-  const { state, retry } = useGraphData();
+  const { state, retry, reload } = useGraphData();
   const data = state.status === 'ready' ? state.data : null;
   const { scene, first } = useGraphScene(data);
   const model = scene?.model ?? null;
   const reducedMotion = usePrefersReducedMotion();
+  const aiTouch = useAiTouchPlayback(model, reducedMotion, reload);
   const [selection, setSelection] = useState<GraphSelection | null>(null);
   const [fps, setFps] = useState<number | null>(null);
   const canvasRef = useRef<GraphCanvasHandle>(null);
@@ -93,6 +96,7 @@ export function GraphScreen() {
           onBackgroundClick={() => setSelection(null)}
           onNodeOpen={(id) => openGraphNode(id)}
           onFps={debugFps ? onFps : undefined}
+          aiTouches={aiTouch.plays}
         />
         {loading ? (
           <p role="status" className="graph-screen__message">
@@ -137,6 +141,13 @@ export function GraphScreen() {
         }
         onOpen={(id) => openGraphNode(id)}
         onClear={clearSelection}
+        aiTouch={
+          <GraphAiTouchPanel
+            model={model}
+            announcement={aiTouch.announcement}
+            onOpen={(path) => openGraphNode(path)}
+          />
+        }
       />
     </div>
   );

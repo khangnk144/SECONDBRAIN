@@ -15,12 +15,16 @@ const HAS_BASE_CHAR = /[\p{L}\p{N}]/u;
  * A term made only of combining marks would become an empty prefix phrase in FTS5, which makes
  * the whole AND match nothing, so such terms are dropped.
  */
-export function searchTerms(text: string): string[] {
+export function searchTerms(
+  text: string,
+  options: { max?: number; skip?: (term: string) => boolean } = {},
+): string[] {
+  const max = options.max ?? MAX_TERMS;
   const out: string[] = [];
   for (const word of normalizeForIndex(text).match(WORD) ?? []) {
-    if (!HAS_BASE_CHAR.test(word) || out.includes(word)) continue;
+    if (!HAS_BASE_CHAR.test(word) || out.includes(word) || options.skip?.(word)) continue;
     out.push(word);
-    if (out.length === MAX_TERMS) break;
+    if (out.length === max) break;
   }
   return out;
 }
@@ -34,6 +38,12 @@ export function foldedTerms(terms: readonly string[]): string[] {
   }
   // Longest first so a highlight covers `giai` rather than stopping at the `gia` of another term.
   return out.sort((a, b) => b.length - a.length);
+}
+
+/** `"dao"* OR "ham"*`: any term may match (AI retrieval ranks by bm25 instead of filtering). */
+export function ftsAnyTermExpression(terms: readonly string[]): string | null {
+  if (terms.length === 0) return null;
+  return terms.map((term) => `"${term.replaceAll('"', '""')}"*`).join(' OR ');
 }
 
 /**

@@ -4,6 +4,7 @@ import { BackupExportRow } from './backup-export-row';
 import { BackupRestoreForm } from './backup-restore-form';
 import { IndexRebuildRow } from './index-rebuild-row';
 import { SettingsSection } from './settings-section';
+import { TemplatesUpgradeRow } from './templates-upgrade-row';
 import { LogsRevealRow, SampleDataRow, TemplatesRestoreRow } from './vault-maintenance-rows';
 import { VaultSwitchForm } from './vault-switch-form';
 
@@ -28,6 +29,7 @@ export function VaultSection({ vault }: { vault: VaultInfo | null }) {
         <BackupRestoreForm />
       </div>
       <TemplatesRestoreRow />
+      <TemplatesUpgradeRow />
       <SampleDataRow />
       <LogsRevealRow />
     </SettingsSection>

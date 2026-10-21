@@ -6,7 +6,7 @@ import type { HubSocket } from '../../src/ws/websocket-hub.js';
 import { makeTempDir, removeDir } from '../helpers/test-environment.js';
 import { createVaultTestApp, type VaultTestApp } from './vault-test-app.js';
 
-const PORT = 47611;
+const PORT = 47735;
 const KEY = 'sk-proj-ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789wxyz';
 
 /** Records every hub broadcast like a connected WebSocket client. */
@@ -82,7 +82,12 @@ describe('GET/PUT /api/settings (F18.1, F18.2, F18.6)', () => {
         folders: null,
         enabled: false,
         embeddings: false,
+        consent: null,
+        embeddingsConsent: null,
+        embeddingProvider: 'openai',
+        monthlyTokenLimit: 2_000_000,
       },
+      mcp: { allowNoteEdits: false },
     });
   });
 
@@ -121,8 +126,16 @@ describe('GET/PUT /api/settings (F18.1, F18.2, F18.6)', () => {
     [{ reminders: { time: '8:00' } }, 'reminders.time', 'pattern'],
     [{ port: 1023 }, 'port', 'out-of-range'],
     [{ port: 47.5 }, 'port', 'type'],
-    [{ ai: { enabled: true } }, 'ai.enabled', 'ai-not-available'],
-    [{ ai: { embeddings: true } }, 'ai.embeddings', 'ai-not-available'],
+    [{ ai: { enabled: true } }, 'ai.enabled', 'consent-required'],
+    [{ ai: { embeddings: true } }, 'ai.embeddings', 'consent-required'],
+    [{ ai: { enabled: true, embeddingsConsent: true } }, 'ai.enabled', 'consent-required'],
+    [{ ai: { consent: 'yes' } }, 'ai.consent', 'type'],
+    [{ ai: { embeddingProvider: 'anthropic' } }, 'ai.embeddingProvider', 'not-allowed'],
+    [{ ai: { monthlyTokenLimit: 9_999 } }, 'ai.monthlyTokenLimit', 'out-of-range'],
+    [{ ai: { monthlyTokenLimit: 100_000_001 } }, 'ai.monthlyTokenLimit', 'out-of-range'],
+    [{ ai: { monthlyTokenLimit: 50_000.5 } }, 'ai.monthlyTokenLimit', 'type'],
+    [{ mcp: { allowNoteEdits: 'true' } }, 'mcp.allowNoteEdits', 'type'],
+    [{ mcp: { other: true } }, 'mcp.other', 'unknown-field'],
     [
       { ai: { apiKey: { provider: 'openai', value: 'short' } } },
       'ai.apiKey.value',

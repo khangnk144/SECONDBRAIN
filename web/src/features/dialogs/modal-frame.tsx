@@ -11,6 +11,8 @@ export interface ModalFrameProps {
   role?: 'dialog' | 'alertdialog';
   onCancel: () => void;
   initialFocus?: RefObject<HTMLElement | null>;
+  /** A tall dialog read from the top: opening does not scroll it to the focused button. */
+  startAtTop?: boolean;
   className?: string;
   children: ReactNode;
 }
@@ -26,11 +28,12 @@ export function ModalFrame({
   role = 'dialog',
   onCancel,
   initialFocus,
+  startAtTop,
   className,
   children,
 }: ModalFrameProps) {
   const ref = useRef<HTMLDivElement>(null);
-  useFocusTrap(ref, { onEscape: onCancel, initialFocus });
+  useFocusTrap(ref, { onEscape: onCancel, initialFocus, startAtTop });
   useEffect(() => suspendShortcuts(), []);
   useEffect(() => holdToastTimers(), []);
 

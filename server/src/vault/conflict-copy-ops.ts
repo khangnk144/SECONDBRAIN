@@ -3,8 +3,11 @@ import { writeStateFile, type VaultCore } from './vault-core.js';
 import { readAtRevision, replaceContent } from './vault-write-ops.js';
 import type { ConflictCopyResult, TrashEntry, TrashReason, VaultPath } from './vault-types.js';
 
-/** Why the bytes on disk are kept: "keep mine" of the conflict UI, or a history restore. */
-export type KeptCopyReason = Extract<TrashReason, 'conflict' | 'history-restore'>;
+/** Why the bytes on disk are kept: "keep mine", a history restore or a template upgrade. */
+export type KeptCopyReason = Extract<
+  TrashReason,
+  'conflict' | 'history-restore' | 'template-upgrade'
+>;
 
 /**
  * "Keep mine" of the conflict UI (SPEC §4.10): the version on disk (at `expectedRevision`, the one

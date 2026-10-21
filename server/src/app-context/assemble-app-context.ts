@@ -3,6 +3,7 @@ import type { AppLogger } from '../logging/rotating-file-logger.js';
 import { createSampleDataService } from '../sample-data/sample-data-service.js';
 import type { PendingJournalEntry, VaultService } from '../vault/vault-types.js';
 import type { VaultWatcher } from '../vault/vault-watcher.js';
+import type { ServerEvent } from '../ws/server-events.js';
 import type { WebSocketHub } from '../ws/websocket-hub.js';
 import { errorCodeOf } from './app-context-errors.js';
 import type { AppContext } from './create-app-context.js';
@@ -20,6 +21,8 @@ export interface ContextParts {
   now: () => Date;
   /** Journal entries reported at boot (clients get them on connect). */
   pending: PendingJournalEntry[];
+  /** Subscribers of the router's client events (`AppContext.onEvent`). */
+  listeners?: Set<(event: ServerEvent) => void>;
 }
 
 /** The running context: rebuild control, journal broadcasts and an orderly shutdown. */
@@ -29,6 +32,7 @@ export function assembleAppContext(parts: ContextParts): AppContext {
   let rebuilding: Promise<void> | null = null;
   let closing: Promise<void> | null = null;
   const plugins = new Map<string, VaultPluginInstance>();
+  const listeners = parts.listeners ?? new Set<(event: ServerEvent) => void>();
 
   return {
     vault,
@@ -73,6 +77,12 @@ export function assembleAppContext(parts: ContextParts): AppContext {
     attachPlugin(name, instance) {
       plugins.set(name, instance);
     },
+    onEvent(listener) {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    },
     close() {
       closing ??= (async () => {
         // Plugins first (their timers may still read the index or write through the vault).
@@ -84,6 +94,7 @@ export function assembleAppContext(parts: ContextParts): AppContext {
             );
         }
         plugins.clear();
+        listeners.clear();
         await watcher?.close();
         await vault.close(); // queued writes finish and still reach the router
         await router.close();

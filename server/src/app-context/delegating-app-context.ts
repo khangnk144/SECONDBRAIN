@@ -40,6 +40,7 @@ export function createDelegatingContext(parts: {
     greet: (send) => current().greet(send),
     plugin: <T extends VaultPluginInstance>(name: string) => current().plugin<T>(name),
     attachPlugin: (name, instance) => current().attachPlugin(name, instance),
+    onEvent: (listener) => current().onEvent(listener),
     close: parts.close,
   };
 }

@@ -62,6 +62,13 @@ export interface AppContext {
   plugin<T extends VaultPluginInstance>(name: string): T | null;
   /** Host only: records a started plugin; `close()` closes plugins first, in reverse order. */
   attachPlugin(name: string, instance: VaultPluginInstance): void;
+  /**
+   * Every event the vault's change router sends to clients (`note:*`, `folder:changed`, sent once
+   * the change is in the index), for per-vault services such as text extraction and embedding
+   * jobs. Listeners must be quick and must not throw (errors are logged as codes). Returns an
+   * unsubscribe function.
+   */
+  onEvent(listener: (event: ServerEvent) => void): () => void;
   close(): Promise<void>;
 }
 
@@ -102,7 +109,17 @@ export async function createAppContext(options: AppContextOptions): Promise<AppC
   logger.info(`Vault ${vault.id} opened; ${created.length} missing standard entries created.`);
 
   const hub = options.hub ?? createWebSocketHub();
-  const broadcast = (event: ServerEvent) => hub.broadcast(event);
+  const listeners = new Set<(event: ServerEvent) => void>();
+  const broadcast = (event: ServerEvent) => {
+    hub.broadcast(event);
+    for (const listener of listeners) {
+      try {
+        listener(event);
+      } catch (error) {
+        logger.warn(`A vault event listener failed (${errorCodeOf(error)}).`);
+      }
+    }
+  };
   const early: VaultChange[] = [];
   let forward: (change: VaultChange) => void = (change) => early.push(change);
   let index: IndexService | null = null;
@@ -165,6 +182,7 @@ export async function createAppContext(options: AppContextOptions): Promise<AppC
       logger,
       now,
       pending,
+      listeners,
     });
   } catch (error) {
     await watcher?.close().catch(() => undefined);

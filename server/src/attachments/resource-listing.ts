@@ -24,6 +24,15 @@ export interface ResourceFile {
   /** Last modification, epoch milliseconds. */
   mtime: number;
   referencedBy: ResourceReference[];
+  /** Extracted-text state of a supported source file (SPEC F30.2); null otherwise. */
+  text: ResourceText | null;
+}
+
+/** "Không đọc được chữ" in the Documents view = quality `none` (reason says why). */
+export interface ResourceText {
+  quality: 'ok' | 'low' | 'none' | 'pending';
+  pages: number | null;
+  reason: string | null;
 }
 
 export interface FileFacts {
@@ -52,11 +61,13 @@ export function resourcePaths(rows: GraphRows): VaultPath[] {
 
 /**
  * Builds the listing; `facts` holds size and mtime of each path still on disk (a path missing
- * from it vanished meanwhile and is left out). Sorted by folder, then name (Vietnamese order).
+ * from it vanished meanwhile and is left out), `texts` the text state of supported sources.
+ * Sorted by folder, then name (Vietnamese order).
  */
 export function buildResourceListing(
   rows: GraphRows,
   facts: ReadonlyMap<VaultPath, FileFacts>,
+  texts: ReadonlyMap<VaultPath, ResourceText> = new Map(),
 ): ResourceFile[] {
   const paths = resourcePaths(rows);
   const references = new Map<VaultPath, ResourceReference[]>(paths.map((path) => [path, []]));
@@ -79,6 +90,7 @@ export function buildResourceListing(
       size: fact.size,
       mtime: fact.mtimeMs,
       referencedBy: references.get(path)!.sort(byTitleThenPath),
+      text: texts.get(path) ?? null,
     });
   }
   return files.sort(

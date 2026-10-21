@@ -8,10 +8,12 @@
  * Startup failures are also written to <home>/.secondbrain/logs/server.log, which the launcher
  * shows when the server does not come up.
  */
+import { createAiPlugin } from './ai/ai-plugin.js';
 import { CliUsageError } from './config/cli-args.js';
 import { createHistoryPlugin } from './git/history-plugin.js';
 import { createRemindersPlugin } from './reminders/reminders-plugin.js';
 import { startServer } from './runtime/start-server.js';
+import { createSourcesPlugin } from './sources/sources-plugin.js';
 
 const EXIT_OK = 0;
 const EXIT_FAILURE = 1;
@@ -22,7 +24,12 @@ const EXIT_USAGE = 64;
 async function main(): Promise<number> {
   const argv = process.argv.slice(2);
   // Per-vault background services: they start with each opened vault and stop before it closes.
-  const plugins = [createRemindersPlugin(), createHistoryPlugin()];
+  const plugins = [
+    createSourcesPlugin(),
+    createRemindersPlugin(),
+    createHistoryPlugin(),
+    createAiPlugin(),
+  ];
   const result = await startServer({ argv, echoLogs: argv.includes('--dev'), plugins });
 
   if (result.kind === 'already-running') {

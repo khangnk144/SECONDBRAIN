@@ -37,6 +37,7 @@ Notion chậm và cần mạng. Obsidian mạnh nhưng phải cài plugin và c�
 | **Tài liệu** | Kéo thả hoặc dán PDF, ảnh, slide vào ghi chú, tên file luôn là duy nhất. Ảnh hiện ngay trong ghi chú. PDF mở trong app, có lật trang, phóng to và chọn chữ. Trang **Tài liệu** cho biết ghi chú nào đang nhắc đến từng file. |
 | **Bản đồ não** | Mỗi ghi chú là một chấm sáng, màu theo thư mục. Bấm vào một chấm là tia sáng chạy sang các ghi chú kề, có ngăn tìm để dùng hoàn toàn bằng bàn phím. Mỗi ghi chú có bản đồ cục bộ riêng. |
 | **Tìm và ghi nhanh** | `Ctrl+K` tìm toàn bộ ghi chú không cần dấu (kể cả *đ*), lọc theo `tag:`, `folder:`, `due:7d`, và gõ `>` để chạy lệnh. `Alt+Q` ghi nhanh vào Inbox, `Alt+T` mở ghi chú hằng ngày. |
+| **AI (M6)** | **Hỏi AI** về ghi chú của mình: câu hỏi về deadline lấy đúng danh sách của trang Hôm nay, câu hỏi khác trả lời từ vài đoạn ghi chú liên quan kèm link về ghi chú gốc. Bôi đen một đoạn rồi `Alt+A` để tóm tắt, viết lại, giải thích, gợi ý link hay tag. AI gợi ý chỗ để cho ghi chú trong Inbox. Tìm theo nghĩa. Tìm được cả chữ trong PDF. Dùng khóa API của bạn (Anthropic, OpenAI hoặc Gemini); không gửi gì đi trước khi bạn đồng ý, có hạn mức token mỗi tháng. **Nối Claude Desktop qua MCP** để Claude nạp paper thành wiki nghiên cứu, với quyền do app kiểm soát; bản đồ não sáng lên những trang AI vừa cập nhật. |
 | **An toàn dữ liệu** | Ghi nguyên tử. Mỗi lần ghi đều kiểm tra phiên bản, nên khi file vừa bị sửa ở nơi khác app hiện màn hình xung đột ba bản (gốc, trên đĩa, của bạn). Có thùng rác, nhật ký thao tác khôi phục sau sự cố, và bản nháp giữ chữ khi tab bị tắt đột ngột. **Lịch sử phiên bản** dùng git, **sao lưu** ra file zip. |
 | **Giao diện** | Mặc định tối ("Đêm tím"), có chế độ sáng, ba bộ màu (Dâu tằm, Hoa đào, Oải hương), ba cỡ chữ, tiếng Việt và tiếng Anh, tất cả đổi tức thì. Cài được thành app có cửa sổ và icon riêng, mở được cả khi mất mạng. |
 
@@ -164,8 +165,8 @@ Mỗi mốc chỉ được tính là xong khi mọi tiêu chí nghiệm thu đ�
 |---|---|---|
 | M0 đến M3 | Khung app, kho ghi chú và chỉ mục, editor và liên kết, Hôm nay, lịch, tìm kiếm, bản đồ não | ✅ |
 | M4 | Nhắc nhở Windows, Cài đặt, tài liệu và trình xem PDF, lịch sử phiên bản, sao lưu, cài app (PWA) | ✅ bản 1.0 |
-| M6 | AI: chat với ghi chú của mình kèm trích dẫn, tìm theo nghĩa, gợi ý liên kết và tag, dọn Inbox giúp (AI đề xuất, bạn đồng ý mới đổi); nối Claude qua MCP để nạp paper thành wiki nghiên cứu; đọc chữ trong PDF | Tiếp theo |
-| M5 | Bản đồ não tua thời gian, trang tổng hợp học kỳ, weekly review, sao lưu tự động, giao diện điện thoại, bản `.exe` không cần Node.js | Sau đó |
+| M6 | AI: chat với ghi chú của mình kèm trích dẫn, tìm theo nghĩa, gợi ý liên kết và tag, dọn Inbox giúp (AI đề xuất, bạn đồng ý mới đổi); nối Claude qua MCP để nạp paper thành wiki nghiên cứu; đọc chữ trong PDF | ✅ |
+| M5 | Bản đồ não tua thời gian, trang tổng hợp học kỳ, weekly review, sao lưu tự động, giao diện điện thoại, bản `.exe` không cần Node.js | Tiếp theo |
 
 ## Gặp sự cố
 

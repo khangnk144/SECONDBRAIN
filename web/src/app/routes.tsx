@@ -15,6 +15,7 @@ import { RemindersScreen } from '../features/reminders/reminders-screen';
 import { FileViewerScreen } from '../features/viewer/file-viewer-screen';
 import { FileReferencesPanel } from '../features/viewer/file-references-panel';
 import { ResourcesScreen } from '../features/resources/resources-screen';
+import { AskScreen } from '../features/ai-chat/ask-screen';
 
 /**
  * Route handle read by the layout:
@@ -58,6 +59,7 @@ export const appRoutes: RouteObject[] = [
       // `#/file?path=<encoded vault path>`: the viewer tab of a vault file (PDF).
       { path: 'file', element: <FileViewerScreen />, handle: fileHandle },
       { path: 'resources', element: <ResourcesScreen /> },
+      { path: 'ask', element: <AskScreen /> },
       { path: '*', element: <NotFoundScreen /> },
     ],
   },

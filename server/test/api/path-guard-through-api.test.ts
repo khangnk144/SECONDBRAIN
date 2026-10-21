@@ -112,6 +112,7 @@ describe('path guard through the API (F1.5)', () => {
         ['GET', `/api/history?${q(bad)}`, undefined],
         ['GET', `/api/history/version?${q(bad)}&commit=abcdef1`, undefined],
         ['POST', '/api/history/restore', { path: bad, commit: 'abcdef1', ...rev }],
+        ['POST', '/api/templates/upgrade', { paths: [bad] }],
       ] as const) {
         await expectInvalidPath(await t.call(method, url, payload));
       }

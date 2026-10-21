@@ -142,7 +142,10 @@ function inbox(today: string): SampleFile[] {
   ];
 }
 
-/** The last three Daily notes: a task due today, an overdue one, and the ambiguous link. */
+/**
+ * The last three Daily notes: a task due today (naming its course as a link, as AI answers about
+ * a course find it best), an overdue one, and the ambiguous link.
+ */
 function dailyNotes(today: string): SampleFile[] {
   const daily = (offset: number, body: string[]): SampleFile => {
     const date = addDays(today, offset);

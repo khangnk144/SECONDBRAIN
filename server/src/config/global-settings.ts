@@ -4,9 +4,11 @@ import { generateSessionToken, isWellFormedToken } from '../security/session-tok
 import { DEFAULT_PORT } from './cli-args.js';
 import {
   normalizeAi,
+  normalizeMcp,
   normalizeReminders,
   normalizeSystem,
   type AiSettings,
+  type McpSettings,
   type ReminderSettings,
   type SystemSettings,
 } from './settings-sections.js';
@@ -34,6 +36,7 @@ export interface GlobalSettings {
   reminders: ReminderSettings;
   system: SystemSettings;
   ai: AiSettings;
+  mcp: McpSettings;
   [extra: string]: unknown;
 }
 
@@ -94,6 +97,7 @@ export function normalizeSettings(raw: Record<string, unknown>): GlobalSettings 
     reminders: normalizeReminders(raw.reminders),
     system: normalizeSystem(raw.system),
     ai: normalizeAi(raw.ai),
+    mcp: normalizeMcp(raw.mcp),
   };
 }
 

@@ -1,0 +1,93 @@
+{
+  "nav": "Hỏi AI",
+  "command": "Hỏi AI…",
+  "assistant": "Trợ lý AI",
+  "you": "Bạn hỏi",
+  "conversation": "Cuộc trò chuyện với trợ lý AI",
+  "appNote": "Thông báo của app",
+  "sent": "Câu hỏi của bạn và vài đoạn trích từ ghi chú liên quan được gửi đến {{provider}} để trả lời.",
+  "sentHybrid": "Câu hỏi cũng được gửi tới {{provider}} để tìm theo nghĩa.",
+  "screen": {
+    "title": "Hỏi ghi chú của bạn",
+    "intro": "Trợ lý AI trả lời từ ghi chú trong các thư mục AI được đọc, ngắn gọn, và dẫn link về ghi chú gốc.",
+    "modeBm25": "Tìm theo từ khóa (BM25).",
+    "modeHybrid": "Tìm theo từ khóa và theo nghĩa.",
+    "startersLabel": "Gợi ý câu hỏi",
+    "starterDue": "Tuần này có gì đến hạn?",
+    "starterToday": "Hôm nay còn việc gì?",
+    "starterSummary": "Tóm tắt những gì mình đã ghi về …",
+    "starterSummaryText": "Tóm tắt những gì mình đã ghi về "
+  },
+  "panel": {
+    "title": "Hỏi",
+    "intro": "Hỏi về ghi chú này và các ghi chú liên quan.",
+    "outOfScope": "Ghi chú này nằm ngoài các thư mục AI được đọc, nên trợ lý chỉ dùng các ghi chú khác."
+  },
+  "input": {
+    "label": "Câu hỏi của bạn",
+    "placeholder": "Hỏi gì đó về ghi chú của bạn…",
+    "hint": "Enter để gửi, Shift+Enter để xuống dòng.",
+    "ask": "Hỏi",
+    "stop": "Dừng",
+    "newConversation": "Cuộc trò chuyện mới",
+    "tooLong": "Câu hỏi dài quá: tối đa {{max}} ký tự."
+  },
+  "turn": {
+    "waiting": "Đang đọc ghi chú…",
+    "stopped": "Đã dừng.",
+    "retry": "Thử lại",
+    "answered": "Trợ lý AI đã trả lời.",
+    "fromToday": "Lấy từ trang Hôm nay",
+    "save": "Lưu thành ghi chú"
+  },
+  "sources": {
+    "toggle": "Nguồn ({{count}})",
+    "page": "tr. {{page}}"
+  },
+  "notices": {
+    "citation-rejected": "Một vài trích dẫn không khớp ghi chú nào nên đã được bỏ.",
+    "uncited": "Câu trả lời này chưa dẫn nguồn, hãy kiểm tra lại.",
+    "out-of-scope-hidden": "Một số mục nằm ngoài thư mục AI được đọc nên không được hiện."
+  },
+  "notReady": {
+    "disabled": "AI chưa bật. Bạn bật được trong Cài đặt, mục AI.",
+    "reconsent": "Bạn vừa đổi nhà cung cấp AI. Mở Cài đặt, mục AI, bấm Xem và đồng ý.",
+    "noKey": "Để hỏi ngay trong app, AI cần một khóa API của Anthropic (Claude), OpenAI hoặc Google Gemini, nhập trong Cài đặt, mục AI.",
+    "routeA": "Dùng tài khoản Claude của bạn qua Claude Desktop: xem mục Kết nối Claude trong Cài đặt.",
+    "budget": "Đã dùng hết hạn mức tháng này ({{limit}} token). Tăng hạn mức trong Cài đặt hoặc chờ sang tháng.",
+    "openSettings": "Mở Cài đặt AI",
+    "openMcp": "Mở Kết nối Claude"
+  },
+  "errors": {
+    "network": "Không kết nối được với {{provider}}. Kiểm tra mạng rồi thử lại.",
+    "auth": "Khóa API không đúng hoặc đã hết hạn. Kiểm tra lại trong Cài đặt.",
+    "rateLimit": "{{provider}} đang nhận quá nhiều yêu cầu. Đợi một chút rồi thử lại.",
+    "quota": "Tài khoản {{provider}} đã hết hạn mức hoặc hết tiền nạp. Kiểm tra tài khoản trên trang của {{provider}} rồi thử lại.",
+    "timeout": "{{provider}} trả lời quá lâu nên app đã thôi chờ. Thử lại sau ít phút.",
+    "server": "{{provider}} đang gặp sự cố. Thử lại sau ít phút.",
+    "badRequest": "{{provider}} không nhận yêu cầu này. Kiểm tra tên mô hình trong Cài đặt rồi thử lại.",
+    "malformed": "Câu trả lời từ {{provider}} bị ngắt giữa chừng. Thử lại.",
+    "provider": "{{provider}} chưa trả lời được. Thử lại sau ít phút.",
+    "overBudget": "Câu hỏi này cần nhiều token hơn phần hạn mức còn lại của tháng. Tăng hạn mức trong Cài đặt hoặc chờ sang tháng.",
+    "appOffline": "Không kết nối được với máy chủ của app. Kiểm tra Second Brain đang chạy rồi thử lại.",
+    "incomplete": "Câu trả lời bị ngắt giữa chừng. Thử lại.",
+    "unavailable": "AI chưa sẵn sàng cho kho ghi chú này. Thử lại sau ít phút.",
+    "generic": "Trợ lý AI chưa trả lời được. Thử lại."
+  },
+  "save": {
+    "title": "Lưu câu trả lời thành ghi chú",
+    "body": "Câu hỏi và câu trả lời được lưu thành một ghi chú mới, có ghi rõ đây là câu trả lời của trợ lý AI.",
+    "folderLabel": "Lưu vào",
+    "root": "Thư mục gốc",
+    "confirm": "Lưu",
+    "saving": "Đang lưu…",
+    "cancel": "Hủy",
+    "done": "Đã lưu thành ghi chú",
+    "open": "Mở",
+    "failed": "Không lưu được câu trả lời. Thử lại."
+  },
+  "today": {
+    "label": "AI",
+    "labelFull": "Trợ lý AI:"
+  }
+}

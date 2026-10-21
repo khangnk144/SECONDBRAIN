@@ -50,6 +50,7 @@ describe('sample data set content', () => {
   });
 
   it('has a Daily task due today and an overdue one, and an ambiguous [[Ghi chú]] link', () => {
+    // The course is written as a link, as AI answers about a course find it best.
     expect(text(`Daily/${TODAY}.md`)).toContain(`- [ ] Nộp bài tập Xác suất thống kê 📅 ${TODAY}`);
     expect(text(`Daily/${addDays(TODAY, -1)}.md`)).toMatch(
       new RegExp(`- \\[ \\] .* 📅 ${addDays(TODAY, -1)}`),
@@ -90,6 +91,10 @@ describe('sample data set content', () => {
       ]) {
         expect(content).toContain(section);
       }
+      // As the CLAUDE.md paper format asks: the PDF linked first under Liên quan.
+      const pdfName = source.slice(source.lastIndexOf('/') + 1);
+      expect(content).toContain(`## Liên quan\n\n- Nguồn: [[${pdfName}]]\n`);
+      expect(content.match(/\[\[[^\]]+\.pdf\]\]/g)).toHaveLength(1);
     }
   });
 

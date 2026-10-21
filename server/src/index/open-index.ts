@@ -17,6 +17,7 @@ import type { IndexService, RebuildProgress } from './index-types.js';
 import type { SwapFaults } from './database-swap.js';
 import { rebuildAndSwap } from './rebuild-and-swap.js';
 import { SerialQueue } from './serial-queue.js';
+import { applySourceText } from './source-text-rows.js';
 
 export interface OpenIndexOptions {
   vault: VaultService;
@@ -170,6 +171,15 @@ class SqliteIndexService extends IndexQueries implements IndexService {
       }
     });
     return this.pendingRebuild;
+  }
+
+  setSourceText(p: VaultPath, contentHash: string, pages: readonly string[] | null): Promise<void> {
+    return this.queue.enqueue(async () => {
+      const live = this.live;
+      if (this.closed || !live) return;
+      const known = (file: VaultPath) => live.writer.fileState(file) !== null;
+      applySourceText(live.db, live.writer.sources, known, { path: p, contentHash, pages });
+    });
   }
 
   isRebuilding(): boolean {

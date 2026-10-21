@@ -23,7 +23,13 @@ export type ServerEvent =
   /** Another vault is open now: windows keep their drafts and reload. */
   | { type: 'vault:switched'; vaultId: string }
   /** The UI settings changed (in any window): apply them here at once. */
-  | { type: 'settings:changed'; ui: UiPrefs };
+  | { type: 'settings:changed'; ui: UiPrefs }
+  /** M6: an MCP ingest finished; `outputs` in the order the AI wrote them (graph effect). */
+  | { type: 'ai:touched'; source: VaultPath; outputs: VaultPath[] }
+  /** M6: AI settings, budget or embedding progress changed; refetch `GET /api/ai/status`. */
+  | { type: 'ai:status'; embeddings: { state: string; done: number; total: number } }
+  /** M6: the text of a source file was read (Documents view, search). */
+  | { type: 'source:extracted'; path: VaultPath; quality: 'ok' | 'low' | 'none' };
 
 /**
  * `resync` is synthetic: emitted by the client after a reconnect, because events may have been

@@ -177,9 +177,17 @@ export interface RelinkPlan {
   unresolvable?: UnresolvableRelink[];
 }
 
-/** `history-restore`: the text a version restore replaced, when it could not be committed first. */
+/**
+ * `history-restore`: the text a version restore replaced, when it could not be committed first.
+ * `template-upgrade`: a bundled template or `CLAUDE.md` replaced by "Cập nhật mẫu".
+ */
 export type TrashReason =
-  'user' | 'conflict' | 'sample-data' | 'restore-collision' | 'history-restore';
+  | 'user'
+  | 'conflict'
+  | 'sample-data'
+  | 'restore-collision'
+  | 'history-restore'
+  | 'template-upgrade';
 
 /** `vault/.secondbrain/trash/<id>/meta.json` (SPEC §4.11). */
 export interface TrashMeta {
@@ -246,6 +254,12 @@ export interface VaultService extends VaultEditingOperations {
   readBytes(path: VaultPath): Promise<BytesRead>;
   /** Guarded absolute disk path of an existing file (for streaming in GET /files). */
   resolveExisting(path: VaultPath): Promise<string>;
+  /**
+   * The vault path a request path really reaches, existing or not: folder links (symlinks,
+   * junctions) and Windows short names resolved, true on-disk spelling (NFC). Callers that judge
+   * a write by its path compare it with the request (beyond NFC and letter case, it is a link).
+   */
+  realPath(path: VaultPath): Promise<VaultPath>;
 
   /** Creates a new file; EXISTS if the path (or a case/NFC variant on Windows) exists. */
   create(path: VaultPath, content: string | Uint8Array): Promise<WriteResult>;

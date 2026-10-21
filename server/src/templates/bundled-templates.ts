@@ -72,11 +72,15 @@ created: {{date}}
 ## Ôn tập
 `;
 
+// Section order asked for by the owner (problem, existing methods, gap, method, data,
+// experiments…); bumping this text needs its previous hash in `template-upgrades.ts`.
 const paper = `---
 type: paper
 authors: []
 year:
+venue:
 url:
+datasets: []
 source:
 source_hash:
 pages_covered:
@@ -91,11 +95,40 @@ created: {{date}}
 
 {{cursor}}
 
+## Bài toán
+
+**Input:**
+
+**Output:**
+
+## Các cách hiện có
+
+## Khoảng trống và động lực
+
 ## Phương pháp
+
+**Ý chính:**
+
+**Chi tiết:**
+
+## Dữ liệu
+
+- Tên:
+- Kích thước:
+- Nguồn:
+
+## Thí nghiệm
+
+- So sánh với (baseline):
+- Thước đo (metric):
 
 ## Kết quả (theo tác giả)
 
+## Hạn chế và hướng tiếp theo
+
 ## Nhận xét
+
+## Liên quan
 `;
 
 const researchProject = `---

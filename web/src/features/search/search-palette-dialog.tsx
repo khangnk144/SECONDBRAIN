@@ -129,8 +129,16 @@ export function SearchPaletteDialog() {
         optionId={optionId}
         onActivate={setActive}
         onChoose={choose}
+        semanticLabel={t('search.meaningLabel')}
       />
-      <PaletteKeyHints id={hintsId} mode={view.mode} />
+      <div className="palette-footer">
+        <PaletteKeyHints id={hintsId} mode={view.mode} />
+        {view.mode === 'notes' ? (
+          <p className="palette-mode">
+            {t(model.byMeaning ? 'search.mode.hybrid' : 'search.mode.bm25')}
+          </p>
+        ) : null}
+      </div>
     </ModalFrame>
   );
 }

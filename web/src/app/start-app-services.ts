@@ -1,3 +1,4 @@
+import { startAiTouchSync } from '../features/graph/graph-ai-touch';
 import { startJournalSync, useJournalStore } from '../features/journal/journal-store';
 import { startPermissionWatch } from '../features/reminders/notification-permission';
 import { startReminderNotifications } from '../features/reminders/start-reminder-notifications';
@@ -5,6 +6,7 @@ import { startRemindersSync, useRemindersStore } from '../features/reminders/rem
 import { startSettingsSync } from '../features/settings/settings-sync';
 import { showVaultOpenedNotice } from '../features/settings/vault-opened-notice';
 import { startLanguageFollow } from '../i18n/follow-language';
+import { startAiStatusSync } from '../lib/ai-status-store';
 import { setApiVaultId } from '../lib/api';
 import { startLinkTargetsSync, useLinkTargetsStore } from '../lib/link-targets-store';
 import { usePanesStore } from '../lib/panes-store';
@@ -49,6 +51,8 @@ export function startAppServices(token: string | null): () => void {
     startReminderNotifications(),
     startPermissionWatch(),
     startLanguageFollow(),
+    startAiStatusSync(),
+    startAiTouchSync(),
   ];
   stops.push(startServerEvents(token));
   // The page was reloaded into another vault from Settings: say that it is open now.

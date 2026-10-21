@@ -391,3 +391,115 @@ Context: SPEC §0 rule 2 and §12 build M5 (Phase 2) before M6 (Phase 3, AI). Af
 Decision: The next milestone is **M6** (F32 MCP server with permissions and the ingest manifest, F33 in-app AI, F34 graph "AI touched" effect), then **M5** (Phase 2). Pulled forward from M5 because M6 needs it: **F30 PDF text extraction** (`read_source` returns page-numbered text and `extractionQuality`; F32.4 depends on it). Left for M5: the "não hôm nay" widget on Today (F24) – F34's count in that widget is added when the widget exists; F34's graph animation and side-panel list ship with M6. Milestone ids stay as in SPEC; version tags are chosen at each release (M4 = v1.0). Every other rule (DoD, AI proposes and the user accepts, nothing sent without consent) is unchanged.
 Why: The owner's explicit choice; M6 depends on Phase 1 only, apart from PDF text extraction.
 Spec sections affected: §0 rule 2, §12 (order), F30 (moved), F34 (widget count deferred).
+
+## 2026-10-21 M6: building blocks and process model
+Context: SPEC §8 lists `@modelcontextprotocol/sdk`, `@anthropic-ai/sdk`, `openai` and `pdf-parse`; rule 10 asks for the simplest implementation; F32 requires one process owning every job.
+Decision:
+- **`@modelcontextprotocol/sdk` 1.32.1** with **`zod` 4.6.5** for the MCP server (Streamable HTTP, stateless: a new `McpServer` + transport per POST, `enableJsonResponse`; GET/DELETE `/mcp` → 405) and the stdio bridge.
+- **No provider SDKs:** Anthropic, OpenAI and Gemini are called with `fetch` (one module each, one shared SSE parser), so all three behave the same, the network is injectable in tests and nothing new reaches the bundle. Base URLs can be overridden by `SB_AI_{ANTHROPIC,OPENAI,GEMINI}_URL` (e2e mock server only).
+- **No `pdf-parse`:** PDF text uses the `pdfjs-dist` 6.4.299 **legacy build** already used by the viewer (now also a server dependency), inside a `worker_threads` worker (1 GB heap cap, console discarded, `useWasm: false`, CMaps/fonts from the package folder, never the network).
+- Per-vault services get two hooks: `AppContext.onEvent(listener)` (every client event of the change router, after the index has the change) and `VaultPluginHost.globalStateDir` (`<home>/.secondbrain`, for the machine-wide AI usage file). Plugin order: sources, reminders, history, ai.
+- The stdio entry `server/dist/mcp-stdio.js` is a **thin bridge** (stdio ↔ `http://127.0.0.1:<port>/mcp` with the session token as Bearer); it imports no vault, index, watcher, reminder, history or AI module (tested), starts the server through the launcher (`start-hidden.vbs`) when it is down, and never writes anything but protocol to stdout.
+Why: Fewer moving parts, one process, every network call testable.
+Spec sections affected: §8 (library list), F30, F32, F33.
+
+## 2026-10-21 M6: PDF text (F30, pulled forward from M5)
+Decision:
+- Supported: `.pdf` (page by page), `.md`/`.txt`/`.html` (one page). Caps: 50 MB file, 500 pages (more → first 500, quality at most `low`, reason `too-large`), 60 s per file, 100,000 characters per PDF page. Quality: `none` below 20 non-space characters (or encrypted/damaged/timeout), `low` when ≥ 30 % of pages have < 40, else `ok`. A worker crash is `none`/`damaged`. Every outcome is cached by content hash under `.secondbrain/cache/sources/` (deleting it retries everything).
+- Title: PDF metadata title unless it looks like a file name ("Microsoft Word - …", `untitled`), else the file name; the fallback is applied at read time.
+- Background: supported files in `3 Resources` and every PDF anywhere, 2 s debounce per file, a cheap rescan after folder changes and index rebuilds. Only PDFs under `3 Resources` are **searchable** (attachments are not searchable, §4.2); attachment PDFs can still be read by `read_source`.
+- Index schema 6: `source_docs`, `source_pages`, `sources_fts` (same normalization as notes); rebuild refills from the cache. Search: note title matches first, then note bodies and PDF pages merged by bm25 (note first on a tie), one result per PDF with its best `page`; `folder:` applies to PDFs, `tag:`/`type:`/`due:` exclude them.
+- `IndexService.retrieve()` for AI: OR of up to 32 terms (stop words vi+en removed), note titles weighted ×10, one hit per PDF.
+Why: PDF text must help search and AI without ever slowing a save or the UI.
+Spec sections affected: §4.2 (raw sources searchable incl. PDF text), §4.14, F15, F30.
+
+## 2026-10-21 M6: MCP server (F32)
+Decision:
+- Permission table in one pure module; refusals are `FORBIDDEN` with `details.rule` (`claude-md-read-only`, `sources-read-only`, `templates-read-only`, `attachments-read-only`, `wiki-index-via-wiki_index_update`, `wiki-log-append-only`, `wiki-pages-only`, `inbox-create-only`, `daily-today-only`, `wiki-via-write_wiki_page`, `no-create-outside-wiki-and-inbox`, `note-edits-off`, `notes-only`). **`write_note`** is added to SPEC's tool list: the only way to change a user/archived note, and only with Settings "Cho phép AI sửa ghi chú cá nhân" (`mcp.allowNoteEdits`, default off); never creates.
+- Every tool result is bounded (owner question about context size): `read_note` and `read_source` at most 60,000 characters per call with `nextOffset`/`nextPage`; `list_notes` default 200 (max 500) with `nextOffset`; `search_notes` default 20; `wiki_lint` lists at most 100 entries each plus full `counts`.
+- Ingest manifest `state/ingest/<sourceId>.json`; run id `<sourceId>.<ulid>`; ≤ 20 runs kept (the newest success never dropped); a running run blocks `ingest_begin` even with `force` (force only overrides "already ingested"); runs older than 1 h are failed once per vault before its first MCP request. `ingest_complete`: source changed/missing → run failed (`source-changed`); quality `none` → `NEEDS_REVIEW`, run failed; missing outputs leave the run running; the **server** appends `## [YYYY-MM-DD] ingest | <title>` and broadcasts `ai:touched`; a second call for a succeeded run returns the same result and appends nothing.
+- Appends (`wiki_log_append`, `append_to_daily`) only add bytes at the end at the revision just read (retried on conflict), keep the file's line endings; a log line is 1–500 characters with no line break of any kind.
+- `wiki_lint`: links from `index.md`, `log.md` and `CLAUDE.md` do not count against "orphan"; missing concepts count ghost-link occurrences (case-insensitive); works without the sources plugin.
+- Logs: `MCP <tool> <CODE> <ms> ms`, never arguments. MCP is not limited by the in-app AI folder scope: it is the owner's own Claude working on her vault under the permission table.
+- `GET /api/mcp/config` gives the Claude Desktop snippets (stdio with the absolute `node` and bridge paths, `--home` only for an unusual home; HTTP with `"type": "http"` and the token). On Windows the bridge starts the server through the launcher, which uses the default home.
+Why: Permissions enforced by the server, not by prompts; an interrupted ingest can always be retried without duplicates.
+Spec sections affected: F32 (tool list + `write_note`, interpretations), §9.
+
+## 2026-10-21 M6: in-app AI platform (F33)
+Decision:
+- Settings: `ai.consent`/`ai.embeddingsConsent` = `{ at, provider } | null` (a consent counts only for the provider it named; changing provider asks again), `ai.embeddingProvider` (`openai` | `gemini`; Anthropic has no embeddings API), `ai.monthlyTokenLimit` (default 2,000,000; 10,000–100,000,000), `mcp.allowNoteEdits`. Switching on without a counting consent → 400 `consent-required`. Changing a provider without naming a model resets that model to the new provider's default.
+- Defaults (one file, easy to change; checked against the providers' docs on 2026-10-21): chat `claude-haiku-5-5`, `gpt-5-mini`, `gemini-3.5-flash-lite`; embeddings `text-embedding-3-small` (512 dims), `gemini-embedding-001` (768 dims).
+- Errors: `AI_DISABLED` 409, `AI_NO_KEY` 409, `AI_BUDGET` 429, `AI_PROVIDER_ERROR` 502 with `reason` (`network`, `timeout`, `auth`, `rate-limit`, `quota`, `bad-request`, `server`, `malformed`, `aborted`); provider text, keys and prompts never in errors or logs. 30 s to the first byte, 120 s total.
+- Budget: machine-wide `<home>/.secondbrain/ai-usage.json` per local month (13 months kept); a request is refused when used + estimate would pass the limit; embeddings count too.
+- Scope: default every top folder except `3 Resources`, `4 Archive`, `Templates`, `Attachments`, plus root notes; templates, attachments and control docs (except `wiki/index.md`) are never sent.
+- Embeddings: `.md` notes only (PDF text stays BM25); the embedded text is title (+ heading) + chunk; 5 minutes after a note's last change; backlog at once on enable/model change; batches ≤ 64; backoff 1 min, 5 min, 30 min, 2 h; `auth`/`quota` stop until settings change; a batch that would pass the limit pauses the jobs. Embeddings also need AI enabled: AI off means no network at all.
+- `POST /ai/embeddings/rebuild` answers like `assertReady('embed')`.
+Why: Nothing leaves the machine without consent, a key and budget; costs stay predictable.
+Spec sections affected: F18, F33 (interpretations).
+
+## 2026-10-21 M6: in-app AI answers (F33, S5)
+Decision:
+- Intent: one JSON call (English prompt, temperature 0) with today's date, the week and the in-scope course/project titles; strict validation; local rules decide when the call fails or the JSON is unusable. With no in-scope note at all, the rules decide and nothing is sent.
+- Deadline questions: the server renders the list from the deadline service (grouped by day, overdue first with how late, links `[[path|title]]`), the model only writes ≤ 2 sentences from the counts; if that call fails the list is still sent. "This week" = Today's `deadlinesThisWeek` items. Items of out-of-scope notes are dropped with a count and notice.
+- Text questions: OR-BM25 candidates → chunk BM25 (terms under 5 letters whole-word only) + embeddings when available → reciprocal-rank fusion → 12 chunks, ≤ 24,000 characters; control docs are never sources. Citations `[S<n>]` become links of the retrieved set only; model-written `[[…]]` links are kept only when they resolve inside that set; PDF citations add "(tr. n)".
+- Actions: summarize/improve/explain; link suggestions from ≤ 15 note candidates; tag suggestions counted over in-scope notes (her spelling first); Inbox placement only for notes directly in `0 Inbox` (`keep: true` = leave it). Names use the quick-capture rules (own sanitizer, not cut at 40). Nothing changes on the server: the web applies accepted proposals through the normal operations.
+- Today line: one sentence ≤ 160 characters, cached per vault, day and language; GET never generates.
+- `POST /ai/search` needs AI ready even in BM25 mode.
+Why: Exact answers for dates, honest citations, proposals only.
+Spec sections affected: F33 (interpretations), §9 (routes added: `/ai/today-summary`, `/ai/save-answer`, `/ai/search`).
+
+## 2026-10-21 M6: paper format and template upgrade (owner request)
+Context: the owner asked for richer paper notes: the problem with input/output, how existing methods solve it in plain words, the gap that motivates the paper, datasets, experiments, limits.
+Decision: `Templates/Paper.md` and the paper-page format in the `CLAUDE.md` skeleton use Tóm tắt, Bài toán (Input, Output), Các cách hiện có, Khoảng trống và động lực, Phương pháp, Dữ liệu, Thí nghiệm, Kết quả (theo tác giả), Hạn chế và hướng tiếp theo, Nhận xét / Nhận xét của AI, Liên quan (SPEC's four wiki section names kept exactly). "Cập nhật mẫu" (`GET /api/templates/upgrades`, `POST /api/templates/upgrade`) replaces `Templates/Paper.md` and `CLAUDE.md` only when they are byte-identical to a previously bundled version; the old copy goes to the trash (reason `template-upgrade`); edited files are never touched.
+Why: The owner's request without ever overwriting what she wrote (G5).
+Spec sections affected: F14, F32 (page format, additive).
+
+## 2026-10-21 M6: AI in the web app (chat, editor, Inbox, Settings, graph, search)
+Context: SPEC F33/F34 and design.md screen 7 describe the surfaces; details are open.
+Decision:
+- **Chat ("Hỏi")**: the Ask screen `#/ask` (sidebar "Hỏi AI", palette "Hỏi AI…") and a collapsible "Hỏi" section first in the note panel (one conversation per note, nothing persisted, streams live outside components so collapsing never cuts an answer). History sent: finished pairs only, last 10 messages, each ≤ 8,000 characters. Answers render through a small Markdown subset (never HTML); links resolve against the answer's own set first, then the vault; PDF links open at "(tr. n)". Every AI message is labelled "Trợ lý AI"; when ready, the screen says what is sent to which provider. design.md's "Mở trong Claude" button is not offered (a page cannot reliably open Claude Desktop): the no-key state explains API key vs "Kết nối Claude". The SSE `error` event carries `details.reason` (a code only).
+- **Today line**: shown only when AI is ready, once per local day per window (`POST` at most once, never retried), labelled "AI"; nothing on errors or offline.
+- **Editor AI menu**: a toolbar button "AI" (Sparkle) before the source-mode switch and `Alt+A`; disabled with its reason (readiness, scope, source mode, read-only, no selection). What is sent: the selection as Markdown (words only inside one block; a verbatim block's source). Results in a non-modal popover (a bottom sheet below 40rem): summaries/explanations insert `> **Tóm tắt (AI):** …` / `> **Giải thích (AI):** …` as one undo step; "Thay" refuses when the selected text changed; links in title form (path form when not unique); tags merged into `tags:` through the revision-checked property patch (diacritic-insensitive dedupe, her spelling kept).
+- **Inbox tidying**: "Gợi ý chỗ để" (note header and tree menu) and the palette's "Dọn Inbox với AI" dialog (one request at a time, never automatic); move + rename together is **one** `POST /note/rename` into the new folder (one journal entry, one undo toast); only checked parts are applied.
+- **Settings**: turning AI or embeddings on always opens its consent dialog (focus starts on "Để sau"; Esc/outside = "Để sau"), turning off keeps the stored consent; the consent copy also names deadline titles (Today line) and, for embeddings, search text and re-sending edited notes; the folder list gains "Ghi chú ở gốc kho" (root notes) and hides Templates/Attachments (never sent); monthly limit accepts "2.000.000"; the MCP section shows the stdio snippet in full and the HTTP one collapsed with the token as `••••last4` on screen (full only when copied); "Cập nhật mẫu" sits under "Khôi phục mẫu gốc".
+- **Graph "AI vừa chạm"**: each `ai:touched` event is kept (last 5) and played once, the first time the map shows it: the source grows in at the nearest canvas edge (drawn as its own hollow dot when not on the map), signals leave 150 ms apart (300 ms travel), each page lit 10 s with a halo and its name; the rest is not dimmed; one refetch when nodes are missing; the side panel lists "AI vừa cập nhật" (newest first, pages in the AI's order) with a polite live-region sentence; reduced motion lights everything at once.
+- **Palette**: footer label "Tìm theo từ khóa (BM25)" or "Từ khóa và theo nghĩa" (hybrid and ready); a "Theo nghĩa" group at the end (one row per file, deduplicated, filters never sent, aborted on change); PDF hits show "tr. N" and open the viewer at that page (`#/file?path=…&page=N`, applied once per navigation, invalid → page 1).
+- **Documents**: the text state shows only when not `ok` ("Đang đọc chữ…", "Đọc được một phần chữ", "Không đọc được chữ" + a hint by reason).
+- Shared client: `ApiRequestInit.signal` (AI actions and semantic search abort through the shared client, so a vault switch is handled everywhere).
+Why: AI proposes and she decides; every surface says what it sends; nothing animates without meaning.
+Spec sections affected: F8, F15, F16, F18, F22 (`Alt+A`), F33, F34, design.md §4 screen 7 (interpretations).
+
+## 2026-10-21 M6 review round A: rules added while fixing confirmed findings
+Context: An independent security/privacy review proved one High, five Medium and four Low defects; every fix has a regression test.
+Decision:
+- **Linked paths**: every MCP write (and "Lưu thành ghi chú") checks the **real** place of the path (`VaultService.realPath`: folder links, junctions, Windows 8.3 names resolved) and refuses with `FORBIDDEN`, rule `linked-path`, when it differs from the request beyond NFC/case. The owner's own app writes (capture, daily, notes) still follow links inside the vault, unchanged.
+- **Budget reservations**: requests in flight hold their estimate (chat and embeddings); the check counts recorded + held tokens and is repeated when the stream starts (`AI_BUDGET` from the stream then). The estimate stays characters/4 + the output allowance; Vietnamese text runs ~2–3 characters per token, so one admitted request may overrun by the difference (providers report the real usage, which is what is recorded).
+- **PDF worker memory**: heap 512 MB + young 32 MB; decoded buffers capped at 256 MB + 3× the file size by a 20 ms watchdog; exhaustion → `none`/`too-large`. On Linux freed worker memory is kept by the allocator (RSS levels off around 0.6–1.1 GB after repeated bombs); a child process would isolate it fully (later, if needed).
+- `htmlToText` is a linear scan (identical output); citations are validated **without honouring escapes** and re-checked until stable; the web link parser follows the server's rules exactly.
+- The default AI scope never includes hidden top folders (`.name`); an explicit list can.
+- Ingest: `logLine` is stored before the append; a retry appends only when the log does not already end with it. Server-written log lines turn control characters and Unicode line/paragraph separators into spaces.
+- The Today line counts only in-scope items. One usage store per file; usage arriving after a vault switch goes to the current store (or straight into the file).
+Why: Permissions must hold whatever the folder structure; the cap and the server must hold under load and hostile files.
+Spec sections affected: §5, F30, F32, F33 (interpretations).
+
+## 2026-10-21 M6 review round B: rules added while fixing confirmed findings (server side)
+Decision:
+- **Topics in deadline questions**: an item belongs to a course/project when its note is that note, has `course:` pointing to it, links to it, **or** the topic title appears as whole words in the item's or its note's title (case- and diacritic-insensitive, đ = d). When no in-range item matches, the answer says "Không thấy việc nào gắn với <X>. Đây là <n> việc trong khoảng này:" and lists all of them (no model call). Known limits: a short title can over-match ("Toán" in "an toàn"); a Daily note linking a course counts for all its tasks.
+- Structured rows show links inside task text as plain words (one link per row, to the item's note); Daily tasks say "(trong daily note dd/mm)"; English dates use the long format ("Wednesday, October 21"). Zero items → notice `no-items` (no "Lưu thành ghi chú").
+- `out-of-scope-hidden` on text answers only when hidden matches come from outside `3 Resources` (excluded by default anyway).
+- `/ai/search` lists vector hits only from cosine 0.25 (search only; to recheck with real keys, Gemini's baseline is higher); snippets are the index's plain text.
+- The stdio bridge prefers the port of a live server from `<home>/.secondbrain/server.json` (pid alive and `/api/health` answers), else `settings.json`.
+- The paper-page format asks for `- Nguồn: [[<file>.pdf]]` first under `## Liên quan`, so the brain map keeps the paper → PDF edge; the previous skeleton hash is a known old version for "Cập nhật mẫu".
+Spec sections affected: S5, F32 (page format), F33 (interpretations).
+
+## 2026-10-21 M6 review round B: rules added while fixing confirmed findings (web side)
+Decision:
+- Every "sent to" sentence also names the embedding provider when search by meaning is on (chat, note panel, "Gợi ý liên kết", Inbox dialogs, embeddings consent); other editor actions do no retrieval and do not say it.
+- `no-consent` (provider changed) has its own text everywhere: "Bạn vừa đổi nhà cung cấp AI. Mở Cài đặt, mục AI, bấm Xem và đồng ý."
+- Focus traps wrap Tab/Shift+Tab from an element outside the focusable list and keep Esc working while focus is outside (innermost trap only). Consent dialogs open at the top (`preventScroll`).
+- Text the app writes (not found, zero items, errors before any AI text) is not labelled "Trợ lý AI" and offers no "Lưu thành ghi chú"; citations in text answers render grouped in parentheses as accent links.
+- Provider names come from one place ("Anthropic (Claude)", "OpenAI", "Google Gemini"); Vietnamese says "khóa API" everywhere.
+- On an Inbox note, "Gợi ý chỗ để" sits under the title; the title input ends with an ellipsis instead of being cut.
+- The graph's ghost source dot and its name keep clear of the legend and other overlays.
+- Documents: `low` says pages have little text (pictures, slides), the scan wording is kept for `none`.
+Spec sections affected: §5 (accessibility), F33, F34, design.md §7 (interpretations).

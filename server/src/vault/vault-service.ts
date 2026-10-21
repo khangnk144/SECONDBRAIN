@@ -10,7 +10,7 @@ import {
 } from './rename-ops.js';
 import { listTrash, purgeTrash, restoreTrashEntry, trashFiles } from './trash-ops.js';
 import { createUlidGenerator } from './ulid.js';
-import type { VaultCore, VaultWarning } from './vault-core.js';
+import { resolvePath, type VaultCore, type VaultWarning } from './vault-core.js';
 import type { VaultFaults } from './vault-faults.js';
 import { buildStatePaths } from './vault-layout.js';
 import {
@@ -87,6 +87,7 @@ export function createVaultService(options: VaultServiceOptions): VaultService {
     readBytes: (path) => open(() => readVaultBytes(core, path)),
     resolveExisting: (path) => open(() => resolveExistingFile(core, path)),
     resolveEntry: (path) => open(() => resolveExistingEntry(core, path)),
+    realPath: (path) => open(async () => (await resolvePath(core, path, 'real')).vaultPath),
     create: (path, content) => createFile(core, path, content),
     createUnique: (path, content) => createUniqueFile(core, path, content),
     createFolder: (path) => createVaultFolder(core, path),

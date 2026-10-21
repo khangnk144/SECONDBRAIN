@@ -56,6 +56,9 @@ export async function createVaultTestApp(
     drainTimeoutMs?: number;
     /** Adds test-only routes before the app is ready. */
     beforeReady?: (app: FastifyInstance) => void | Promise<void>;
+    /** App folder and install root as the MCP config snippet should see them. */
+    appDir?: string;
+    homeDir?: string;
   } = {},
 ): Promise<VaultTestApp> {
   const home = options.home ?? makeTempDir('sb vault home Ghi chú');
@@ -96,6 +99,8 @@ export async function createVaultTestApp(
     vaultRoutes: options.vaultRoutes,
     runAtLogin: options.runAtLogin,
     platform: options.platform,
+    appDir: options.appDir,
+    homeDir: options.homeDir,
   });
   await options.beforeReady?.(app);
   if (options.listen) await app.listen({ host: '127.0.0.1', port });

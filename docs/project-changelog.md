@@ -10,6 +10,15 @@ One entry per milestone (newest first). Format:
 - Known gaps: …
 ```
 
+## [M6] 2026-10-21 — AI: MCP server for Claude Desktop, in-app AI, "AI vừa chạm", PDF text
+- Added: PDF text extraction (worker thread with size/page/time/memory caps, quality flag, derived cache), PDF pages in search with page numbers, viewer opening at a page, text state in "Tài liệu"; index schema 6 with `retrieve()` for AI.
+- Added: MCP server (`/mcp` Streamable HTTP with Bearer token, stdio bridge `server/dist/mcp-stdio.js` for Claude Desktop), 19 tools behind a server-enforced permission table, ingest manifest with idempotent completion and server-written log lines, `wiki_lint`, resources and prompts from `CLAUDE.md`, bounded results; Settings "Kết nối Claude (MCP)" with the config snippet and "Cho phép AI sửa ghi chú cá nhân".
+- Added: in-app AI (Anthropic/OpenAI/Gemini over `fetch`): consent dialogs, folder scope, monthly token limit with reservations, status; chat "Hỏi" (Ask screen, note panel, palette) with structured deadline answers and validated citations, "Lưu thành ghi chú"; editor "AI" menu (`Alt+A`); Inbox tidying with journaled apply and undo; Today assistant line; search by meaning (embeddings with consent, quiet period, backoff, rebuild).
+- Added: graph "AI vừa chạm" effect and accessible "AI vừa cập nhật" list.
+- Changed (owner request): richer paper format in `Templates/Paper.md` and the `CLAUDE.md` page format; "Cập nhật mẫu" upgrades unedited old versions (old copy to the trash).
+- Fixed (review rounds): writes through folder links, cost cap under concurrency, PDF deflate bombs, quadratic HTML stripping, escaped citation links, hidden folders in AI scope, duplicate ingest log line, course filter for plain-word tasks, honest "sent to" copy incl. the embedding provider, focus traps, re-consent wording, styling and copy details.
+- Known gaps: see `MILESTONE-6.md` (Claude Desktop connection, one real ingest and a real API key are manual owner checks).
+
 ## [M4] 2026-10-21 — Reminders, settings, attachments + PDF viewer, history, launcher + PWA (v1.0 candidate)
 - Added: server reminder scheduler (3 days, 1 day, due day at the configured time; catch-up after sleep or a restart; one summary toast for bursts) with Windows toasts (PowerShell, node-notifier fallback) and the in-app "Nhắc nhở" list, badge and one Web Notification across windows when no toast was shown.
 - Added: Settings screen (appearance applied live, reminder time, vault switch in process, rebuild with progress, backup export/restore, template restore, sample-data delete, log folder, run at login, port, install app, quit, AI keys stored masked) and `GET/PUT /api/settings`; vault host with per-vault plugins and an `x-sb-vault-id` guard.

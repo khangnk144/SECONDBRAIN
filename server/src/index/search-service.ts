@@ -1,10 +1,14 @@
 /**
  * Palette search: filter tokens + diacritic-insensitive prefix full-text search. Notes whose
- * TITLE contains every term rank first, then body matches by bm25; snippets come from the
- * original text. An empty query lists the most recently modified searchable notes.
+ * TITLE contains every term rank first; then note bodies and PDF pages (`3 Resources` PDFs, one
+ * result per PDF naming its best page) merged by bm25 rank. The two bm25 values come from two FTS
+ * tables with their own statistics: comparable in scale, not exactly; title matches never mix in.
+ * `folder:` also filters PDFs; `tag:`/`type:`/`due:` exclude them (PDFs have none). Snippets come
+ * from the original text. An empty query lists the most recently modified searchable notes.
  */
 import type Database from 'better-sqlite3';
 import { foldForMatch, normalizeForIndex } from '../markdown/normalize-text.js';
+import { classifyPath, noteTitleFromPath, topFolderOfPath } from '../markdown/content-classes.js';
 import type { ContentClass } from '../markdown/markdown-types.js';
 import type { VaultPath } from '../vault/vault-types.js';
 import { foldedTerms, ftsMatchExpression, searchTerms } from './fts-query.js';
@@ -12,6 +16,7 @@ import { SEARCHABLE_SQL } from './index-reader.js';
 import type { SearchQuery, SearchResult } from './index-types.js';
 import { hasFilters, parseSearchQuery, type ParsedSearch } from './search-query-parser.js';
 import { buildSnippet } from './search-snippet.js';
+import { bestSourcePages, sourcePageText, type SourcePageHit } from './source-text-search.js';
 import { buildTermPattern } from './term-pattern.js';
 
 /** Recents shown for an empty query (the client replaces them with recently opened notes). */
@@ -120,23 +125,59 @@ export function runSearch(deps: SearchDeps, query: SearchQuery): SearchResult[] 
   const titleMatch = ftsMatchExpression(terms, 'title_norm') as string;
   const anyMatch = ftsMatchExpression(terms) as string;
   const titleRows = ftsRows(db, titleMatch, filters, parsed.limit);
-  const ids = titleRows.map((r) => r.id);
   const results = titleRows.map((r) => toResult(r, 'title', TITLE_BONUS + clampRank(r.rank)));
-  if (results.length < parsed.limit) {
-    const seen = new Set(ids);
-    for (const row of ftsRows(db, anyMatch, filters, parsed.limit + titleRows.length)) {
-      if (seen.has(row.id)) continue;
-      ids.push(row.id);
-      results.push(toResult(row, 'body', clampRank(row.rank)));
-      if (results.length >= parsed.limit) break;
+  const noteText = db.prepare('SELECT plain FROM note_text WHERE note_id = ?').pluck();
+  const notePlain = (id: number) => (noteText.get(id) as string | undefined) ?? '';
+  const texts: (() => string)[] = titleRows.map((r) => () => notePlain(r.id));
+  const room = parsed.limit - results.length;
+  if (room > 0) {
+    const seen = new Set(titleRows.map((r) => r.id));
+    const notes = ftsRows(db, anyMatch, filters, parsed.limit + titleRows.length)
+      .filter((row) => !seen.has(row.id))
+      .slice(0, room);
+    const pdfs = pdfAllowed(parsed)
+      ? bestSourcePages(db, { match: anyMatch, limit: room, folderPrefix: folderPrefix(parsed) })
+      : [];
+    // Both lists are already in rank order: merge them, a note first on equal rank.
+    let n = 0;
+    let p = 0;
+    while (results.length < parsed.limit && (n < notes.length || p < pdfs.length)) {
+      const note = notes[n];
+      const pdf = pdfs[p];
+      if (note && (!pdf || note.rank <= pdf.rank)) {
+        n += 1;
+        results.push(toResult(note, 'body', clampRank(note.rank)));
+        texts.push(() => notePlain(note.id));
+      } else if (pdf) {
+        p += 1;
+        results.push({ ...pdfResult(pdf), score: clampRank(pdf.rank) });
+        texts.push(() => sourcePageText(db, pdf.id));
+      }
     }
   }
   const folded = foldedTerms(terms);
   const pattern = buildTermPattern(folded);
-  const text = db.prepare('SELECT plain FROM note_text WHERE note_id = ?').pluck();
   results.forEach((result, i) => {
-    const plain = (text.get(ids[i]) as string | undefined) ?? '';
-    result.snippet = buildSnippet(plain, folded, pattern);
+    result.snippet = buildSnippet(texts[i]!(), folded, pattern);
   });
   return results;
+}
+
+/** PDFs carry no tags, type or deadline: any of those filters leaves them out. */
+const pdfAllowed = (parsed: ParsedSearch) =>
+  parsed.tags.length === 0 && parsed.type === null && parsed.due === null;
+
+const folderPrefix = (parsed: ParsedSearch) =>
+  parsed.folder === null ? null : `${normalizeForIndex(parsed.folder)}/`;
+
+function pdfResult(hit: SourcePageHit): Omit<SearchResult, 'score'> {
+  return {
+    path: hit.path,
+    title: noteTitleFromPath(hit.path),
+    folder: topFolderOfPath(hit.path),
+    class: classifyPath(hit.path),
+    matchedIn: 'body',
+    snippet: null,
+    page: hit.page,
+  };
 }

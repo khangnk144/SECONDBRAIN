@@ -1,0 +1,93 @@
+{
+  "nav": "Ask AI",
+  "command": "Ask AI…",
+  "assistant": "AI assistant",
+  "you": "You asked",
+  "conversation": "Conversation with the AI assistant",
+  "appNote": "Message from the app",
+  "sent": "Your question and a few excerpts from related notes are sent to {{provider}} to answer it.",
+  "sentHybrid": "Your question is also sent to {{provider}} to search by meaning.",
+  "screen": {
+    "title": "Ask your notes",
+    "intro": "The AI assistant answers briefly from the notes in the folders AI may read, and links back to the notes it used.",
+    "modeBm25": "Search by keywords (BM25).",
+    "modeHybrid": "Search by keywords and by meaning.",
+    "startersLabel": "Suggested questions",
+    "starterDue": "What's due this week?",
+    "starterToday": "What's left to do today?",
+    "starterSummary": "Summarize what I wrote about …",
+    "starterSummaryText": "Summarize what I wrote about "
+  },
+  "panel": {
+    "title": "Ask",
+    "intro": "Ask about this note and related notes.",
+    "outOfScope": "This note is outside the folders AI may read, so the assistant only uses other notes."
+  },
+  "input": {
+    "label": "Your question",
+    "placeholder": "Ask something about your notes…",
+    "hint": "Enter sends, Shift+Enter adds a line.",
+    "ask": "Ask",
+    "stop": "Stop",
+    "newConversation": "New conversation",
+    "tooLong": "The question is too long: {{max}} characters at most."
+  },
+  "turn": {
+    "waiting": "Reading your notes…",
+    "stopped": "Stopped.",
+    "retry": "Try again",
+    "answered": "The AI assistant answered.",
+    "fromToday": "Taken from the Today page",
+    "save": "Save as a note"
+  },
+  "sources": {
+    "toggle": "Sources ({{count}})",
+    "page": "p. {{page}}"
+  },
+  "notices": {
+    "citation-rejected": "Some citations didn't match any note, so they were removed.",
+    "uncited": "This answer doesn't cite any note yet. Please check it.",
+    "out-of-scope-hidden": "Some items are in folders AI may not read, so they aren't shown."
+  },
+  "notReady": {
+    "disabled": "AI is off. You can turn it on in Settings, under AI.",
+    "reconsent": "You just changed the AI provider. Open Settings, under AI, and press Review and agree.",
+    "noKey": "To ask right here in the app, AI needs an API key from Anthropic (Claude), OpenAI or Google Gemini, entered in Settings, under AI.",
+    "routeA": "Use your Claude account through Claude Desktop: see Connect Claude in Settings.",
+    "budget": "This month's limit is used up ({{limit}} tokens). Raise the limit in Settings or wait for next month.",
+    "openSettings": "Open AI settings",
+    "openMcp": "Open Connect Claude"
+  },
+  "errors": {
+    "network": "Couldn't reach {{provider}}. Check your connection, then try again.",
+    "auth": "The API key is wrong or has expired. Check it in Settings.",
+    "rateLimit": "{{provider}} is getting too many requests. Wait a moment, then try again.",
+    "quota": "Your {{provider}} account has run out of quota or credit. Check your account on the {{provider}} site, then try again.",
+    "timeout": "{{provider}} took too long to answer, so the app stopped waiting. Try again in a few minutes.",
+    "server": "{{provider}} is having problems. Try again in a few minutes.",
+    "badRequest": "{{provider}} didn't accept this request. Check the model name in Settings, then try again.",
+    "malformed": "The answer from {{provider}} was cut off. Try again.",
+    "provider": "{{provider}} couldn't answer. Try again in a few minutes.",
+    "overBudget": "This question needs more tokens than are left of this month's limit. Raise the limit in Settings or wait for next month.",
+    "appOffline": "Couldn't reach the app's server. Check that Second Brain is running, then try again.",
+    "incomplete": "The answer was cut off. Try again.",
+    "unavailable": "AI isn't ready for this vault yet. Try again in a few minutes.",
+    "generic": "The AI assistant couldn't answer. Try again."
+  },
+  "save": {
+    "title": "Save the answer as a note",
+    "body": "The question and the answer are saved as a new note that says the answer came from the AI assistant.",
+    "folderLabel": "Save to",
+    "root": "Vault root",
+    "confirm": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "done": "Saved as a note",
+    "open": "Open",
+    "failed": "Couldn't save the answer. Try again."
+  },
+  "today": {
+    "label": "AI",
+    "labelFull": "AI assistant:"
+  }
+}

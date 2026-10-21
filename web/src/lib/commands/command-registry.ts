@@ -21,6 +21,9 @@ import {
   runAppShortcut,
   triggerRegisteredShortcut,
 } from './command-actions';
+import { openAskScreen } from '../../features/ai-chat/open-ask-screen';
+import { AI_ACTION_COMMANDS } from '../../features/ai-actions/ai-action-commands';
+import { AI_INBOX_COMMANDS } from '../../features/ai-inbox/ai-inbox-commands';
 import { openHistoryDialog } from '../../features/history/open-history-dialog';
 import { isImplemented, type AppFeature } from './implemented-features';
 import {
@@ -104,6 +107,16 @@ export const APP_COMMANDS: readonly AppCommand[] = [
     keywords: ['graph', 'map', 'bản đồ'],
     feature: 'graph',
   }),
+  {
+    id: 'ask-ai',
+    labelKey: 'ai-chat.command',
+    keywords: ['ai', 'ask', 'chat', 'assistant', 'claude', 'hỏi', 'trợ lý', 'câu hỏi'],
+    feature: 'ai',
+    run: openAskScreen,
+  },
+  // AI on the editor's selection and Inbox tidying (listed only while they can run).
+  ...AI_ACTION_COMMANDS,
+  ...AI_INBOX_COMMANDS,
   navigation('openTags', TAGS_ROUTE, 'tags', ['tags', 'thẻ', '#']),
   navigation('openReminders', REMINDERS_ROUTE, 'reminders', ['reminders', 'nhắc', 'notification']),
   navigation('openResources', RESOURCES_ROUTE, 'attachments', [

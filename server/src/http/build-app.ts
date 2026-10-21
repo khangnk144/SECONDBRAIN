@@ -10,9 +10,12 @@ import { registerSystemRoutes } from '../api/system-routes.js';
 import { registerVaultSwitchRoutes } from '../api/vault-switch-routes.js';
 import { errorCodeOf } from '../app-context/app-context-errors.js';
 import type { AppContext } from '../app-context/create-app-context.js';
+import { AI_PLUGIN } from '../app-context/vault-plugins.js';
+import type { AiRuntime } from '../ai/ai-types.js';
 import type { VaultHost } from '../app-context/vault-host.js';
 import type { GlobalSettings } from '../config/global-settings.js';
 import { createSettingsStore, type SettingsStore } from '../config/settings-store.js';
+import { registerMcpRoutes } from '../mcp/register-mcp-routes.js';
 import { registerRequestLogging } from '../logging/register-request-logging.js';
 import { createSilentLogger, type AppLogger } from '../logging/rotating-file-logger.js';
 import { registerSecurityHooks } from '../security/register-security-hooks.js';
@@ -72,6 +75,8 @@ export interface BuildAppOptions {
   appDir?: string;
   /** Platform reported by GET /settings (tests). */
   platform?: NodeJS.Platform;
+  /** Install root (`D:\SECONDBRAIN`): the MCP config snippet adds `--home` when it is unusual. */
+  homeDir?: string;
 }
 
 /**
@@ -144,6 +149,7 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
       createRunAtLoginService({ appDir: options.appDir ?? path.dirname(options.webDir) }),
     vaultInfo: () => host?.vaultInfo() ?? null,
     hub: context?.hub ?? null,
+    ai: () => context?.plugin<AiRuntime>(AI_PLUGIN) ?? null,
   });
   registerWebSocketRoute(
     app,
@@ -157,6 +163,13 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
       ...options.vaultRoutes,
     });
     registerSystemRoutes(app, context, options.vaultRoutes?.reveal);
+    // `/mcp` (SPEC F32) and `GET /api/mcp/config`; the security hook and the gate cover `/mcp`.
+    registerMcpRoutes(app, context, {
+      settings: options.getSettings,
+      port: options.port,
+      appDir: options.appDir ?? path.dirname(options.webDir),
+      homeDir: options.homeDir,
+    });
   }
   if (host) {
     registerVaultSwitchRoutes(app, host);

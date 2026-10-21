@@ -4,6 +4,7 @@
  * back if the save fails; other windows apply them from the `settings:changed` event.
  */
 import { create } from 'zustand';
+import { useAiStatusStore } from '../../lib/ai-status-store';
 import { getSettings, putSettings } from '../../lib/api/settings-api';
 import type { SettingsPatch, SettingsResponse } from '../../lib/api/settings-types';
 import { applyUiPrefsLive, withUiChange } from '../../lib/ui-prefs-live';
@@ -61,6 +62,8 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     try {
       const settings = await putSettings(patch);
       set({ settings, status: 'ready' });
+      // What AI may do now follows at once in this window (others refetch on `ai:status`).
+      if (patch.ai || patch.mcp) void useAiStatusStore.getState().load();
       // The answer holds every window's latest UI change, this one's included.
       if (patch.ui) applyUiPrefsLive(settings.ui);
       return settings;

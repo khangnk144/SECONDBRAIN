@@ -6,8 +6,20 @@ import { PdfDocumentView } from './pdf-document-view';
 import { usePdfDocument } from './use-pdf-document';
 import { downloadVaultFile, openWithOtherApp } from './vault-file-actions';
 
+/** `&page=N` of the viewer route; `key` tells one navigation from the next. */
+export interface PdfPageRequest {
+  page: number;
+  key: string;
+}
+
 /** The PDF of the viewer tab, or what keeps it from showing (missing, broken, password, offline). */
-export function PdfViewer({ path }: { path: VaultPath }) {
+export function PdfViewer({
+  path,
+  pageRequest = null,
+}: {
+  path: VaultPath;
+  pageRequest?: PdfPageRequest | null;
+}) {
   const { t } = useTranslation();
   const { state, reload } = usePdfDocument(path);
   const name = baseName(path);
@@ -45,6 +57,7 @@ export function PdfViewer({ path }: { path: VaultPath }) {
           key={state.version}
           doc={state.doc}
           path={path}
+          pageRequest={pageRequest}
           onDownload={() => void downloadVaultFile(path)}
           onOpenExternal={() => void openWithOtherApp(path)}
         />

@@ -72,9 +72,9 @@ describe('palette commands (F8.4)', () => {
     expect(texts).toContain('Mở Lịch');
     expect(texts).toContain('Mở Bản đồ nãoAlt+G');
     expect(texts).toContain('Xây lại chỉ mục');
-    // Nothing that needs a note on screen, and no AI before its phase.
+    // Nothing that needs a note on screen; asking the AI is a command since M6.
     expect(texts).not.toContain('Chế độ nguồnAlt+S');
-    expect(texts.some((text) => text?.includes('AI'))).toBe(false);
+    expect(texts.some((text) => text?.startsWith('Hỏi AI…'))).toBe(true);
     expect(texts).toHaveLength(availableCommands().length);
     // The first request (blank query, sent on open) is the only one.
     expect(mock.callsTo('GET /api/search').every((c) => c.query.get('q') === '')).toBe(true);
@@ -93,7 +93,9 @@ describe('palette commands (F8.4)', () => {
     });
     registerShortcut({ id: 'source-mode', keys: 'Alt+S', run: () => undefined, labelKey: 'x' });
     const commands = availableCommands();
-    expect(commands).toHaveLength(APP_COMMANDS.length);
+    // Every command that can run here (AI actions also need a selection or AI ready) is listed:
+    // none of them names a feature this build lacks.
+    expect(commands).toHaveLength(APP_COMMANDS.filter((c) => c.isAvailable?.() ?? true).length);
     for (const command of commands) {
       const label = i18n.t(command.labelKey);
       const { dialog, input } = await openPalette(user, `>${label}`);

@@ -22,7 +22,6 @@ export const APP_FEATURES = [
   'reminders',
   'attachments',
   'history',
-  // Not in this build yet.
   'ai',
 ] as const;
 
@@ -47,6 +46,7 @@ export const IMPLEMENTED_FEATURES: readonly AppFeature[] = [
   'reminders',
   'attachments',
   'history',
+  'ai',
 ];
 
 export function isImplemented(feature: AppFeature): boolean {

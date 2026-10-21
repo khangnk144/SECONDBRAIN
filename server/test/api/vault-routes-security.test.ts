@@ -69,6 +69,8 @@ const ROUTES: {
   { method: 'GET', url: `/api/files?${q('Templates/Note.md')}` },
   { method: 'GET', url: '/api/templates' },
   { method: 'POST', url: '/api/templates/restore' },
+  { method: 'GET', url: '/api/templates/upgrades' },
+  { method: 'POST', url: '/api/templates/upgrade', payload: { paths: ['CLAUDE.md'] } },
   { method: 'POST', url: '/api/index/rebuild' },
   { method: 'GET', url: '/api/sample-data' },
   { method: 'POST', url: '/api/sample-data' },
@@ -123,6 +125,19 @@ const ROUTES: {
   { method: 'POST', url: '/api/backup/export' },
   { method: 'POST', url: '/api/backup/restore' },
   { method: 'POST', url: '/api/logs/reveal' },
+  { method: 'GET', url: '/api/ai/status' },
+  { method: 'POST', url: '/api/ai/embeddings/rebuild' },
+  { method: 'POST', url: '/api/ai/chat', payload: { question: 'Ma trận là gì?' } },
+  { method: 'POST', url: '/api/ai/action', payload: { action: 'summarize', text: 'x' } },
+  { method: 'GET', url: '/api/ai/today-summary' },
+  { method: 'POST', url: '/api/ai/today-summary', payload: {} },
+  {
+    method: 'POST',
+    url: '/api/ai/save-answer',
+    payload: { question: 'q', answer: 'a', folder: '0 Inbox' },
+  },
+  { method: 'POST', url: '/api/ai/search', payload: { q: 'ma trận' } },
+  { method: 'GET', url: '/api/mcp/config' },
 ];
 
 const label = (route: (typeof ROUTES)[number]) => `${route.method} ${route.url.split('?')[0]}`;

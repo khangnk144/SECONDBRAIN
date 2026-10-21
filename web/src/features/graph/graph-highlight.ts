@@ -28,6 +28,8 @@ export interface HighlightInput {
   hover: number;
   /** A node always labelled (the note of a local graph) or -1. */
   pinnedLabel: number;
+  /** Nodes "AI vừa chạm" lights (1 = lit): emphasized and named, whatever the selection. */
+  touched?: Uint8Array | null;
 }
 
 export class GraphHighlight {
@@ -81,16 +83,20 @@ export class GraphHighlight {
       for (const neighbor of model.neighbors[hover] ?? []) this.hoverMark[neighbor] = 1;
     }
     this.dimming = levels !== null;
+    const touched = input.touched ?? null;
     const lit = (i: number) => {
       const level = levels?.[i] ?? UNREACHED;
       return level !== UNREACHED && level <= litDepth;
     };
+    const isTouched = (i: number) => touched !== null && touched[i] === 1;
 
     this.bucketStart.fill(0);
     for (const node of model.nodes) {
       const i = node.i;
       let state: number;
-      if (levels) state = lit(i) ? STATE_EMPHASIS : this.hoverMark[i] ? STATE_NORMAL : STATE_DIM;
+      if (isTouched(i)) state = STATE_EMPHASIS;
+      else if (levels)
+        state = lit(i) ? STATE_EMPHASIS : this.hoverMark[i] ? STATE_NORMAL : STATE_DIM;
       else state = this.hoverMark[i] ? STATE_EMPHASIS : STATE_NORMAL;
       const baseClass = (node.orphan ? 1 : 0) + (node.archived ? 2 : 0);
       const alphaClass =
@@ -118,8 +124,10 @@ export class GraphHighlight {
       const a = model.edgeSource[e] ?? 0;
       const b = model.edgeTarget[e] ?? 0;
       const touchesHover = hover >= 0 && (a === hover || b === hover);
-      if (touchesHover || (levels && lit(a) && lit(b))) this.edgeState[e] = STATE_EMPHASIS;
-      else this.edgeState[e] = levels ? STATE_DIM : STATE_NORMAL;
+      const bothTouched = isTouched(a) && isTouched(b);
+      if (touchesHover || bothTouched || (levels && lit(a) && lit(b))) {
+        this.edgeState[e] = STATE_EMPHASIS;
+      } else this.edgeState[e] = levels ? STATE_DIM : STATE_NORMAL;
     }
     this.collectLabels(input, lit);
   }
@@ -131,6 +139,12 @@ export class GraphHighlight {
       if (index >= 0 && !picked.includes(index)) picked.push(index);
     }
     this.forcedLabels = picked.length;
+    const touched = input.touched;
+    if (touched) {
+      for (const node of this.model.nodes) {
+        if (touched[node.i] === 1 && !picked.includes(node.i)) picked.push(node.i);
+      }
+    }
     if (input.levels) {
       const levels = input.levels;
       const rest = this.model.nodes

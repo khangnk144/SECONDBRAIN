@@ -1,160 +1,78 @@
-import { useLayoutEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { aiProviderName } from '../../lib/ai-provider-name';
+import { useAiStatusStore } from '../../lib/ai-status-store';
 import { AI_PROVIDERS, type AiProvider, type SettingsResponse } from '../../lib/api/settings-types';
+import { AiBudgetField } from './ai-budget-field';
+import { AiEmbeddingsSection } from './ai-embeddings-section';
+import { AiEnableControls } from './ai-enable-controls';
 import { AiFolderScope } from './ai-folder-scope';
+import { ApiKeyField } from './ai-key-field';
+import { AiModelField } from './ai-model-field';
 import { SaveStatus } from './save-status';
 import { SettingsField, SettingsSection } from './settings-section';
 import { useSettingSave } from './use-setting-save';
 
 type AiSettings = SettingsResponse['ai'];
 
-/** The key is never shown again: only "…abcd" from the server; the field empties after a save. */
-function ApiKeyField({ ai }: { ai: AiSettings }) {
+/** A provider change while AI is on needs a new consent (the status line then asks for it). */
+function ProviderField({ ai }: { ai: AiSettings }) {
   const { t } = useTranslation();
-  const { state, save, fail } = useSettingSave();
-  const [value, setValue] = useState('');
-  const status = ai.keys[ai.provider];
-  const providerName = t(`settings.ai.providers.${ai.provider}`);
-
-  const submit = async () => {
-    const key = value.trim();
-    if (key === '') return fail(t('settings.ai.keyEmpty'));
-    const saved = await save({ ai: { apiKey: { provider: ai.provider, value: key } } });
-    if (saved) setValue('');
-  };
-
+  const { state, save } = useSettingSave();
   return (
     <SettingsField
-      label={t('settings.ai.key', { provider: providerName })}
-      htmlFor="settings-ai-key"
-      status={<SaveStatus state={state} id="settings-ai-key-status" />}
-      hint={
-        status.set
-          ? status.last4
-            ? t('settings.ai.keySaved', { last4: status.last4 })
-            : t('settings.ai.keySavedShort')
-          : t('settings.ai.keyNone')
-      }
+      label={t('settings.ai.provider')}
+      htmlFor="settings-ai-provider"
+      status={<SaveStatus state={state} />}
     >
-      <input
-        id="settings-ai-key"
-        type="password"
-        className="text-input settings-input--key"
-        value={value}
-        autoComplete="off"
-        spellCheck={false}
-        aria-describedby="settings-ai-key-status"
-        onChange={(event) => setValue(event.target.value)}
-        onKeyDown={(event) => {
-          if (event.key === 'Enter') void submit();
-        }}
-      />
-      <button
-        type="button"
-        className="button button--secondary"
-        disabled={value.trim() === '' || state.kind === 'saving'}
-        onClick={() => void submit()}
+      <select
+        id="settings-ai-provider"
+        className="text-input settings-select"
+        value={ai.provider}
+        onChange={(event) => void save({ ai: { provider: event.target.value as AiProvider } })}
       >
-        {t('settings.ai.keySave')}
-      </button>
-      {status.set ? (
-        <button
-          type="button"
-          className="button button--secondary"
-          disabled={state.kind === 'saving'}
-          onClick={() => void save({ ai: { apiKey: { provider: ai.provider, value: null } } })}
-        >
-          {t('settings.ai.keyRemove')}
-        </button>
-      ) : null}
-    </SettingsField>
-  );
-}
-
-function ModelField({
-  id,
-  label,
-  value,
-  field,
-}: {
-  id: string;
-  label: string;
-  value: string | null;
-  field: 'chatModel' | 'embeddingModel';
-}) {
-  const { state, save, clear } = useSettingSave();
-  const stored = value ?? '';
-  const [draft, setDraft] = useState(stored);
-  useLayoutEffect(() => setDraft(stored), [stored]);
-  const commit = () => {
-    if (draft.trim() === stored) return;
-    void save({ ai: { [field]: draft.trim() === '' ? null : draft.trim() } });
-  };
-  return (
-    <SettingsField label={label} htmlFor={id} status={<SaveStatus state={state} />}>
-      <input
-        id={id}
-        className="text-input settings-input--model"
-        value={draft}
-        autoComplete="off"
-        spellCheck={false}
-        onChange={(event) => setDraft(event.target.value)}
-        onBlur={commit}
-        onKeyDown={(event) => {
-          if (event.key === 'Enter') commit();
-          if (event.key === 'Escape') {
-            setDraft(stored);
-            clear();
-          }
-        }}
-      />
+        {AI_PROVIDERS.map((value) => (
+          <option key={value} value={value}>
+            {aiProviderName(value, t)}
+          </option>
+        ))}
+      </select>
     </SettingsField>
   );
 }
 
 /**
- * "AI" (Phase 3 arrives later; the copy says so): provider, API key, models and the folders AI
- * may read are stored now, and nothing is sent anywhere.
+ * "AI" (route B, SPEC F18, F33): what AI does now, the switch behind a consent dialog, provider,
+ * key, model, the folders it may read, the monthly limit and, separately, search by meaning.
+ * What is true right now comes from `GET /api/ai/status` (the shared status store).
  */
 export function AiSection({ ai }: { ai: AiSettings }) {
   const { t } = useTranslation();
-  const provider = useSettingSave();
+  const status = useAiStatusStore((state) => state.status);
+  const chatDefault =
+    ai.chatModel === null && status?.provider === ai.provider ? status.chatModel : null;
   return (
-    <SettingsSection id="ai" title={t('settings.ai.title')} intro={t('settings.ai.intro')}>
-      <SettingsField
-        label={t('settings.ai.provider')}
-        htmlFor="settings-ai-provider"
-        status={<SaveStatus state={provider.state} />}
-      >
-        <select
-          id="settings-ai-provider"
-          className="text-input settings-select"
-          value={ai.provider}
-          onChange={(event) =>
-            void provider.save({ ai: { provider: event.target.value as AiProvider } })
-          }
-        >
-          {AI_PROVIDERS.map((value) => (
-            <option key={value} value={value}>
-              {t(`settings.ai.providers.${value}`)}
-            </option>
-          ))}
-        </select>
-      </SettingsField>
-      <ApiKeyField ai={ai} />
-      <ModelField
+    <SettingsSection
+      id="ai"
+      title={t('settings.ai.title')}
+      intro={
+        <>
+          {t('settings.ai.intro')} {t('settings.ai.subscriptionNote')}
+        </>
+      }
+    >
+      <AiEnableControls ai={ai} status={status} />
+      <ProviderField ai={ai} />
+      <ApiKeyField id="settings-ai-key" provider={ai.provider} status={ai.keys[ai.provider]} />
+      <AiModelField
         id="settings-ai-chat-model"
         label={t('settings.ai.chatModel')}
         value={ai.chatModel}
         field="chatModel"
-      />
-      <ModelField
-        id="settings-ai-embedding-model"
-        label={t('settings.ai.embeddingModel')}
-        value={ai.embeddingModel}
-        field="embeddingModel"
+        defaultModel={chatDefault}
       />
       <AiFolderScope folders={ai.folders} />
+      <AiBudgetField limit={ai.monthlyTokenLimit} status={status} />
+      <AiEmbeddingsSection ai={ai} status={status} />
     </SettingsSection>
   );
 }

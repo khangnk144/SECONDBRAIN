@@ -1,6 +1,9 @@
-import { FileText, Funnel, Lightning, Plus } from '@phosphor-icons/react';
+import { FilePdf, FileText, Funnel, Lightning, Plus } from '@phosphor-icons/react';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { VaultPath } from '../../lib/api/vault-types';
 import { commandKeys } from '../../lib/commands/command-registry';
+import { vaultFileKind } from '../../lib/open-vault-file';
 import { parentFolder } from '../../lib/vault-paths';
 import { HighlightedText } from './highlighted-text';
 import type { PaletteEntry } from './palette-entries';
@@ -13,33 +16,64 @@ const iconProps = {
   focusable: false,
 } as const;
 
+/** A file row (keyword or meaning hit): icon by type, title, "tr. N" for a PDF page, folder. */
+function FileHitView(props: {
+  path: VaultPath;
+  title: string;
+  page: number | null | undefined;
+  snippet: ReactNode;
+}) {
+  const { t } = useTranslation();
+  const folder = parentFolder(props.path);
+  const pdf = vaultFileKind(props.path) === 'pdf';
+  const Icon = pdf ? FilePdf : FileText;
+  return (
+    <>
+      <Icon {...iconProps} />
+      <span className="palette-option__main">
+        <span className="palette-option__line">
+          <span className="palette-option__title">{props.title}</span>
+          {pdf && typeof props.page === 'number' ? (
+            <span className="palette-option__page">{t('search.page', { page: props.page })}</span>
+          ) : null}
+          {folder ? <span className="palette-option__folder">{folder}</span> : null}
+        </span>
+        {props.snippet ? <span className="palette-option__snippet">{props.snippet}</span> : null}
+      </span>
+    </>
+  );
+}
+
 /**
- * Content of one palette row, by kind: a note (title, folder, snippet), "Tạo '<q>'", a command
- * (label and its key) or a filter value (`tag:đồ-án` and what it means).
+ * Content of one palette row, by kind: a note or PDF (title, page, folder, snippet), "Tạo '<q>'",
+ * a command (label and its key), a filter value (`tag:đồ-án` and what it means) or a hit by
+ * meaning (plain snippet).
  */
 export function PaletteEntryView({ entry }: { entry: PaletteEntry }) {
   const { t } = useTranslation();
   switch (entry.kind) {
     case 'note': {
-      const folder = parentFolder(entry.hit.path);
-      const snippet = entry.hit.snippet;
+      const { snippet } = entry.hit;
       return (
-        <>
-          <FileText {...iconProps} />
-          <span className="palette-option__main">
-            <span className="palette-option__line">
-              <span className="palette-option__title">{entry.hit.title}</span>
-              {folder ? <span className="palette-option__folder">{folder}</span> : null}
-            </span>
-            {snippet ? (
-              <span className="palette-option__snippet">
-                <HighlightedText text={snippet.text} ranges={snippet.highlights} />
-              </span>
-            ) : null}
-          </span>
-        </>
+        <FileHitView
+          path={entry.hit.path}
+          title={entry.hit.title}
+          page={entry.hit.page}
+          snippet={
+            snippet ? <HighlightedText text={snippet.text} ranges={snippet.highlights} /> : null
+          }
+        />
       );
     }
+    case 'semantic':
+      return (
+        <FileHitView
+          path={entry.hit.path}
+          title={entry.hit.title}
+          page={entry.hit.page}
+          snippet={entry.hit.snippet}
+        />
+      );
     case 'create':
       return (
         <>

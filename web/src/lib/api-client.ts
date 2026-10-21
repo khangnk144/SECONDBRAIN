@@ -37,6 +37,8 @@ export interface ApiClientOptions {
 export interface ApiRequestInit {
   method?: string;
   body?: unknown;
+  /** Aborts the request (e.g. "Hủy" on an AI action; the server then stops the provider call). */
+  signal?: AbortSignal;
 }
 
 /** A request whose body and answer are not JSON (multipart upload, file download). */
@@ -118,7 +120,12 @@ export function createApiClient({
       headers['Content-Type'] = 'application/json';
       body = JSON.stringify(init.body);
     }
-    const response = await send(path, { method: init.method ?? 'GET', headers, body });
+    const response = await send(path, {
+      method: init.method ?? 'GET',
+      headers,
+      body,
+      signal: init.signal,
+    });
     if (response.status === 204) return undefined as T;
     return (await response.json()) as T;
   }

@@ -1,5 +1,3 @@
-import { createHash } from 'node:crypto';
-import { addDays } from '../lib/local-date.js';
 import { writeOnePagePdf } from './minimal-pdf-writer.js';
 import type { SampleFile } from './sample-file.js';
 
@@ -7,15 +5,11 @@ import type { SampleFile } from './sample-file.js';
  * Three invented papers for the sample research project. The PDFs say plainly that they are
  * generated sample data so nobody mistakes them for real publications.
  */
-interface SamplePaper {
+export interface SamplePaper {
   slug: string;
   title: string;
   authors: string[];
   abstract: string[];
-  summary: string;
-  method: string;
-  results: string;
-  aiNote: string;
   concepts: string[];
 }
 
@@ -32,11 +26,6 @@ export const SAMPLE_PAPERS: readonly SamplePaper[] = [
         'open problems: small samples, missing data from offline classes, and little evidence ' +
         'that predictions lead to better teaching decisions.',
     ],
-    summary: 'Tổng quan 120 nghiên cứu dùng log hệ thống học tập để dự đoán kết quả (tr. 1).',
-    method: 'Phân loại nghiên cứu theo nguồn dữ liệu, mục tiêu dự đoán và cách đánh giá (tr. 1).',
-    results:
-      'Phần lớn chỉ dùng dữ liệu một môn, một học kỳ; ít bài kiểm tra trên trường khác (tr. 1).',
-    aiNote: 'Bài tổng quan hữu ích để định vị đề tài; cần đọc danh sách tài liệu tham khảo.',
     concepts: ['Phân tích học tập'],
   },
   {
@@ -50,10 +39,6 @@ export const SAMPLE_PAPERS: readonly SamplePaper[] = [
       'All courses in the study are fully online; we do not know how the model behaves for ' +
         'students who mostly attend classes in person.',
     ],
-    summary: 'Dự đoán bỏ học từ hoạt động hằng tuần bằng mô hình chuỗi (tr. 1).',
-    method: 'Mạng hồi quy trên số lần đăng nhập, thời gian xem video, số lần làm quiz (tr. 1).',
-    results: 'AUC 0,86 ở tuần thứ 4, so với 0,78 của hồi quy logistic (tr. 1).',
-    aiNote: 'Chỉ có khóa học trực tuyến; chưa rõ áp dụng cho lớp học trực tiếp.',
     concepts: ['Phân tích học tập'],
   },
   {
@@ -67,11 +52,6 @@ export const SAMPLE_PAPERS: readonly SamplePaper[] = [
       'The data covers one university and two academic years; we did not study other countries ' +
         'or how students react to being contacted.',
     ],
-    summary: 'Dự đoán điểm cuối kỳ có giải thích để hỗ trợ can thiệp sớm (tr. 1).',
-    method:
-      'Cây tăng cường gradient và giải thích theo từng đặc trưng; phỏng vấn 12 giảng viên (tr. 1).',
-    results: 'Giảng viên thấy phần giải thích giúp chọn sinh viên cần liên hệ trước (tr. 1).',
-    aiNote: 'Mẫu từ một trường; không có dữ liệu từ châu Á.',
     concepts: ['Mô hình giải thích được', 'Phân tích học tập'],
   },
 ];
@@ -80,7 +60,8 @@ export function samplePaperPdfPath(slug: string): string {
   return `3 Resources/papers/${slug}.pdf`;
 }
 
-function paperPdf(paper: SamplePaper): Uint8Array {
+/** The one-page PDF of a sample paper (deterministic: the same bytes on every call). */
+export function samplePaperPdf(paper: SamplePaper): Uint8Array {
   return writeOnePagePdf({
     title: paper.title,
     byline: [
@@ -91,54 +72,13 @@ function paperPdf(paper: SamplePaper): Uint8Array {
   });
 }
 
-function paperPage(paper: SamplePaper, pdf: Uint8Array, ingestedOn: string): string {
-  const hash = createHash('sha256').update(pdf).digest('hex');
-  const concepts = paper.concepts.map((concept) => `[[${concept}]]`).join(', ');
-  return [
-    '---',
-    'type: paper',
-    `title: "${paper.title}"`,
-    `authors: [${paper.authors.join(', ')}]`,
-    'year: 2024',
-    `source: ${samplePaperPdfPath(paper.slug)}`,
-    `source_hash: ${hash}`,
-    'pages_covered: 1',
-    'verified: false',
-    `ingested_at: ${ingestedOn}`,
-    `created: ${ingestedOn}`,
-    '---',
-    '',
-    `# ${paper.title}`,
-    '',
-    `Nguồn: [[${paper.slug}.pdf]]. Khái niệm liên quan: ${concepts}.`,
-    '',
-    '## Tóm tắt',
-    '',
-    paper.summary,
-    '',
-    '## Phương pháp',
-    '',
-    paper.method,
-    '',
-    '## Kết quả (theo tác giả)',
-    '',
-    paper.results,
-    '',
-    '## Nhận xét của AI',
-    '',
-    `${paper.aiNote} Trang này là dữ liệu mẫu, chưa được kiểm tra.`,
-    '',
-  ].join('\n');
-}
-
-/** The three PDFs in `3 Resources/papers/` and their summary pages in `wiki/papers/`. */
-export function samplePaperFiles(today: string): SampleFile[] {
-  const ingestedOn = addDays(today, -2);
-  return SAMPLE_PAPERS.flatMap((paper) => {
-    const pdf = paperPdf(paper);
-    return [
-      { path: samplePaperPdfPath(paper.slug), content: pdf },
-      { path: `wiki/papers/${paper.slug}.md`, content: paperPage(paper, pdf, ingestedOn) },
-    ];
-  });
+/**
+ * The three PDFs in `3 Resources/papers/`. Their summary pages in `wiki/papers/` come with the
+ * other wiki pages (`sample-paper-pages.ts`).
+ */
+export function samplePaperFiles(_today: string): SampleFile[] {
+  return SAMPLE_PAPERS.map((paper) => ({
+    path: samplePaperPdfPath(paper.slug),
+    content: samplePaperPdf(paper),
+  }));
 }

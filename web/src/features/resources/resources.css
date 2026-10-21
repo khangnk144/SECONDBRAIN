@@ -118,3 +118,27 @@
 .resource-row__menu {
   flex: 0 0 auto;
 }
+
+/* What could be read of a source's text (F30.2); quiet, shown only when not fully read. */
+.resource-row__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: max(12px, 0.78125rem);
+  line-height: 1.5;
+}
+
+.resource-row__text-state {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.resource-row__text--pending .resource-row__text-state {
+  color: var(--ink-2);
+  font-weight: 400;
+}
+
+.resource-row__text-hint {
+  max-width: var(--measure);
+  color: var(--ink-2);
+}

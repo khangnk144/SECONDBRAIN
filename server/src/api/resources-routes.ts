@@ -2,11 +2,15 @@ import { lstat } from 'node:fs/promises';
 import nodePath from 'node:path';
 import type { FastifyInstance } from 'fastify';
 import type { AppContext } from '../app-context/create-app-context.js';
+import { SOURCES_PLUGIN } from '../app-context/vault-plugins.js';
 import {
   buildResourceListing,
   resourcePaths,
   type FileFacts,
+  type ResourceText,
 } from '../attachments/resource-listing.js';
+import { sourceFormatOf } from '../sources/source-formats.js';
+import type { SourceTextService } from '../sources/source-types.js';
 import type { VaultPath } from '../vault/vault-types.js';
 
 /**
@@ -43,12 +47,43 @@ async function factsFor(
   return facts;
 }
 
-/** `GET /api/resources` → `{ files: ResourceFile[] }` for the "Tài liệu" view (SPEC F15). */
+/**
+ * Text state of the supported source files (SPEC F30.2), one after the other: a file the
+ * background extraction has not seen yet is hashed here, and hashing many large files at once
+ * would only compete for the disk. Nothing is extracted. No sources plugin → no entries.
+ */
+async function textsFor(
+  context: AppContext,
+  paths: VaultPath[],
+): Promise<Map<VaultPath, ResourceText>> {
+  const texts = new Map<VaultPath, ResourceText>();
+  const sources = context.plugin<SourceTextService>(SOURCES_PLUGIN);
+  if (!sources) return texts;
+  for (const path of paths) {
+    if (sourceFormatOf(path) === null) continue;
+    const status = await sources.status(path).catch(() => null);
+    if (status) {
+      texts.set(path, {
+        quality: status.quality,
+        pages: status.pageCount,
+        reason: status.reason ?? null,
+      });
+    }
+  }
+  return texts;
+}
+
+/** `GET /api/resources` → `{ files: ResourceFile[] }` for the "Tài liệu" view (SPEC F15, F30.2). */
 export function registerResourcesRoutes(app: FastifyInstance, context: AppContext): void {
   app.get('/api/resources', async () => {
     await context.settled();
     const rows = context.index.graphRows();
-    const facts = await factsFor(context, resourcePaths(rows));
-    return { files: buildResourceListing(rows, facts) };
+    const paths = resourcePaths(rows);
+    const facts = await factsFor(context, paths);
+    const texts = await textsFor(
+      context,
+      paths.filter((path) => facts.has(path)),
+    );
+    return { files: buildResourceListing(rows, facts, texts) };
   });
 }

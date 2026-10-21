@@ -13,6 +13,8 @@ import type { VaultPath } from './api/vault-types';
 export interface OpenVaultFileOptions {
   /** Ctrl+click, middle-click, Ctrl+Enter: open beside the current tab. */
   newTab?: boolean;
+  /** PDFs: the viewer opens at this page (1-based; an invalid page opens page 1). */
+  page?: number;
 }
 
 export type VaultFileKind = 'note' | 'image' | 'pdf' | 'other';

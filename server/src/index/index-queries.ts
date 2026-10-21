@@ -8,7 +8,8 @@ import type { LinkCatalog } from '../markdown/markdown-types.js';
 import type { VaultPath } from '../vault/vault-types.js';
 import { notesWithOpenItems } from './due-filter.js';
 import { createIndexReader, type IndexReader } from './index-reader.js';
-import type { SearchQuery, SearchResult } from './index-types.js';
+import type { RetrievalHit, RetrievalQuery, SearchQuery, SearchResult } from './index-types.js';
+import { runRetrieval } from './index-retrieval.js';
 import { createIndexWriter, type IndexWriter } from './index-writer.js';
 import { notesLinkingByKeys } from './link-reresolve.js';
 import { buildLinkTargets, type LinkTargets } from './link-target-list.js';
@@ -62,6 +63,8 @@ export abstract class IndexQueries {
     return expression === null ? [] : this.current.reader.matchingNotes(expression);
   };
   deadlineRows = () => this.current.reader.deadlineRows();
+  retrieve = (query: RetrievalQuery): RetrievalHit[] => runRetrieval(this.current.db, query);
+  sourceTextHash = (p: VaultPath) => this.current.writer.sources.hashOf(p);
   graphRows = () => this.current.views.graphRows();
   dailyNotePaths = () => this.current.views.dailyNotePaths();
 

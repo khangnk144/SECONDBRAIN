@@ -1,12 +1,16 @@
-import { useId, useMemo, useState, type KeyboardEvent } from 'react';
+import { useEffect, useId, useMemo, useState, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getResources } from '../../lib/api/resources-api';
+import { debounce } from '../../lib/debounce';
 import { useLiveQuery } from '../../lib/use-live-query';
+import { useServerEvent } from '../../lib/ws/use-server-event';
 import { groupResources } from './resource-groups';
 import { ResourceRow } from './resource-row';
 import './resources.css';
 
 const TITLE_ID = 'resources-title';
+/** Text extraction finishes file after file: the list refetches once a burst settles. */
+export const TEXT_STATE_REFRESH_MS = 300;
 
 /** ↑/↓ on a file name moves to the previous/next file name (Tab still visits every control). */
 function moveBetweenNames(event: KeyboardEvent<HTMLElement>): void {
@@ -21,8 +25,9 @@ function moveBetweenNames(event: KeyboardEvent<HTMLElement>): void {
 }
 
 /**
- * "Tài liệu" (`#/resources`, SPEC F15): every file in `3 Resources/` and `Attachments/`, grouped by
- * folder, with the notes that mention it; a diacritic-insensitive filter; current with the vault.
+ * "Tài liệu" (`#/resources`, SPEC F15, F30.2): every file in `3 Resources/` and `Attachments/`,
+ * grouped by folder, with the notes that mention it and what could be read of its text; a
+ * diacritic-insensitive filter; current with the vault and with text extraction.
  */
 export function ResourcesScreen() {
   const { t } = useTranslation();
@@ -30,6 +35,13 @@ export function ResourcesScreen() {
   const [filter, setFilter] = useState('');
   const query = useLiveQuery('resources', getResources);
   const files = query.data?.files;
+  const { refresh } = query;
+  const refreshTexts = useMemo(
+    () => debounce(() => void refresh(), TEXT_STATE_REFRESH_MS),
+    [refresh],
+  );
+  useEffect(() => () => refreshTexts.cancel(), [refreshTexts]);
+  useServerEvent('source:extracted', () => refreshTexts.schedule());
   const groups = useMemo(() => groupResources(files ?? [], filter), [files, filter]);
   const total = files?.length ?? 0;
   const shown = groups.reduce((sum, group) => sum + group.files.length, 0);

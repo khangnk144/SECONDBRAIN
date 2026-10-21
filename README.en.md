@@ -39,6 +39,7 @@ The interface is in Vietnamese by default and fully available in English.
 | **Documents** | Drop or paste PDFs, images and slides into a note; file names are always unique. Images show inside the note. PDFs open in the app with paging, zoom and text selection. The **Documents** view shows which notes mention each file. |
 | **Brain map** | Every note is a glowing dot, colored by folder. Click a dot and a signal travels to its neighbours; a search panel makes it fully usable by keyboard. Every note has its own local map. |
 | **Search and capture** | `Ctrl+K` searches all notes without needing accents (including *đ*), filters with `tag:`, `folder:`, `due:7d`, and runs commands after `>`. `Alt+Q` captures to the Inbox; `Alt+T` opens today's daily note. |
+| **AI (M6)** | **Ask AI** about your own notes: deadline questions use exactly Today's list, other questions are answered from a few related note excerpts with links back to the notes. Select text and press `Alt+A` to summarize, rewrite, explain, or get link and tag suggestions. AI suggests where an Inbox note belongs. Search by meaning, and text inside PDFs is searchable. Uses your own API key (Anthropic, OpenAI or Gemini); nothing is sent before you agree, with a monthly token limit. **Connect Claude Desktop through MCP** so Claude turns papers into a research wiki, with permissions enforced by the app; the brain map lights up the pages the AI just updated. |
 | **Data safety** | Atomic writes. Every write checks the file's revision, so a file changed elsewhere opens a three-version conflict screen (original, on disk, yours). A trash folder, an operation journal that recovers after a crash, and drafts that keep your words if a tab is killed. **Version history** with git and **zip backups**. |
 | **Look and feel** | Dark by default ("Đêm tím"), with a light mode, three palettes, three font sizes and Vietnamese or English, all applied instantly. It installs as an app with its own window and icon, and opens even when you are offline. |
 
@@ -166,8 +167,8 @@ A milestone counts as done only when every acceptance criterion has a test, or a
 |---|---|---|
 | M0 to M3 | Scaffold, vault and index, editor and links, Today, calendar, search, brain map | ✅ |
 | M4 | Windows reminders, Settings, documents and the PDF viewer, version history, backups, installable app (PWA) | ✅ version 1.0 |
-| M6 | AI: chat with your own notes with citations, search by meaning, link and tag suggestions, help sorting the Inbox (the AI proposes, you accept); connect Claude through MCP to turn papers into a research wiki; text from PDFs | Next |
-| M5 | Brain map timeline, a semester overview page, weekly review, scheduled backups, phone layout, a `.exe` that needs no Node.js | After that |
+| M6 | AI: chat with your own notes with citations, search by meaning, link and tag suggestions, help sorting the Inbox (the AI proposes, you accept); connect Claude through MCP to turn papers into a research wiki; text from PDFs | ✅ |
+| M5 | Brain map timeline, a semester overview page, weekly review, scheduled backups, phone layout, a `.exe` that needs no Node.js | Next |
 
 ## Troubleshooting
 

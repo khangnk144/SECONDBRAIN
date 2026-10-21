@@ -1,0 +1,118 @@
+/**
+ * Words that carry no topic in a question to the assistant ("tóm tắt những gì mình học về đạo
+ * hàm" → the topic is "đạo hàm"), dropped from AI retrieval queries (SPEC F33). Short on purpose:
+ * only function words and filler, written with their diacritics (an unaccented "co" or "la" may
+ * be a real word, so it stays). Shared with the AI chunk ranking so both drop the same words.
+ */
+import { normalizeForIndex } from '../markdown/normalize-text.js';
+
+const VIETNAMESE = [
+  'à',
+  'ạ',
+  'ai',
+  'bị',
+  'cả',
+  'các',
+  'cái',
+  'cho',
+  'chưa',
+  'có',
+  'của',
+  'cũng',
+  'đã',
+  'đang',
+  'để',
+  'đó',
+  'được',
+  'gì',
+  'giúp',
+  'hay',
+  'hãy',
+  'hoặc',
+  'không',
+  'là',
+  'lại',
+  'mà',
+  'mình',
+  'một',
+  'này',
+  'nào',
+  'nhé',
+  'nhỉ',
+  'như',
+  'nhưng',
+  'những',
+  'nếu',
+  'ơi',
+  'rằng',
+  'rồi',
+  'sao',
+  'sẽ',
+  'thế',
+  'thì',
+  'tôi',
+  'tớ',
+  'trong',
+  'và',
+  'vậy',
+  'về',
+  'với',
+];
+
+const ENGLISH = [
+  'a',
+  'about',
+  'an',
+  'and',
+  'are',
+  'as',
+  'at',
+  'be',
+  'by',
+  'can',
+  'could',
+  'did',
+  'do',
+  'does',
+  'for',
+  'from',
+  'how',
+  'i',
+  'in',
+  'is',
+  'it',
+  'me',
+  'my',
+  'of',
+  'on',
+  'or',
+  'please',
+  'that',
+  'the',
+  'these',
+  'this',
+  'those',
+  'to',
+  'was',
+  'we',
+  'were',
+  'what',
+  'when',
+  'where',
+  'which',
+  'who',
+  'why',
+  'with',
+  'you',
+  'your',
+];
+
+/** Normalized like index terms (`normalizeForIndex`: NFC, lowercase, đ→d). */
+export const STOP_WORDS: ReadonlySet<string> = new Set(
+  [...VIETNAMESE, ...ENGLISH].map((word) => normalizeForIndex(word)),
+);
+
+/** True for a stop word; `term` may be raw text or an already normalized term. */
+export function isStopWord(term: string): boolean {
+  return STOP_WORDS.has(normalizeForIndex(term));
+}

@@ -10,6 +10,7 @@ import {
   Trash,
 } from '@phosphor-icons/react';
 import type { TFunction } from 'i18next';
+import { inboxTreeMenuItems } from '../ai-inbox/inbox-entry-points';
 import { ARCHIVE_FOLDER, isInsideFolder, parentFolder } from '../../lib/vault-paths';
 import type { PopupMenuItem } from '../dialogs/popup-menu';
 import { openHistoryDialog } from '../history/open-history-dialog';
@@ -116,5 +117,7 @@ export function treeMenuItems(
       onSelect: () => openHistoryDialog(row.path),
     });
   }
+  // AI Inbox tidying: "Gợi ý chỗ để" on Inbox notes, "Dọn Inbox với AI" on the Inbox folder.
+  items.push(...inboxTreeMenuItems(row, t));
   return items;
 }

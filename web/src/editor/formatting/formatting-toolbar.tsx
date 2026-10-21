@@ -10,8 +10,9 @@ import {
   type FormattingCommand,
   type FormattingContext,
 } from './formatting-commands';
-import { BAR_ITEMS, MORE_ITEM, STYLE_ITEM, toolbarLayout } from './toolbar-layout';
+import { BAR_ITEMS, MORE_ITEM, SIZES_REM, STYLE_ITEM, toolbarLayout } from './toolbar-layout';
 import { ToolbarMenuButton } from './toolbar-menu-button';
+import { withExtraItem, type ToolbarExtraItem } from './toolbar-extra-item';
 import { useToolbarTooltip } from './toolbar-tooltip';
 import {
   coarsePointer,
@@ -33,6 +34,7 @@ export interface FormattingToolbarProps {
   onToggleSource: () => void;
   /** The source field, for undo/redo while in source mode. */
   sourceField: RefObject<HTMLTextAreaElement | null>;
+  extraItem?: ToolbarExtraItem;
 }
 
 /** `Ctrl+B` → `Control+B` (aria-keyshortcuts notation). */
@@ -57,7 +59,7 @@ function sourceHistory(field: HTMLTextAreaElement | null, action: 'undo' | 'redo
  * that cannot apply where the selection is stay visible but disabled.
  */
 export function FormattingToolbar(props: FormattingToolbarProps) {
-  const { editor, sourceMode, canToggleSource, onToggleSource, sourceField } = props;
+  const { editor, sourceMode, canToggleSource, onToggleSource, sourceField, extraItem } = props;
   const { t } = useTranslation();
   const faded = useWritingFocus((state) => state.focused);
   const row = useRef<HTMLDivElement>(null);
@@ -76,9 +78,16 @@ export function FormattingToolbar(props: FormattingToolbarProps) {
     [editor, sourceMode, canToggleSource, onToggleSource, sourceField],
   );
   const states = useFormattingStates(context);
-  const layout = toolbarLayout(width ?? Number.POSITIVE_INFINITY, rootFontSize(), coarsePointer());
+  const remPx = rootFontSize();
+  const extraPx = extraItem ? (extraItem.widthRem + SIZES_REM.separator) * remPx : 0;
+  const layout = toolbarLayout(
+    (width ?? Number.POSITIVE_INFINITY) - extraPx,
+    remPx,
+    coarsePointer(),
+  );
+  const bar = withExtraItem(layout.bar, extraItem);
   const [focusId, setFocusId] = useState<string | null>(null);
-  const tabStop = focusId !== null && layout.bar.includes(focusId) ? focusId : layout.bar[0];
+  const tabStop = focusId !== null && bar.includes(focusId) ? focusId : bar[0];
 
   const tooltip = useToolbarTooltip();
   const enabled = (id: string) => states[id]?.enabled === true;
@@ -111,6 +120,9 @@ export function FormattingToolbar(props: FormattingToolbarProps) {
 
   const renderItem = (id: string) => {
     const tabIndex = id === tabStop ? 0 : -1;
+    if (extraItem && id === extraItem.id) {
+      return extraItem.render({ tabIndex, tooltipProps: tooltip.props });
+    }
     if (id === STYLE_ITEM) {
       const current = STYLE_COMMANDS.find((command) => states[command.id]?.pressed);
       const shown = current ? t(current.labelKey) : t('editor.toolbar.textStyle');
@@ -185,13 +197,14 @@ export function FormattingToolbar(props: FormattingToolbarProps) {
         if (id) setFocusId(id);
       }}
     >
-      {layout.bar.map((id, index) => {
-        const previous = groupOf(layout.bar[index - 1]);
+      {bar.map((id, index) => {
+        const previous = groupOf(bar[index - 1]);
         const current = groupOf(id);
+        const extra = extraItem?.id === id && index > 0;
         return (
           <Fragment key={id}>
             {id === 'sourceMode' ? <span className="formatting-toolbar__spacer" /> : null}
-            {previous && current && previous !== current ? (
+            {extra || (previous && current && previous !== current) ? (
               <span className="formatting-toolbar__separator" aria-hidden="true" />
             ) : null}
             {renderItem(id)}

@@ -17,7 +17,8 @@
       "api-key-format": "An API key has 16 to 512 characters (plain letters, digits, symbols). Check it, then save again.",
       "unsupported-platform": "This option is only available on Windows.",
       "invalid-path": "A folder cannot be used. Choose folders inside the vault.",
-      "shortcut-failed": "The Windows startup shortcut could not be created. Try again, or open the log folder to see why."
+      "shortcut-failed": "The Windows startup shortcut could not be created. Try again, or open the log folder to see why.",
+      "consent-required": "Your consent is needed before turning this on. Turn it on again to see what is sent."
     },
     "vault": {
       "not-absolute": "Enter the full path, for example D:\\Notes\\New vault.",
@@ -139,7 +140,17 @@
     "sampleKept_one": "{{count}} file was kept because you edited it: {{names}}.",
     "sampleKept_other": "{{count}} files were kept because you edited them: {{names}}.",
     "logs": "Open the log folder",
-    "logsDone": "The log folder was opened in File Explorer."
+    "logsDone": "The log folder was opened in File Explorer.",
+    "templatesUpgradeLabel": "Update templates",
+    "templatesUpgradeOffer": "There are new versions of {{names}} (with Problem, Input/Output, Data…).",
+    "templatesUpgrade": "Update templates",
+    "templatesUpgradeHint": "The old copies go to the trash. Templates you edited stay as they are.",
+    "templatesUpgradeEdited": "You edited {{name}}, so the app leaves it as it is.",
+    "templatesUpgradeBusy": "Updating templates…",
+    "templatesUpgradeDone_one": "Updated {{names}}. The old copy is in the trash.",
+    "templatesUpgradeDone_other": "Updated {{names}}. The old copies are in the trash.",
+    "templatesUpgradeNone": "No template needs an update.",
+    "templatesUpgradeConflict": "A template changed during the update, so the app stopped. Click Update templates again."
   },
   "app": {
     "title": "App",
@@ -160,28 +171,147 @@
   },
   "ai": {
     "title": "AI",
-    "intro": "AI can be connected in a few steps, in a later version.",
-    "provider": "Provider",
-    "providers": {
-      "anthropic": "Anthropic (Claude)",
-      "openai": "OpenAI",
-      "gemini": "Google Gemini"
+    "intro": "AI in the app answers questions from your notes and helps summarize, reword and suggest links. It needs an API key: a code you create on the provider's site so the app can call their AI service, which they charge by use.",
+    "subscriptionNote": "A Claude Pro or Max account cannot be used inside the app. To use that account, see Connect Claude (MCP) below.",
+    "status": {
+      "ready": "AI is on with {{provider}}, model {{model}}.",
+      "off": "AI is off. The app sends nothing.",
+      "reconsent": "Your consent is needed again because you changed the provider.",
+      "consent": "Your consent is needed before AI sends anything.",
+      "noKey": "AI is on but there is no {{provider}} API key yet. Paste one in the field below.",
+      "budget": "AI is paused because this month's limit is used up.",
+      "unavailable": "AI cannot run for the open vault yet. Quit and open the app again."
     },
+    "reviewConsent": "Review and agree",
+    "enable": "Turn on AI in the app",
+    "enableHint": "When you turn it on, the app shows exactly what is sent so you can agree first.",
+    "consent": {
+      "title": "Turn on AI with {{provider}}?",
+      "lead": "When you use AI in the app, the things below are sent to {{provider}} and handled under {{provider}}'s policy.",
+      "sentLabel": "What is sent",
+      "sentQuestion": "Your question, with the earlier questions and answers of the same conversation.",
+      "sentExcerpts": "A few excerpts from related notes in these folders: {{folders}}.",
+      "sentNames": "The names of your courses, projects and upcoming deadlines in those folders.",
+      "sentSelection": "The text you select when you use an AI action. For tag suggestions, also the list of tags you use.",
+      "sentInbox": "A whole Inbox note when you press Suggest a place, with the folder names and the names of a few related notes.",
+      "neverLabel": "What is never sent",
+      "neverOutside": "Notes outside the chosen folders.",
+      "neverExcluded": "{{folders}}, unless you add them to the folder list.",
+      "neverFiles": "Attachments such as images or PDFs. Text from a PDF is only quoted when the PDF is in a chosen folder.",
+      "neverKey": "Your API key, except to {{provider}} itself.",
+      "limit": "Monthly limit: {{limit}} tokens. When it is used up, AI pauses until next month.",
+      "wrong": "AI can be wrong. Answers link to your notes when they can; please check them.",
+      "agree": "Agree and turn on",
+      "later": "Not now"
+    },
+    "provider": "Provider",
     "key": "{{provider}} API key",
     "keyEmpty": "Paste the API key into the field first.",
     "keySaved": "Key {{last4}} is saved.",
     "keySavedShort": "A key is saved.",
     "keyNone": "No key yet. A key stays on this computer and is never shown in full again.",
+    "keyShared": "Uses the {{provider}} API key above.",
     "keySave": "Save key",
+    "keySaveNamed": "Save the {{provider}} key",
     "keyRemove": "Remove key",
+    "keyRemoveNamed": "Remove the {{provider}} key",
     "chatModel": "Chat model",
-    "embeddingModel": "Embedding model",
+    "modelDefault": "Leave empty to use the default model ({{model}}).",
     "folders": "Folders AI may read",
-    "foldersHint": "By default AI reads every folder except 3 Resources and 4 Archive.",
-    "foldersEmpty": "The vault has no folders yet."
+    "foldersHint": "AI only reads the chosen folders. By default that is every folder except 3 Resources and 4 Archive. Templates and attachments are never sent.",
+    "foldersRoot": "Notes at the top of the vault",
+    "foldersNone": "no folder chosen",
+    "foldersEmpty": "The vault has no folders yet.",
+    "budget": {
+      "label": "Monthly limit (tokens)",
+      "usage": "Used this month: {{used}} / {{limit}} tokens.",
+      "explain": "Tokens are how providers count text and charge for it; a token is a few characters. A question usually takes a few thousand tokens. The numbers here are approximate and may differ a little from the bill.",
+      "invalid": "The limit must be a whole number from {{min}} to {{max}} tokens.",
+      "paused": "AI is paused because this month's {{limit}} tokens are used up. To go on, raise the limit above or wait until {{next}}."
+    },
+    "embeddings": {
+      "title": "Search by meaning (embeddings)",
+      "intro": "Finds notes about the same idea even with other words: \"notes about matrices\" still finds \"Linear algebra – chapter 3\". This is turned on separately, with its own consent.",
+      "enable": "Turn on search by meaning",
+      "provider": "Provider for search by meaning",
+      "model": "Embedding model",
+      "progressLabel": "Progress of the meaning index",
+      "state": {
+        "off": "Off. Search matches words only.",
+        "needsAi": "Search by meaning only runs while AI is on.",
+        "reconsent": "Your consent is needed again because you changed the provider.",
+        "consent": "Your consent is needed before anything is sent.",
+        "noKey": "A {{provider}} API key is needed to build the meaning index.",
+        "budget": "Paused because this month's limit is not enough to go on. Raise the limit or wait until next month.",
+        "unavailable": "Cannot run for the open vault yet. Quit and open the app again.",
+        "queued": "Waiting to build the meaning index…",
+        "running": "Building the meaning index {{done}}/{{total}}.",
+        "runningStart": "Building the meaning index…",
+        "idle": "Ready.",
+        "stale": "Needs a rebuild because you changed the model.",
+        "error": "Error: {{message}}",
+        "retrying": "Error: {{message}} The app will try again later."
+      },
+      "errors": {
+        "auth": "the API key is wrong or has expired. Check the key, then click Rebuild the meaning index.",
+        "quota": "the {{provider}} account is out of credit or over its quota. Top it up, then click Rebuild the meaning index.",
+        "network": "could not reach {{provider}}.",
+        "timeout": "{{provider}} took too long to answer.",
+        "rate-limit": "{{provider}} is limiting how often it can be called.",
+        "server": "{{provider}} is having problems.",
+        "malformed": "{{provider}} sent an answer the app could not read.",
+        "budget": "this month's limit is used up.",
+        "generic": "the meaning index could not be built."
+      },
+      "rebuild": "Rebuild the meaning index",
+      "rebuildHint": "Sends the text of every note in the folders AI may read again, costing tokens like the first time.",
+      "rebuildStarted": "Started rebuilding the meaning index.",
+      "rebuildRunning": "The index is being built. Wait until it is done, then try again.",
+      "rebuildErrors": {
+        "disabled": "Turn on AI and search by meaning first.",
+        "no-consent": "Your consent is needed before building the index.",
+        "no-key": "A {{provider}} API key is needed before building the index.",
+        "budget": "This month's limit is used up. Raise the limit or wait until next month.",
+        "unavailable": "AI cannot run for the open vault yet. Quit and open the app again."
+      },
+      "consent": {
+        "title": "Turn on search by meaning with {{provider}}?",
+        "lead": "To build the meaning index, the text of every note in the folders AI may read ({{folders}}) is sent to {{provider}} little by little and handled under {{provider}}'s policy.",
+        "edits": "When you edit a note, its text is sent again a few minutes later.",
+        "search": "What you type when searching, the questions you ask AI, the text you select for Suggest links and the Inbox note you press Suggest a place for are also sent to {{provider}} to search by meaning.",
+        "cost": "Each note costs a few tokens, counted in the monthly limit.",
+        "never": "Notes outside those folders, attachments and your API key (except to {{provider}} itself) are never sent.",
+        "off": "You can turn it off any time. Then the app sends nothing more and stops using this index.",
+        "agree": "Agree and turn on",
+        "later": "Not now"
+      }
+    }
   },
   "mcp": {
     "title": "Connect Claude (MCP)",
-    "intro": "Connecting Claude Desktop to your vault comes in a later version. This section will then have a snippet for you to paste."
+    "intro": "MCP lets Claude Desktop read and write your wiki through this app, with the Claude account you already have (no API key needed). The app enforces the permissions: Claude can only do what the app allows, even if told otherwise.",
+    "stepsLabel": "How to connect",
+    "steps": {
+      "install": "Install and open Claude Desktop, and sign in with your Claude account.",
+      "config": "In Claude Desktop, open Settings, choose Developer, then click Edit Config.",
+      "paste": "Open the claude_desktop_config.json file that appears, paste the snippet below and save. If the file already has an mcpServers entry, add only the \"second-brain\" part inside it.",
+      "restart": "Quit Claude Desktop completely (including its tray icon), then open it again.",
+      "try": "Try asking Claude: \"Search Second Brain for notes about matrices\"."
+    },
+    "snippetLabel": "Snippet for Claude Desktop",
+    "copy": "Copy",
+    "copied": "Copied",
+    "copyFailed": "Could not copy. Select the snippet and press Ctrl+C.",
+    "copyFailedMasked": "Could not copy. Try again.",
+    "bridgeMissing": "Open the app once with Mở Second Brain so it can prepare the connection file.",
+    "loading": "Loading the snippet…",
+    "loadError": "Could not load the snippet. Check that the server is running, then try again.",
+    "retry": "Try again",
+    "httpTitle": "Another way: connect over HTTP",
+    "httpIntro": "For apps that support MCP over HTTP. This only works while the app is open.",
+    "httpSnippetLabel": "HTTP snippet",
+    "httpWarning": "This snippet holds the app's access code. The screen shows only its last 4 characters; the Copy button copies all of it. Do not share it: anyone with this code can read and change your notes while the app is running.",
+    "noteEdits": "Let AI edit your own notes",
+    "noteEditsHint": "When off, Claude only writes in wiki/, adds to the Inbox and to today's daily note. When on, Claude may also change your own notes, always checking it has the latest version."
   }
 }

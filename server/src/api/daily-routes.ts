@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import type { AppContext } from '../app-context/create-app-context.js';
 import { isCalendarDate } from '../lib/local-date.js';
-import type { TemplateLanguage } from '../templates/template-variables.js';
+import type { FilledTemplate, TemplateLanguage } from '../templates/template-variables.js';
 import { VaultError, type VaultPath } from '../vault/vault-types.js';
 import { dailyNoteContent } from './new-note-content.js';
 
@@ -19,6 +19,20 @@ function checkDate(date: string): string {
 }
 
 export const dailyNotePath = (date: string): VaultPath => `Daily/${date}.md`;
+
+/**
+ * Content of the daily note of `date` from `Templates/Daily.md` (also used by the MCP tool
+ * `append_to_daily`); an unusable template is logged by code and gives the minimal note.
+ */
+export function dailyNoteFor(
+  context: AppContext,
+  date: string,
+  language: TemplateLanguage,
+): Promise<FilledTemplate> {
+  return dailyNoteContent(context.vault, { date, now: context.now(), language }, (code) =>
+    context.logger.warn(`Daily template not used (${code}); minimal note created.`),
+  );
+}
 
 /** Nearest existing daily notes before and after `date` (by the index), as vault paths. */
 function neighbours(paths: VaultPath[], date: string) {
@@ -58,11 +72,7 @@ export function registerDailyRoutes(
     { schema: { body: { type: 'object', required: ['date'], properties: { date: dateSchema } } } },
     async (request, reply) => {
       const date = checkDate(request.body.date);
-      const { content, cursor } = await dailyNoteContent(
-        context.vault,
-        { date, now: context.now(), language: uiLanguage() },
-        (code) => context.logger.warn(`Daily template not used (${code}); minimal note created.`),
-      );
+      const { content, cursor } = await dailyNoteFor(context, date, uiLanguage());
       const result = await context.vault.create(dailyNotePath(date), content);
       await context.settled();
       return reply.code(201).send({ path: result.path, revision: result.revision, cursor });

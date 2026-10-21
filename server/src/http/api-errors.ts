@@ -15,7 +15,14 @@ export type ApiErrorCode =
   /** 400: a folder chosen as the vault cannot be opened (`details.reason`). */
   | 'VAULT_UNUSABLE'
   /** 503: a per-vault plugin (reminders, history) is not running for the open vault. */
-  | 'UNAVAILABLE';
+  | 'UNAVAILABLE'
+  /** M6 (F33): see `AiErrorCode` in `ai/ai-types.ts` for statuses. */
+  | 'AI_DISABLED'
+  | 'AI_NO_KEY'
+  | 'AI_BUDGET'
+  | 'AI_PROVIDER_ERROR'
+  /** 409 (F32.4): a source without usable text cannot be marked as ingested. */
+  | 'NEEDS_REVIEW';
 
 export interface ApiErrorBody {
   error: { code: ApiErrorCode; message: string; details?: unknown };

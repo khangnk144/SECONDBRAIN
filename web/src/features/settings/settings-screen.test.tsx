@@ -42,7 +42,7 @@ describe('Settings screen (F18.1)', () => {
       'Kết nối Claude (MCP)',
     ]);
     expect(screen.getByText('D:\\SECONDBRAIN\\vault')).toBeVisible();
-    expect(screen.getByText('AI có thể nối sau vài bước, ở bản sau.')).toBeVisible();
+    expect(await screen.findByText('AI đang tắt. App không gửi gì đi.')).toBeVisible();
     expect(screen.getByLabelText('Giờ nhắc')).toHaveValue('08:00');
   });
 
@@ -224,11 +224,13 @@ describe('Settings screen (F18.1)', () => {
     expect(await screen.findByText('Đã lưu khóa …abcd.')).toBeVisible();
     expect(key).toHaveValue('');
     expect(document.body.textContent).not.toContain('sk-ant-1234567890abcd');
-    await user.click(screen.getByRole('button', { name: 'Xóa khóa' }));
+    await user.click(screen.getByRole('button', { name: 'Xóa khóa Anthropic (Claude)' }));
     await waitFor(() =>
       expect(puts()[1]).toEqual({ ai: { apiKey: { provider: 'anthropic', value: null } } }),
     );
-    expect(await screen.findByText(/Chưa có khóa nào/)).toBeVisible();
+    await waitFor(() => expect(screen.queryByText('Đã lưu khóa …abcd.')).toBeNull());
+    // Both key fields (chat and, for OpenAI, search by meaning) are empty now.
+    expect(screen.getAllByText(/Chưa có khóa nào/)).toHaveLength(2);
   });
 
   it('a key the server refuses is explained; models save trimmed; folders default without sources', async () => {
@@ -236,13 +238,15 @@ describe('Settings screen (F18.1)', () => {
     installSettingsRoutes(mock, settingsResponse());
     renderSettings();
     const scope = await screen.findByRole('group', { name: 'Thư mục AI được đọc' });
-    await waitFor(() => expect(within(scope).getAllByRole('checkbox')).toHaveLength(5));
+    // Root notes first, then the top folders.
+    await waitFor(() => expect(within(scope).getAllByRole('checkbox')).toHaveLength(6));
+    expect(within(scope).getByRole('checkbox', { name: 'Ghi chú ở gốc kho' })).toBeChecked();
     expect(within(scope).getByRole('checkbox', { name: '1 Projects' })).toBeChecked();
     expect(within(scope).getByRole('checkbox', { name: '3 Resources' })).not.toBeChecked();
     await user.click(within(scope).getByRole('checkbox', { name: '4 Archive' }));
     await waitFor(() =>
       expect(puts()).toEqual([
-        { ai: { folders: ['0 Inbox', '1 Projects', '2 Areas', '4 Archive'] } },
+        { ai: { folders: ['', '0 Inbox', '1 Projects', '2 Areas', '4 Archive'] } },
       ]),
     );
 

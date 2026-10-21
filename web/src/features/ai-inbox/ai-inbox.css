@@ -1,0 +1,106 @@
+/* Inbox tidying with AI: the dialog's rows and the quiet note-header action. Tokens only. */
+.inbox-tidy.modal {
+  width: min(560px, 100%);
+}
+
+.inbox-tidy__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.inbox-tidy__header .modal__title {
+  margin: 0;
+}
+
+.inbox-tidy__list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.inbox-tidy__row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--line);
+}
+
+.inbox-tidy__note {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.inbox-tidy__title {
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.inbox-tidy__line,
+.inbox-tidy__reason,
+.inbox-tidy__hint {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: max(12px, 0.78125rem);
+  overflow-wrap: anywhere;
+}
+
+.inbox-tidy__status {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.inbox-tidy__proposal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.inbox-tidy__changes {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.inbox-tidy__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* "Gợi ý chỗ để" under the note title (never beside it): quiet until hovered or focused. */
+.ai-inbox-action {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 28px;
+  padding: 0 var(--space-2);
+  border: 0;
+  border-radius: var(--radius-s);
+  background: transparent;
+  color: var(--ink-2);
+  font: inherit;
+  font-size: max(12px, 0.78125rem);
+  cursor: pointer;
+}
+
+.ai-inbox-action:hover:not([aria-disabled='true']) {
+  color: var(--ink);
+}
+
+.ai-inbox-action[aria-disabled='true'] {
+  opacity: 0.5;
+  cursor: default;
+}

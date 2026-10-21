@@ -123,7 +123,11 @@ export async function applyChanges(ctx: MutationContext, changes: ChangeSet): Pr
         if (writer.noteId(to) !== null) writer.deleteNote(to);
         writer.moveNote(id, to);
         movedIds.push(id);
-      } else if (writer.deleteNote(from) === null) writer.deleteFile(from);
+      } else {
+        // A renamed PDF keeps its extracted text (the content did not change).
+        if (loaded.get(to)?.kind === 'file') writer.sources.move(from, to);
+        if (writer.deleteNote(from) === null) writer.deleteFile(from);
+      }
     }
     for (const [path, item] of loaded) {
       if (item.kind === 'file') {

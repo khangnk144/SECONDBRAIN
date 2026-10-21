@@ -8,6 +8,7 @@ import type { FileStat, VaultPath } from '../vault/vault-types.js';
 import type { LinkResolver } from './link-targets.js';
 import { folderOf, titleForPath, type NoteRecord } from './note-record.js';
 import { CLASS_RULES, classifyPath } from '../markdown/content-classes.js';
+import { createSourceTextRows } from './source-text-rows.js';
 
 export interface NoteRowState {
   id: number;
@@ -69,6 +70,8 @@ export function createIndexWriter(db: Database.Database) {
     ),
     deleteFile: db.prepare('DELETE FROM files WHERE path = ?'),
   };
+
+  const sources = createSourceTextRows(db);
 
   function clearChildren(id: number): void {
     s.deleteLinks.run(id);
@@ -179,8 +182,13 @@ export function createIndexWriter(db: Database.Database) {
       s.upsertFile.run(stat.path, normalizeForIndex(name), stat.size, Math.trunc(stat.mtimeMs));
     },
 
+    /** Removes a non-note file and its PDF text rows. */
     deleteFile(path: VaultPath): boolean {
+      sources.remove(path);
       return s.deleteFile.run(path).changes > 0;
     },
+
+    /** PDF page text rows (F30): written by `setSourceText`, moved on rename. */
+    sources,
   };
 }

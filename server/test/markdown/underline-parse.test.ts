@@ -52,7 +52,10 @@ describe('underlined words are found by search', () => {
   afterAll(() => v.cleanup());
 
   it('finds a word only written inside <u> and filters by a tag right after <u>', () => {
-    expect(titles(v.index.search({ q: 'quan trong' }))).toEqual(['Gạch chân']);
+    // The vault's own CLAUDE.md (a searchable control doc) also holds "liên quan" and
+    // "khoảng trống"; only the user note matters here.
+    const notes = v.index.search({ q: 'quan trong' }).filter((r) => r.class !== 'control');
+    expect(titles(notes)).toEqual(['Gạch chân']);
     expect(titles(v.index.search({ q: 'tag:đầu-dòng' }))).toEqual(['Gạch chân']);
   });
 });

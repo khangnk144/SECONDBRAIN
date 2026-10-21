@@ -89,6 +89,7 @@ describe('GET /api/settings', () => {
     expect(Object.keys(res.json()).sort()).toEqual([
       'ai',
       'configuredPort',
+      'mcp',
       'port',
       'reminders',
       'restartRequired',
@@ -123,7 +124,12 @@ describe('Global settings sections for reminders, run at login and AI', () => {
       folders: null,
       enabled: false,
       embeddings: false,
+      consent: null,
+      embeddingsConsent: null,
+      embeddingProvider: 'openai',
+      monthlyTokenLimit: 2_000_000,
     });
+    expect(settings.mcp).toEqual({ allowNoteEdits: false });
   });
 
   it('keeps valid values and unknown keys, repairs invalid ones', () => {

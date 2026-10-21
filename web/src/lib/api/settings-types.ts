@@ -3,9 +3,23 @@
  * `server/src/config/settings-response.ts` and `server/src/config/settings-patch.ts`.
  */
 import type { UiPrefs } from '../ui-prefs';
+import type { EmbeddingProvider } from './ai-types';
 
 export type AiProvider = 'anthropic' | 'openai' | 'gemini';
 export const AI_PROVIDERS: readonly AiProvider[] = ['anthropic', 'openai', 'gemini'];
+/** Anthropic has no embeddings API. */
+export const EMBEDDING_PROVIDERS: readonly EmbeddingProvider[] = ['openai', 'gemini'];
+
+/** Monthly token limit bounds of `PUT /api/settings` (`ai.monthlyTokenLimit`). */
+export const MIN_MONTHLY_TOKEN_LIMIT = 10_000;
+export const MAX_MONTHLY_TOKEN_LIMIT = 100_000_000;
+
+/** When she agreed to send note text to a provider; counts only for that provider. */
+export interface AiConsent<P extends string = AiProvider> {
+  /** ISO timestamp. */
+  at: string;
+  provider: P;
+}
 
 export interface ApiKeyStatus {
   set: boolean;
@@ -36,11 +50,19 @@ export interface SettingsResponse {
     keys: Record<AiProvider, ApiKeyStatus>;
     chatModel: string | null;
     embeddingModel: string | null;
-    /** Folders AI may read; null = the default (everything but `3 Resources`, `4 Archive`). */
+    /**
+     * Folders AI may read ('' = notes at the vault root); null = the default (root notes and
+     * every top folder but `3 Resources`, `4 Archive`).
+     */
     folders: string[] | null;
     enabled: boolean;
     embeddings: boolean;
+    consent: AiConsent | null;
+    embeddingsConsent: AiConsent<EmbeddingProvider> | null;
+    embeddingProvider: EmbeddingProvider;
+    monthlyTokenLimit: number;
   };
+  mcp: { allowNoteEdits: boolean };
 }
 
 /** `PUT /api/settings`: only the fields that change (the server refuses unknown keys). */
@@ -55,7 +77,17 @@ export interface SettingsPatch {
     embeddingModel?: string | null;
     folders?: string[] | null;
     apiKey?: { provider: AiProvider; value: string | null };
+    /** Needs a consent that counts (400 `consent-required` otherwise). */
+    enabled?: boolean;
+    embeddings?: boolean;
+    /** `true` records consent for the provider chosen after the patch; `false` withdraws it. */
+    consent?: boolean;
+    embeddingsConsent?: boolean;
+    /** A provider change without a model resets that model to the new provider's default. */
+    embeddingProvider?: EmbeddingProvider;
+    monthlyTokenLimit?: number;
   };
+  mcp?: { allowNoteEdits?: boolean };
 }
 
 /** `DELETE /api/sample-data`. */

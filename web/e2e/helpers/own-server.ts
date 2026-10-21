@@ -35,6 +35,8 @@ export interface OwnServerOptions {
   appDir?: string;
   /** Reuse a home (a restart with another build); a fresh one is made otherwise. */
   home?: string;
+  /** Extra environment (the AI specs point `SB_AI_*_URL` at the local mock provider). */
+  env?: Record<string, string>;
 }
 
 export function makeTempHome(label: string): string {
@@ -90,6 +92,7 @@ export function ownServer(port: number, options: OwnServerOptions = {}): OwnServ
             HOME: osHome,
             USERPROFILE: osHome,
             XDG_CONFIG_HOME: path.join(osHome, '.config'),
+            ...options.env,
           },
           stdio: ['ignore', 'pipe', 'pipe'],
         },

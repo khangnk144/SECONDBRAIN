@@ -1,5 +1,6 @@
 import { addDays } from '../lib/local-date.js';
 import type { SampleFile } from './sample-file.js';
+import { samplePaperPages } from './sample-paper-pages.js';
 import { SAMPLE_PAPERS } from './sample-papers.js';
 
 export const SAMPLE_RESEARCH_GAP_PATH = 'wiki/research-gaps/tim-research-gap.md';
@@ -113,6 +114,12 @@ function researchGapPage(today: string): SampleFile {
   return { path: SAMPLE_RESEARCH_GAP_PATH, content };
 }
 
+/** Paper pages first (they link to the PDFs), then index, log, concepts and the research gap. */
 export function sampleWikiFiles(today: string): SampleFile[] {
-  return [...controlDocs(today), ...conceptPages(today), researchGapPage(today)];
+  return [
+    ...samplePaperPages(today),
+    ...controlDocs(today),
+    ...conceptPages(today),
+    researchGapPage(today),
+  ];
 }

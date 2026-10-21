@@ -1,5 +1,11 @@
 import type { GlobalSettings, UiSettings } from './global-settings.js';
-import { AI_PROVIDERS, type AiProvider, type AiSettings } from './settings-sections.js';
+import {
+  AI_PROVIDERS,
+  mcpSettingsOf,
+  type AiProvider,
+  type AiSettings,
+  type McpSettings,
+} from './settings-sections.js';
 
 export interface VaultInfo {
   /** Absolute path of the open vault. */
@@ -28,6 +34,7 @@ export interface SettingsResponse {
   /** Null only in API-only builds without a vault (tests). */
   vault: VaultInfo | null;
   ai: Omit<AiSettings, 'apiKeys'> & { keys: Record<AiProvider, ApiKeyStatus> };
+  mcp: McpSettings;
 }
 
 /** What the response needs besides the stored settings. */
@@ -84,6 +91,13 @@ export function buildSettingsResponse(
       folders: ai.folders ? [...ai.folders] : null,
       enabled: ai.enabled,
       embeddings: ai.embeddings,
+      consent: ai.consent ? { at: ai.consent.at, provider: ai.consent.provider } : null,
+      embeddingsConsent: ai.embeddingsConsent
+        ? { at: ai.embeddingsConsent.at, provider: ai.embeddingsConsent.provider }
+        : null,
+      embeddingProvider: ai.embeddingProvider,
+      monthlyTokenLimit: ai.monthlyTokenLimit,
     },
+    mcp: { allowNoteEdits: mcpSettingsOf(settings).allowNoteEdits },
   };
 }

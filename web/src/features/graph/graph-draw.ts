@@ -12,6 +12,8 @@ import {
   STATE_NORMAL,
   type GraphHighlight,
 } from './graph-highlight';
+import { drawAiTouchHalos, drawAiTouchLabels, drawAiTouchMarks } from './graph-ai-touch-draw';
+import type { TouchFrame } from './graph-ai-touch-effect';
 import { drawLabels } from './graph-labels';
 import type { GraphModel } from './graph-model';
 import type { GraphPalette } from './graph-palette';
@@ -58,6 +60,8 @@ export interface FrameInput {
   labelPass: number;
   /** Canvas areas under overlays (title, controls, legend) that names keep off, CSS px. */
   labelExclusions: readonly LabelRect[];
+  /** "AI vừa chạm" playbacks on screen (full map only), or null. */
+  touch: TouchFrame | null;
 }
 
 export interface LabelRect {
@@ -178,13 +182,16 @@ export function drawGraph(ctx: CanvasRenderingContext2D, f: FrameInput): void {
   ctx.lineWidth = 1.5 / view.scale;
   strokeEdges(ctx, f, STATE_EMPHASIS);
 
+  drawAiTouchHalos(ctx, f);
   drawBuckets(ctx, f, false, GLOW_EXTRA_PX / view.scale, GLOW_ALPHA, EMPHASIS_GLOW_ALPHA);
   drawBuckets(ctx, f, false, 0, 1, 1);
   ctx.lineWidth = 1.25 / view.scale;
   drawBuckets(ctx, f, true, 0, 1, 1);
 
   drawSignals(ctx, f);
+  drawAiTouchMarks(ctx, f);
   if (f.hover !== f.ring) drawRing(ctx, f, f.hover, palette.ink);
   drawRing(ctx, f, f.ring, palette.accent);
   drawLabels(ctx, f);
+  drawAiTouchLabels(ctx, f);
 }

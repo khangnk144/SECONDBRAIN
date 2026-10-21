@@ -18,6 +18,8 @@
 
 .note-title__input {
   width: 100%;
+  /* A title longer than the row ends in "…" (while not being edited), never cut mid-letter. */
+  text-overflow: ellipsis;
   padding: 0;
   border: 0;
   border-radius: var(--radius-s);

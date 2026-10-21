@@ -17,7 +17,11 @@ import { useUiPrefsStore } from '../ui-prefs-store';
 import { emitServerEvent } from '../ws/server-event-bus';
 import { matchCommands } from './command-matching';
 import { APP_COMMANDS, availableCommands, commandKeys, type AppCommand } from './command-registry';
-import { IMPLEMENTED_FEATURES } from './implemented-features';
+import { IMPLEMENTED_FEATURES, type AppFeature } from './implemented-features';
+import { useChatStore } from '../../features/ai-chat/chat-store';
+import { AI_EDITOR_ACTIONS } from '../../features/ai-actions/ai-action-kinds';
+import { registerAiActionTarget } from '../../features/ai-actions/ai-action-target';
+import { resetInboxTidy, useInboxTidy } from '../../features/ai-inbox/inbox-tidy-store';
 
 let navigate: ReturnType<typeof vi.fn<Navigator>>;
 let mock: FetchMock;
@@ -28,6 +32,10 @@ const command = (id: string): AppCommand => {
   return found;
 };
 const toasts = () => useToastStore.getState().toasts.map((toast) => toast.message);
+/** A note editor holding a selection (the AI selection commands need one). */
+const aiStart = vi.fn();
+const noteWithSelection = () =>
+  registerAiActionTarget({ hasSelection: () => true, start: aiStart });
 
 /** A note screen with three tabs, the middle one active (tab commands need a note on screen). */
 function noteScreenWithTabs() {
@@ -64,6 +72,20 @@ const EFFECTS: Record<string, () => Promise<void> | void> = {
   openTasks: () => expect(navigate).toHaveBeenLastCalledWith('/tasks', undefined),
   openCalendar: () => expect(navigate).toHaveBeenLastCalledWith('/calendar', undefined),
   graph: () => expect(navigate).toHaveBeenLastCalledWith('/graph', undefined),
+  ...Object.fromEntries(
+    AI_EDITOR_ACTIONS.map((action) => [
+      `ai-${action}`,
+      () => expect(aiStart).toHaveBeenLastCalledWith(action),
+    ]),
+  ),
+  'ai-tidy-inbox': () => {
+    expect(useInboxTidy.getState().mode).toEqual({ kind: 'all' });
+    resetInboxTidy();
+  },
+  'ask-ai': () => {
+    expect(navigate).toHaveBeenLastCalledWith('/ask', undefined);
+    expect(useChatStore.getState().focus?.threadId).toBe('ask');
+  },
   openTags: () => expect(navigate).toHaveBeenLastCalledWith('/tags', undefined),
   'shortcut-sheet': () => expect(useShortcutSheetUi.getState().isOpen).toBe(true),
   'toggle-left-pane': () => expect(usePanesStore.getState().leftCollapsed).toBe(true),
@@ -167,20 +189,28 @@ describe('command registry (F8.4)', () => {
       expect(i18n.exists(c.labelKey, { lng: 'vi' }), c.labelKey).toBe(true);
       expect(i18n.exists(c.labelKey, { lng: 'en' }), c.labelKey).toBe(true);
     }
-    // "Hỏi AI…" arrives with the AI phase.
-    expect(APP_COMMANDS.some((c) => c.feature === 'ai')).toBe(false);
+    // "Hỏi AI…" ships with the AI phase.
+    expect(command('ask-ai').feature).toBe('ai');
   });
 
   it('hides a command whose feature is not implemented, or that cannot run here', () => {
-    const ask: AppCommand = { ...command('openToday'), id: 'ask-ai', feature: 'ai' };
-    expect(availableCommands([...APP_COMMANDS, ask]).map((c) => c.id)).not.toContain('ask-ai');
+    // Every feature of APP_FEATURES ships now; a later one stays hidden the same way.
+    const later: AppCommand = {
+      ...command('openToday'),
+      id: 'later',
+      feature: 'later' as AppFeature,
+    };
+    expect(availableCommands([...APP_COMMANDS, later]).map((c) => c.id)).not.toContain('later');
     const visible = availableCommands().map((c) => c.id);
     for (const id of ['source-mode', 'close-tab', 'previous-tab', 'next-tab']) {
       expect(visible).not.toContain(id);
     }
+    for (const action of AI_EDITOR_ACTIONS) expect(visible).not.toContain(`ai-${action}`);
     noteScreenWithTabs();
     registerShortcut({ id: 'source-mode', keys: 'Alt+S', run: sourceToggle, labelKey: 'x' });
+    const dropTarget = noteWithSelection();
     expect(availableCommands()).toHaveLength(APP_COMMANDS.length);
+    dropTarget();
   });
 
   it('shows the key of its shortcut, read from the shortcut registry', () => {
@@ -203,9 +233,11 @@ describe('command registry (F8.4)', () => {
         navigate = (await resetAppState()) as ReturnType<typeof vi.fn<Navigator>>;
         noteScreenWithTabs();
         registerShortcut({ id: 'source-mode', keys: 'Alt+S', run: sourceToggle, labelKey: 'x' });
+        const dropTarget = noteWithSelection();
         expect(availableCommands().map((a) => a.id)).toContain(c.id);
         c.run();
         await EFFECTS[c.id]?.();
+        dropTarget();
       }
     } finally {
       uninstall();

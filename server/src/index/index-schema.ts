@@ -7,7 +7,8 @@ import type Database from 'better-sqlite3';
 
 // 4: tags right after `<u>` count; task text keeps a closing `</u>` or code span before a date.
 // 5: date tokens inside wikilinks, embeds and Markdown links are not task dates.
-export const INDEX_SCHEMA_VERSION = '5';
+// 6: PDF page text (source_docs, source_pages, sources_fts).
+export const INDEX_SCHEMA_VERSION = '6';
 
 const SCHEMA_SQL = `
 CREATE TABLE notes(
@@ -60,6 +61,19 @@ CREATE TABLE note_text(note_id INTEGER PRIMARY KEY, plain TEXT NOT NULL);
 -- Every non-note file (attachments, PDFs, …): link targets and change detection.
 CREATE TABLE files(
   path TEXT PRIMARY KEY, name_key TEXT NOT NULL, size INTEGER NOT NULL, mtime INTEGER NOT NULL
+);
+
+-- PDF page text pushed by the sources plugin (never extracted here). One source_docs row per
+-- PDF of a searchable class; pages without text have no row; sources_fts rowid = source_pages.id.
+CREATE TABLE source_docs(
+  path TEXT PRIMARY KEY, path_norm TEXT NOT NULL, content_hash TEXT NOT NULL
+);
+CREATE TABLE source_pages(
+  id INTEGER PRIMARY KEY, path TEXT NOT NULL, page INTEGER NOT NULL, text TEXT NOT NULL
+);
+CREATE INDEX source_pages_path ON source_pages(path, page);
+CREATE VIRTUAL TABLE sources_fts USING fts5(
+  path UNINDEXED, page UNINDEXED, body_norm, tokenize='unicode61 remove_diacritics 2'
 );
 
 CREATE TABLE meta(key TEXT PRIMARY KEY, value TEXT);

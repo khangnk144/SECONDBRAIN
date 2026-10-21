@@ -9,6 +9,7 @@ import { useLiveQuery } from '../../lib/use-live-query';
 import { useNow } from '../../lib/use-now';
 import { useUiPrefsStore } from '../../lib/ui-prefs-store';
 import { ConnectionBanner, useConnectionBannerVisible } from '../connection/connection-banner';
+import { AiTodayLine } from './ai-today-line';
 import { ProjectsSection } from './projects-section';
 import { QuickCaptureInline } from './quick-capture-inline';
 import { SampleDataPrompt } from './sample-data-prompt';
@@ -103,6 +104,7 @@ export function TodayScreen() {
           )}
         </p>
       )}
+      {offline ? null : <AiTodayLine />}
       {status === 'error' && view === undefined ? (
         <div className="today__error">
           <p role="alert">{t('today.loadError')}</p>

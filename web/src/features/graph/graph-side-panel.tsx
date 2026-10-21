@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { GraphModel } from './graph-model';
 import { GraphNodeDetails } from './graph-node-details';
@@ -11,6 +12,8 @@ export interface GraphSidePanelProps {
   onDepthChange: (depth: 1 | 2) => void;
   onOpen: (id: string) => void;
   onClear: () => void;
+  /** "AI vừa cập nhật" (shown under the search box when the AI touched the vault). */
+  aiTouch?: ReactNode;
 }
 
 /**
@@ -33,6 +36,7 @@ export function GraphSidePanel(props: GraphSidePanelProps) {
   return (
     <aside className="graph-panel" aria-label={t('graph.panel.label')}>
       <GraphNodeSearch model={model} onSelect={onSelect} />
+      {props.aiTouch}
       <p role="status" className="visually-hidden">
         {announcement}
       </p>

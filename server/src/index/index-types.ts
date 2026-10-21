@@ -82,6 +82,28 @@ export interface SearchResult {
   snippet: SearchSnippet | null;
   /** Higher is better; title matches always rank above body-only matches. */
   score: number;
+  /** PDF results only: the best-matching page (1-based); the snippet comes from it. */
+  page?: number;
+}
+
+/** `IndexService.retrieve` input (AI retrieval, SPEC F33 "BM25 always"). */
+export interface RetrievalQuery {
+  /** The question; normalized, stop words dropped, remaining terms OR-combined. */
+  text: string;
+  /** At most this many hits (clamped to 1…200). */
+  limit: number;
+  /** Include PDF page hits (`3 Resources` PDFs). Default false. */
+  includePdf?: boolean;
+}
+
+export interface RetrievalHit {
+  path: VaultPath;
+  title: string;
+  class: ContentClass;
+  /** Best-matching PDF page (one hit per PDF); null for notes. */
+  page: number | null;
+  /** bm25 relevance, higher is better (notes and PDF pages on one scale, see `retrieve`). */
+  score: number;
 }
 
 export interface RebuildProgress {
@@ -136,6 +158,23 @@ export interface IndexService {
    */
   notesContainingPhrase(text: string): VaultPath[];
   search(query: SearchQuery): SearchResult[];
+  /**
+   * OR-semantics BM25 candidates for AI retrieval over searchable classes (no folder scope: the
+   * AI layer filters by scope). Never throws on odd input (FTS syntax is never passed through).
+   */
+  retrieve(query: RetrievalQuery): RetrievalHit[];
+  /**
+   * Stores the page text of a PDF (`pages[i]` = page i + 1) for search and retrieval; `null`
+   * removes it. Ignored for files that are not PDFs of a searchable class or are not indexed.
+   * Applied in order with file changes (after a running rebuild, like them).
+   */
+  setSourceText(
+    path: VaultPath,
+    contentHash: string,
+    pages: readonly string[] | null,
+  ): Promise<void>;
+  /** Content hash of the PDF text the index holds for `path`, or null. */
+  sourceTextHash(path: VaultPath): string | null;
 
   /** Raw task rows for the deadline service (all classes; the service filters). */
   allTasks(): IndexedTask[];

@@ -1,10 +1,12 @@
 import type { FastifyInstance } from 'fastify';
 import type { AppContext } from '../app-context/create-app-context.js';
 import { classifyPath, isNotePath, noteTitleFromPath } from '../markdown/content-classes.js';
+import { templateUpgradeStates, upgradeTemplates } from '../templates/template-upgrades.js';
 import { restoreMissingTemplates } from '../vault/open-vault.js';
 import { TEMPLATE_PATHS } from '../vault/vault-layout.js';
 import type { VaultPath } from '../vault/vault-types.js';
 import { buildVaultTree } from './build-vault-tree.js';
+import { vaultPathSchema } from './vault-route-schemas.js';
 
 const key = (path: VaultPath) => path.normalize('NFC').toLowerCase();
 const collator = new Intl.Collator('vi', { numeric: true, sensitivity: 'base' });
@@ -44,4 +46,29 @@ export function registerVaultListingRoutes(app: FastifyInstance, context: AppCon
     await context.settled();
     return { restored };
   });
+
+  // "Cập nhật mẫu" (R2): which bundled files can be upgraded; never writes.
+  app.get('/api/templates/upgrades', async (_request, reply) => {
+    reply.header('cache-control', 'no-store');
+    return { items: await templateUpgradeStates(context.vault) };
+  });
+
+  // Replaces only files byte-identical to an earlier bundled version (old copy to the trash).
+  app.post<{ Body: { paths: string[] } }>(
+    '/api/templates/upgrade',
+    {
+      schema: {
+        body: {
+          type: 'object',
+          required: ['paths'],
+          properties: { paths: { type: 'array', maxItems: 20, items: vaultPathSchema } },
+        },
+      },
+    },
+    async (request) => {
+      const result = await upgradeTemplates(context.vault, request.body.paths);
+      await context.settled();
+      return result;
+    },
+  );
 }

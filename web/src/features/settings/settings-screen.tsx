@@ -1,13 +1,15 @@
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useAiStatusStore } from '../../lib/ai-status-store';
 import { AiSection } from './ai-section';
 import { AppSection } from './app-section';
 import { AppearanceSection } from './appearance-section';
+import { McpSection } from './mcp-section';
 import { RemindersSettingsSection } from './reminders-settings-section';
-import { SettingsSection } from './settings-section';
 import { useSettingsStore } from './settings-store';
 import { VaultSection } from './vault-section';
 import './settings-screen.css';
+import './settings-ai.css';
 
 const TITLE_ID = 'settings-title';
 
@@ -22,6 +24,8 @@ export function SettingsScreen() {
 
   useEffect(() => {
     void useSettingsStore.getState().load();
+    // What AI may do right now (the store also follows `ai:status` events).
+    void useAiStatusStore.getState().load();
   }, []);
 
   return (
@@ -37,6 +41,7 @@ export function SettingsScreen() {
           <VaultSection vault={settings.vault} />
           <AppSection settings={settings} />
           <AiSection ai={settings.ai} />
+          <McpSection allowNoteEdits={settings.mcp.allowNoteEdits} />
         </>
       ) : status === 'error' ? (
         <div className="settings-screen__note">
@@ -52,7 +57,6 @@ export function SettingsScreen() {
       ) : (
         <p className="settings-screen__note">{t('settings.loading')}</p>
       )}
-      <SettingsSection id="mcp" title={t('settings.mcp.title')} intro={t('settings.mcp.intro')} />
     </article>
   );
 }

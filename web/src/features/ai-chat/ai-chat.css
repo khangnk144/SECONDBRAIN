@@ -1,0 +1,245 @@
+/* Chat with your notes (design.md screen 7): quiet, text first, tokens only. No animation. */
+.ai-chat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.ai-chat--screen {
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.ai-chat__turns {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ai-chat__turn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Her question: a soft paper block, so the AI's text below it reads as the reply. */
+.ai-chat__question {
+  align-self: flex-start;
+  max-width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: var(--paper);
+  color: var(--ink);
+  white-space: pre-wrap;
+}
+
+.ai-chat__who {
+  color: var(--ink-2);
+  font-size: max(12px, 0.78125rem);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.ai-chat__streamed {
+  white-space: pre-wrap;
+}
+
+.ai-chat__note,
+.ai-chat__notice,
+.ai-chat__hint {
+  color: var(--ink-2);
+  font-size: max(12px, 0.78125rem);
+  line-height: 1.5;
+}
+
+.ai-chat__notice {
+  padding-left: var(--space-2);
+  border-left: 2px solid var(--line);
+}
+
+.ai-chat__error,
+.ai-chat__problem {
+  color: var(--urgent-text);
+}
+
+.ai-chat__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.ai-chat__quiet-button,
+.ai-sources__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 28px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: transparent;
+  color: var(--ink);
+  font-size: max(12px, 0.78125rem);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.ai-sources__toggle {
+  border-color: transparent;
+  color: var(--ink-2);
+  padding-left: 0;
+}
+
+.ai-chat__quiet-button:hover,
+.ai-sources__toggle:hover {
+  color: var(--ink);
+  background: var(--paper);
+}
+
+.ai-sources__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0 0 0 var(--space-6);
+  font-size: max(12px, 0.78125rem);
+}
+
+.ai-sources__page {
+  color: var(--ink-2);
+}
+
+.ai-chat__composer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.ai-chat__input {
+  width: 100%;
+  min-height: 60px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.ai-chat__input:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -1px;
+}
+
+.ai-chat__input[aria-invalid='true'] {
+  border-color: var(--urgent);
+}
+
+.ai-chat__not-ready {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  color: var(--ink-2);
+}
+
+/* The answer's small Markdown. */
+.ai-answer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.ai-answer ul,
+.ai-answer ol {
+  margin: 0;
+  padding-left: var(--space-6);
+}
+
+.ai-answer li + li {
+  margin-top: var(--space-1);
+}
+
+.ai-answer code {
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-s);
+  background: var(--paper);
+  font-size: 0.9em;
+}
+
+/* Links are underlined too, so they never depend on color alone. */
+.ai-answer__link {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+.ai-answer__link:focus-visible {
+  border-radius: var(--radius-s);
+}
+
+/* A cited source: in parentheses and a little smaller, so it never reads as part of the sentence. */
+.ai-answer__cite {
+  color: var(--ink-2);
+  font-size: max(12px, 0.875em);
+}
+
+/* "Lưu vào" in the save dialog: real radios styled like Settings' choices (no fieldset box). */
+.ai-save__folders {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.ai-save__folders > legend {
+  margin-bottom: var(--space-1);
+  padding: 0;
+}
+
+.ai-save__folder {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 32px;
+  font-size: 0.875rem;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.ai-save__folder input {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.ai-save__folder input:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (pointer: coarse) {
+  .ai-chat__quiet-button,
+  .ai-sources__toggle,
+  .ai-save__folder {
+    min-height: 40px;
+  }
+}

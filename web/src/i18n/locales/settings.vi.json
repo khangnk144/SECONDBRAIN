@@ -17,7 +17,8 @@
       "api-key-format": "Khóa API cần từ 16 đến 512 ký tự (chữ không dấu, số, ký hiệu). Kiểm tra lại rồi lưu nhé.",
       "unsupported-platform": "Tùy chọn này chỉ có trên Windows.",
       "invalid-path": "Có thư mục không dùng được. Chọn các thư mục trong kho nhé.",
-      "shortcut-failed": "Không tạo được lối tắt khởi động của Windows. Thử lại, hoặc mở thư mục log để xem lý do."
+      "shortcut-failed": "Không tạo được lối tắt khởi động của Windows. Thử lại, hoặc mở thư mục log để xem lý do.",
+      "consent-required": "Cần bạn đồng ý trước khi bật. Bật lại để xem những gì được gửi đi nhé."
     },
     "vault": {
       "not-absolute": "Hãy nhập đường dẫn đầy đủ, ví dụ D:\\Ghi chú\\Kho mới.",
@@ -139,7 +140,17 @@
     "sampleKept_one": "Giữ lại {{count}} tệp vì bạn đã sửa: {{names}}.",
     "sampleKept_other": "Giữ lại {{count}} tệp vì bạn đã sửa: {{names}}.",
     "logs": "Mở thư mục log",
-    "logsDone": "Đã mở thư mục log trong File Explorer."
+    "logsDone": "Đã mở thư mục log trong File Explorer.",
+    "templatesUpgradeLabel": "Cập nhật mẫu",
+    "templatesUpgradeOffer": "Có mẫu mới cho {{names}} (thêm Bài toán, Input/Output, Dữ liệu…).",
+    "templatesUpgrade": "Cập nhật mẫu",
+    "templatesUpgradeHint": "Bản cũ được chuyển vào thùng rác. Mẫu bạn đã sửa được giữ nguyên.",
+    "templatesUpgradeEdited": "Bạn đã sửa {{name}} nên app không thay nó.",
+    "templatesUpgradeBusy": "Đang cập nhật mẫu…",
+    "templatesUpgradeDone_one": "Đã cập nhật {{names}}. Bản cũ nằm trong thùng rác.",
+    "templatesUpgradeDone_other": "Đã cập nhật {{names}}. Bản cũ nằm trong thùng rác.",
+    "templatesUpgradeNone": "Không có mẫu nào cần cập nhật.",
+    "templatesUpgradeConflict": "Một mẫu vừa thay đổi trong lúc cập nhật nên app dừng lại. Bấm Cập nhật mẫu lần nữa nhé."
   },
   "app": {
     "title": "Ứng dụng",
@@ -160,28 +171,147 @@
   },
   "ai": {
     "title": "AI",
-    "intro": "AI có thể nối sau vài bước, ở bản sau.",
-    "provider": "Nhà cung cấp",
-    "providers": {
-      "anthropic": "Anthropic (Claude)",
-      "openai": "OpenAI",
-      "gemini": "Google Gemini"
+    "intro": "AI trong app trả lời câu hỏi từ ghi chú của bạn và giúp tóm tắt, viết lại, gợi ý liên kết. AI cần một khóa API: mã bạn tạo ở trang của nhà cung cấp để app gọi được dịch vụ AI, họ tính phí theo lượng dùng.",
+    "subscriptionNote": "Tài khoản Claude Pro hay Max không dùng được bên trong app. Muốn dùng tài khoản đó, xem mục Kết nối Claude (MCP) ở dưới.",
+    "status": {
+      "ready": "AI đang bật với {{provider}}, mô hình {{model}}.",
+      "off": "AI đang tắt. App không gửi gì đi.",
+      "reconsent": "Cần đồng ý lại vì bạn đã đổi nhà cung cấp.",
+      "consent": "Cần bạn đồng ý trước khi AI gửi gì đi.",
+      "noKey": "AI đã bật nhưng chưa có khóa API {{provider}}. Dán khóa vào ô bên dưới nhé.",
+      "budget": "AI đang tạm dừng vì tháng này đã dùng hết hạn mức.",
+      "unavailable": "AI chưa chạy được với kho đang mở. Thoát rồi mở lại app nhé."
     },
+    "reviewConsent": "Xem và đồng ý",
+    "enable": "Bật AI trong app",
+    "enableHint": "Khi bật, app hiện rõ những gì được gửi đi để bạn đồng ý trước.",
+    "consent": {
+      "title": "Bật AI với {{provider}}?",
+      "lead": "Khi bạn dùng AI trong app, những thứ dưới đây được gửi tới {{provider}} và được xử lý theo chính sách của {{provider}}.",
+      "sentLabel": "Được gửi đi",
+      "sentQuestion": "Câu bạn hỏi, cùng các câu hỏi và câu trả lời trước đó trong cùng cuộc trò chuyện.",
+      "sentExcerpts": "Vài đoạn trích từ ghi chú liên quan trong các thư mục: {{folders}}.",
+      "sentNames": "Tên các môn học, đồ án và việc sắp đến hạn trong các thư mục đó.",
+      "sentSelection": "Đoạn chữ bạn bôi đen khi dùng một thao tác AI. Khi gợi ý thẻ, kèm danh sách thẻ bạn đang dùng.",
+      "sentInbox": "Cả ghi chú Inbox khi bạn bấm Gợi ý chỗ để, cùng tên các thư mục và tên vài ghi chú liên quan.",
+      "neverLabel": "Không bao giờ gửi",
+      "neverOutside": "Ghi chú ngoài các thư mục đã chọn.",
+      "neverExcluded": "{{folders}}, trừ khi bạn thêm vào danh sách thư mục.",
+      "neverFiles": "Tệp đính kèm như ảnh hay PDF. Chữ trong PDF chỉ được trích khi PDF nằm trong thư mục đã chọn.",
+      "neverKey": "Khóa API của bạn, trừ cho chính {{provider}}.",
+      "limit": "Hạn mức tháng: {{limit}} token. Dùng hết thì AI tự tạm dừng tới tháng sau.",
+      "wrong": "AI có thể trả lời sai. Câu trả lời dẫn về ghi chú khi có thể; hãy kiểm tra lại.",
+      "agree": "Đồng ý và bật",
+      "later": "Để sau"
+    },
+    "provider": "Nhà cung cấp",
     "key": "Khóa API {{provider}}",
     "keyEmpty": "Dán khóa API vào ô trước nhé.",
     "keySaved": "Đã lưu khóa {{last4}}.",
     "keySavedShort": "Đã lưu một khóa.",
     "keyNone": "Chưa có khóa nào. Khóa chỉ nằm trên máy này, không bao giờ hiện lại đầy đủ.",
+    "keyShared": "Dùng chung khóa API {{provider}} ở trên.",
     "keySave": "Lưu khóa",
+    "keySaveNamed": "Lưu khóa {{provider}}",
     "keyRemove": "Xóa khóa",
+    "keyRemoveNamed": "Xóa khóa {{provider}}",
     "chatModel": "Mô hình trò chuyện",
-    "embeddingModel": "Mô hình embedding",
+    "modelDefault": "Để trống để dùng mô hình mặc định ({{model}}).",
     "folders": "Thư mục AI được đọc",
-    "foldersHint": "Mặc định AI đọc mọi thư mục trừ 3 Resources và 4 Archive.",
-    "foldersEmpty": "Kho chưa có thư mục nào."
+    "foldersHint": "AI chỉ đọc các thư mục được chọn. Mặc định là mọi thư mục trừ 3 Resources và 4 Archive. Mẫu và tệp đính kèm không bao giờ được gửi.",
+    "foldersRoot": "Ghi chú ở gốc kho",
+    "foldersNone": "chưa chọn thư mục nào",
+    "foldersEmpty": "Kho chưa có thư mục nào.",
+    "budget": {
+      "label": "Hạn mức mỗi tháng (token)",
+      "usage": "Tháng này đã dùng {{used}} / {{limit}} token.",
+      "explain": "Token là đơn vị nhà cung cấp dùng để đếm chữ và tính phí, mỗi token khoảng vài ký tự. Một câu hỏi thường tốn vài nghìn token. Số ở đây là khoảng, có thể lệch một chút so với hóa đơn.",
+      "invalid": "Hạn mức cần là số nguyên từ {{min}} đến {{max}} token.",
+      "paused": "AI đang tạm dừng vì tháng này đã dùng hết {{limit}} token. Muốn dùng tiếp, tăng hạn mức ở trên hoặc chờ đến {{next}}."
+    },
+    "embeddings": {
+      "title": "Tìm theo nghĩa (embeddings)",
+      "intro": "Giúp tìm ra ghi chú cùng ý dù khác chữ: gõ \"bài về ma trận\" vẫn ra \"Đại số tuyến tính – chương 3\". Phần này bật riêng, với sự đồng ý riêng.",
+      "enable": "Bật tìm theo nghĩa",
+      "provider": "Nhà cung cấp cho tìm theo nghĩa",
+      "model": "Mô hình embedding",
+      "progressLabel": "Tiến độ tạo chỉ mục theo nghĩa",
+      "state": {
+        "off": "Đang tắt. Tìm kiếm chỉ khớp theo chữ.",
+        "needsAi": "Tìm theo nghĩa chỉ chạy khi AI đang bật.",
+        "reconsent": "Cần đồng ý lại vì bạn đã đổi nhà cung cấp.",
+        "consent": "Cần bạn đồng ý trước khi gửi gì đi.",
+        "noKey": "Cần khóa API {{provider}} để tạo chỉ mục theo nghĩa.",
+        "budget": "Tạm dừng vì hạn mức tháng này không đủ để tạo tiếp. Tăng hạn mức hoặc chờ sang tháng sau.",
+        "unavailable": "Chưa chạy được với kho đang mở. Thoát rồi mở lại app nhé.",
+        "queued": "Đang chờ để tạo chỉ mục theo nghĩa…",
+        "running": "Đang tạo chỉ mục theo nghĩa {{done}}/{{total}}.",
+        "runningStart": "Đang tạo chỉ mục theo nghĩa…",
+        "idle": "Sẵn sàng.",
+        "stale": "Cần tạo lại vì bạn đổi mô hình.",
+        "error": "Lỗi: {{message}}",
+        "retrying": "Lỗi: {{message}} App sẽ tự thử lại sau."
+      },
+      "errors": {
+        "auth": "khóa API không đúng hoặc đã hết hạn. Kiểm tra khóa rồi bấm Tạo lại chỉ mục theo nghĩa.",
+        "quota": "tài khoản {{provider}} đã hết tiền hoặc hết hạn mức. Nạp thêm rồi bấm Tạo lại chỉ mục theo nghĩa.",
+        "network": "không kết nối được với {{provider}}.",
+        "timeout": "{{provider}} trả lời quá lâu.",
+        "rate-limit": "{{provider}} đang giới hạn số lần gọi.",
+        "server": "{{provider}} đang gặp sự cố.",
+        "malformed": "{{provider}} trả về kết quả không đọc được.",
+        "budget": "tháng này đã dùng hết hạn mức.",
+        "generic": "chưa tạo được chỉ mục theo nghĩa."
+      },
+      "rebuild": "Tạo lại chỉ mục theo nghĩa",
+      "rebuildHint": "Gửi lại chữ của mọi ghi chú trong các thư mục AI được đọc, tốn token như lần đầu.",
+      "rebuildStarted": "Đã bắt đầu tạo lại chỉ mục theo nghĩa.",
+      "rebuildRunning": "Chỉ mục đang được tạo. Đợi xong rồi thử lại nhé.",
+      "rebuildErrors": {
+        "disabled": "Bật AI và tìm theo nghĩa trước nhé.",
+        "no-consent": "Cần bạn đồng ý trước khi tạo chỉ mục.",
+        "no-key": "Cần khóa API {{provider}} trước khi tạo chỉ mục.",
+        "budget": "Tháng này đã dùng hết hạn mức. Tăng hạn mức hoặc chờ sang tháng sau.",
+        "unavailable": "AI chưa chạy được với kho đang mở. Thoát rồi mở lại app nhé."
+      },
+      "consent": {
+        "title": "Bật tìm theo nghĩa với {{provider}}?",
+        "lead": "Để tạo chỉ mục theo nghĩa, chữ của mọi ghi chú trong các thư mục AI được đọc ({{folders}}) được gửi dần tới {{provider}} và được xử lý theo chính sách của {{provider}}.",
+        "edits": "Khi bạn sửa một ghi chú, chữ của ghi chú đó được gửi lại sau vài phút.",
+        "search": "Từ khóa bạn gõ khi tìm kiếm, câu bạn hỏi AI, đoạn chữ bạn chọn khi bấm Gợi ý liên kết và ghi chú Inbox khi bấm Gợi ý chỗ để cũng được gửi tới {{provider}} để tìm theo nghĩa.",
+        "cost": "Mỗi ghi chú tốn một ít token, tính vào hạn mức tháng.",
+        "never": "Ghi chú ngoài các thư mục đó, tệp đính kèm và khóa API của bạn (trừ cho chính {{provider}}) không bao giờ được gửi.",
+        "off": "Bạn tắt được bất cứ lúc nào. Khi tắt, app không gửi gì thêm và không dùng chỉ mục này nữa.",
+        "agree": "Đồng ý và bật",
+        "later": "Để sau"
+      }
+    }
   },
   "mcp": {
     "title": "Kết nối Claude (MCP)",
-    "intro": "Nối Claude Desktop với kho ghi chú sẽ có ở bản sau. Khi đó, phần này sẽ có đoạn cấu hình để bạn dán vào."
+    "intro": "MCP là cách để Claude Desktop đọc và viết vào wiki của bạn thông qua app này, bằng tài khoản Claude bạn đang có (không cần khóa API). Quyền do app kiểm soát: Claude chỉ làm được những gì app cho phép, kể cả khi được bảo làm khác.",
+    "stepsLabel": "Cách kết nối",
+    "steps": {
+      "install": "Cài và mở Claude Desktop, đăng nhập tài khoản Claude của bạn.",
+      "config": "Trong Claude Desktop, mở Settings, chọn Developer rồi bấm Edit Config.",
+      "paste": "Mở tệp claude_desktop_config.json vừa hiện ra, dán đoạn cấu hình bên dưới vào rồi lưu. Nếu tệp đã có mục mcpServers, chỉ thêm phần \"second-brain\" vào trong đó.",
+      "restart": "Thoát hẳn Claude Desktop (cả biểu tượng ở khay hệ thống) rồi mở lại.",
+      "try": "Thử hỏi Claude: \"Tìm trong Second Brain các ghi chú về ma trận\"."
+    },
+    "snippetLabel": "Đoạn cấu hình cho Claude Desktop",
+    "copy": "Sao chép",
+    "copied": "Đã sao chép",
+    "copyFailed": "Chưa sao chép được. Bôi đen đoạn cấu hình rồi bấm Ctrl+C nhé.",
+    "copyFailedMasked": "Chưa sao chép được. Thử lại nhé.",
+    "bridgeMissing": "Hãy mở app bằng Mở Second Brain một lần để app chuẩn bị file kết nối.",
+    "loading": "Đang tải đoạn cấu hình…",
+    "loadError": "Chưa tải được đoạn cấu hình. Kiểm tra máy chủ đang chạy rồi thử lại nhé.",
+    "retry": "Thử lại",
+    "httpTitle": "Cách khác: kết nối qua HTTP",
+    "httpIntro": "Dành cho ứng dụng hỗ trợ MCP qua HTTP. Cách này chỉ chạy khi app đang mở.",
+    "httpSnippetLabel": "Đoạn cấu hình HTTP",
+    "httpWarning": "Đoạn này chứa mã truy cập của app, trên màn hình chỉ hiện 4 ký tự cuối, còn nút Sao chép chép cả mã. Đừng chia sẻ nó: ai có mã này đều đọc và sửa được ghi chú của bạn khi app đang chạy.",
+    "noteEdits": "Cho phép AI sửa ghi chú cá nhân",
+    "noteEditsHint": "Khi tắt, Claude chỉ viết vào wiki/, thêm vào Inbox và vào ghi chú hôm nay. Khi bật, Claude được sửa cả ghi chú của bạn, và luôn kiểm tra mình đang sửa bản mới nhất."
   }
 }

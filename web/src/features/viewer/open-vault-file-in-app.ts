@@ -1,8 +1,11 @@
 /**
- * The app's `openVaultFile`: notes open as note tabs, PDFs in the viewer tab, everything else
- * (images, Office files, HTML pages…) is downloaded with an offer to open it with another app.
+ * The app's `openVaultFile`: notes open as note tabs, PDFs in the viewer tab (at `page` when
+ * given), everything else (images, Office files, HTML pages…) is downloaded with an offer to open
+ * it with another app.
  */
+import { withQuery } from '../../lib/api/query-string';
 import type { VaultPath } from '../../lib/api/vault-types';
+import { FILE_ROUTE, navigateTo } from '../../lib/app-navigation';
 import {
   setOpenVaultFileImplementation,
   vaultFileKind,
@@ -19,6 +22,10 @@ export function openVaultFileInApp(path: VaultPath, options: OpenVaultFileOption
       return;
     case 'pdf':
       useTabsStore.getState().openFile(path, { newTab });
+      // `&page=N` on the same history entry: the viewer scrolls there once (search hits).
+      if (options.page !== undefined) {
+        navigateTo(withQuery(FILE_ROUTE, { path, page: options.page }), { replace: true });
+      }
       return;
     default:
       void downloadVaultFile(path);

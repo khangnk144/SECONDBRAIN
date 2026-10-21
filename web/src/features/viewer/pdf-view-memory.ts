@@ -17,6 +17,8 @@ export interface PdfView {
 export const DEFAULT_PDF_VIEW: PdfView = { page: 1, zoom: 1, fitWidth: true };
 
 const views = new Map<string, PdfView>();
+/** Per file, the navigation (`location.key`) whose `&page=N` was already applied. */
+const appliedPageRequests = new Map<string, string>();
 let unsubscribe: (() => void) | null = null;
 
 const keyOf = (path: VaultPath) => `${useVaultStore.getState().vaultId ?? ''}|${pathKey(path)}`;
@@ -41,9 +43,27 @@ export function rememberView(path: VaultPath, view: PdfView): void {
   views.set(keyOf(path), view);
 }
 
+/**
+ * A `&page=N` request is applied once per navigation: a reload of the file or a remount of the
+ * view comes back to where the reader went since, not to the requested page again.
+ */
+export function isPageRequestApplied(path: VaultPath, requestKey: string): boolean {
+  return appliedPageRequests.get(keyOf(path)) === requestKey;
+}
+
+export function markPageRequestApplied(path: VaultPath, requestKey: string): void {
+  appliedPageRequests.set(keyOf(path), requestKey);
+}
+
+/** The page to open for a requested `n`: a page of the document, else page 1. */
+export function requestedPage(n: number, pageCount: number): number {
+  return Number.isInteger(n) && n >= 1 && n <= pageCount ? n : 1;
+}
+
 /** Test helper. */
 export function resetPdfViews(): void {
   views.clear();
+  appliedPageRequests.clear();
   unsubscribe?.();
   unsubscribe = null;
 }

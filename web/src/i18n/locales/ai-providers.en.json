@@ -1,0 +1,6 @@
+{
+  "anthropic": "Anthropic (Claude)",
+  "openai": "OpenAI",
+  "gemini": "Google Gemini",
+  "unknown": "the AI provider"
+}

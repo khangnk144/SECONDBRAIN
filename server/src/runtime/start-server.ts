@@ -117,6 +117,7 @@ export async function startServer(input: StartServerInput): Promise<StartResult>
     webDir: paths.webDir,
     webDistDir: paths.webDistDir,
     appDir: paths.appDir,
+    homeDir: paths.homeDir,
     logger,
     version: SERVER_VERSION,
     host,

@@ -67,6 +67,7 @@ export async function openVaultHost(options: VaultHostOptions): Promise<VaultHos
           settings: settings.get,
           port: options.port,
           logger,
+          globalStateDir: path.join(home, '.secondbrain'),
         });
         context.attachPlugin(plugin.name, instance);
       } catch (error) {

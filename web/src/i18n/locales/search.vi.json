@@ -32,5 +32,11 @@
     "class": {
       "archive": "gồm cả ghi chú trong Archive"
     }
+  },
+  "page": "tr. {{page}}",
+  "meaningLabel": "Theo nghĩa",
+  "mode": {
+    "bm25": "Tìm theo từ khóa (BM25)",
+    "hybrid": "Từ khóa và theo nghĩa"
   }
 }

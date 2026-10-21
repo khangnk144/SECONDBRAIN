@@ -3,6 +3,7 @@
  * canvas. Frames are drawn only while something moves (intro, signal, live settling, drift);
  * otherwise a change (hover, selection, theme, size) requests exactly one frame.
  */
+import { GraphTouchEffects, type AiTouchPlay } from './graph-ai-touch-effect';
 import { GraphCamera } from './graph-camera';
 import { drawGraph, type FrameInput, type LabelRect } from './graph-draw';
 import { FpsMeter } from './graph-fps-meter';
@@ -47,6 +48,8 @@ export class GraphView implements PointerInputHost {
   private handle = 0;
   private hidden = false;
   private labelExclusions: readonly LabelRect[] = [];
+  /** "AI vừa chạm" playbacks (full map only). */
+  private readonly touches = new GraphTouchEffects();
 
   constructor(
     private readonly canvas: HTMLCanvasElement,
@@ -147,6 +150,14 @@ export class GraphView implements PointerInputHost {
     this.requestFrame();
   }
 
+  /** "AI vừa chạm": the playbacks to show; `wallNow` is `Date.now()` now (their plans' clock). */
+  setAiTouches(plays: readonly AiTouchPlay[], wallNow: number): void {
+    if (this.options.mode !== 'full') return;
+    this.touches.restore(this.scene);
+    this.touches.set(plays, wallNow);
+    this.requestFrame();
+  }
+
   /** Canvas areas covered by overlays (title, controls, legend), which names keep off. */
   setLabelExclusions(rects: readonly LabelRect[]): void {
     this.labelExclusions = rects;
@@ -225,6 +236,18 @@ export class GraphView implements PointerInputHost {
     }
     const drift = this.animated ? clock.driftClock : null;
     scene.computePositions(clock.intro, drift, this.viewport.scale);
+    // Under reduced motion a playback is a still picture: the screen redraws it when it ends.
+    if (!this.touches.empty) {
+      this.touches.update(
+        scene,
+        now,
+        this.viewport,
+        this.camera.size,
+        this.animated,
+        this.labelExclusions,
+      );
+    }
+    frame.touch = this.touches.empty ? null : this.touches.frame;
     frame.ring = scene.selection?.index ?? -1;
     frame.hover = scene.hover;
     frame.levels = scene.levels;

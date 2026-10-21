@@ -3,6 +3,7 @@ import { Outlet, useLocation, useMatches } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { CaptureOverlay } from '../features/capture/capture-overlay';
 import { ConnectionBanner } from '../features/connection/connection-banner';
+import { InboxTidyDialogHost } from '../features/ai-inbox/inbox-tidy-dialog-host';
 import { DialogHost } from '../features/dialogs/dialog-host';
 import { HistoryDialogHost } from '../features/history/history-dialog-host';
 import { JournalBanner } from '../features/journal/journal-banner';
@@ -87,6 +88,8 @@ export function AppLayout() {
       </main>
       {showRightPanel ? <RightPanel>{Panel ? <Panel /> : null}</RightPanel> : null}
       <ToastHost />
+      {/* Before DialogHost: the relink confirmation of "Áp dụng" must show above it. */}
+      <InboxTidyDialogHost />
       <DialogHost />
       <HistoryDialogHost />
       <SearchPalette />

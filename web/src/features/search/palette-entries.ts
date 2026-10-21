@@ -1,11 +1,15 @@
+import type { VaultPath } from '../../lib/api/vault-types';
 import type { AppCommand } from '../../lib/commands/command-registry';
 import { createNote } from '../../lib/note-operations';
 import { cleanName, validateName } from '../../lib/name-validation';
+import { openVaultFile, vaultFileKind } from '../../lib/open-vault-file';
 import { useTabsStore } from '../../lib/tabs-store';
+import { samePath } from '../../lib/vault-paths';
 import type { FilterSuggestion } from './filter-suggestions';
 import { hasFilter } from './palette-query';
 import type { NoteHit } from './recent-notes';
 import type { PaletteResults } from './use-palette-results';
+import type { SemanticHit } from './use-semantic-results';
 
 /**
  * One row of the palette list. Rows are a tagged union so each source (notes, "Tạo", commands,
@@ -15,7 +19,9 @@ export type PaletteEntry =
   | { kind: 'note'; key: string; hit: NoteHit }
   | { kind: 'create'; key: string; title: string }
   | { kind: 'command'; key: string; command: AppCommand }
-  | { kind: 'filter'; key: string; suggestion: FilterSuggestion };
+  | { kind: 'filter'; key: string; suggestion: FilterSuggestion }
+  /** "Theo nghĩa": a hit of the search by meaning (hybrid retrieval only), listed last. */
+  | { kind: 'semantic'; key: string; hit: SemanticHit };
 
 export type PaletteMode = 'notes' | 'commands';
 
@@ -34,6 +40,8 @@ export interface PaletteExtras {
   commands: readonly AppCommand[];
   /** Values for the filter being typed, shown first. */
   suggestions: readonly FilterSuggestion[];
+  /** Hits by meaning for this query (empty unless hybrid retrieval answered it). */
+  semantic?: readonly SemanticHit[];
 }
 
 /** A query can become a note title only when it is a valid file name (no `tag:` filters…). */
@@ -75,17 +83,33 @@ export function buildPaletteView(
   const title = offerCreate ? creatableTitle(query) : null;
   if (title !== null) entries.push({ kind: 'create', key: `create:${title}`, title });
   entries.push(...extras.commands.map(commandEntry));
+  // Last, so rows already under the keyboard never move when these arrive; files the keyword
+  // search already lists are not repeated.
+  for (const hit of extras.semantic ?? []) {
+    if (results.hits.some((note) => samePath(note.path, hit.path))) continue;
+    entries.push({ kind: 'semantic', key: `semantic:${hit.path}`, hit });
+  }
   return { mode: 'notes', entries, noMatch, recent: blank && results.answered?.trim() === '' };
 }
 
+/** A hit opens as a note, or (a PDF page) in the viewer at that page. */
+function openHit(path: VaultPath, page: number | null | undefined, newTab: boolean): void {
+  if (vaultFileKind(path) === 'note') useTabsStore.getState().openNote(path, { newTab });
+  else openVaultFile(path, { newTab, ...(typeof page === 'number' ? { page } : {}) });
+}
+
 /**
- * Runs a row: opens the note (`newTab` for Ctrl+Enter / Ctrl+click), creates it in Inbox, or runs
- * the command. Filter rows complete the query instead (the dialog handles them).
+ * Runs a row: opens the note or the PDF at its page (`newTab` for Ctrl+Enter / Ctrl+click),
+ * creates it in Inbox, or runs the command. Filter rows complete the query instead (the dialog
+ * handles them).
  */
 export function runPaletteEntry(entry: PaletteEntry, newTab: boolean): void {
   switch (entry.kind) {
     case 'note':
-      useTabsStore.getState().openNote(entry.hit.path, { newTab });
+      openHit(entry.hit.path, entry.hit.page, newTab);
+      return;
+    case 'semantic':
+      openHit(entry.hit.path, entry.hit.page, newTab);
       return;
     case 'create':
       void createNote({ title: entry.title, newTab });

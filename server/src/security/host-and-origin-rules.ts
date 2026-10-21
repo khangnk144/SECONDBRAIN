@@ -61,6 +61,18 @@ export function isWebSocketPath(decodedPath: string): boolean {
   return lower === '/ws' || lower.startsWith('/ws/');
 }
 
+/** The Streamable HTTP MCP endpoint (SPEC F32) and anything below it. */
+export function isMcpPath(decodedPath: string): boolean {
+  const lower = decodedPath.toLowerCase();
+  return lower === '/mcp' || lower.startsWith('/mcp/');
+}
+
+/** The token of an `Authorization: Bearer <token>` header (scheme case-insensitive), else null. */
+export function bearerToken(header: string | undefined): string | null {
+  const match = /^Bearer[ \t]+(\S+)[ \t]*$/i.exec(header ?? '');
+  return match ? (match[1] as string) : null;
+}
+
 /** Routes reachable without the session token (the launcher polls health before it knows the token). */
 export function isPublicApiRoute(method: string, decodedPath: string): boolean {
   const m = method.toUpperCase();

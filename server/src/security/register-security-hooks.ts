@@ -1,12 +1,14 @@
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { sendApiError } from '../http/api-errors.js';
 import {
+  bearerToken,
   canonicalOrigin,
   decodedRequestPath,
   isAllowedHost,
   isAllowedOrigin,
   isApiPath,
   isLoopbackIpHost,
+  isMcpPath,
   isPublicApiRoute,
   isStateChangingMethod,
   isWebSocketPath,
@@ -37,10 +39,11 @@ function queryToken(url: string): string | null {
 /**
  * Adds the network-boundary checks as the first root-level onRequest hook, so they run for
  * every request including WebSocket upgrades (which @fastify/websocket routes through Fastify):
- *   1. Host allowlist          → 421
- *   2. Origin on writes and WS → 403
- *   3. Session token           → 401 (header for /api, `?token=` for /ws)
- *   4. 127.0.0.1 shell GET     → 302 to the canonical origin
+ *   1. Host allowlist                → 421
+ *   2. Origin on writes, WS and /mcp → 403 (on every method for /mcp)
+ *   3. Session token                 → 401 (`X-SB-Token` for /api, `?token=` for /ws,
+ *                                      `Authorization: Bearer` for /mcp and nothing else)
+ *   4. 127.0.0.1 shell GET           → 302 to the canonical origin (never /api, /ws, /mcp)
  */
 export function registerSecurityHooks(app: FastifyInstance, options: SecurityHookOptions): void {
   const { port } = options;
@@ -64,7 +67,9 @@ export function registerSecurityHooks(app: FastifyInstance, options: SecurityHoo
     }
 
     const upgrade = isWebSocketUpgrade(request.headers);
-    if (isStateChangingMethod(request.method) || upgrade) {
+    const path = decodedRequestPath(request.url);
+    const mcp = isMcpPath(path);
+    if (isStateChangingMethod(request.method) || upgrade || mcp) {
       if (!isAllowedOrigin(headerValue(request, 'origin'), port)) {
         return sendApiError(
           reply,
@@ -75,7 +80,15 @@ export function registerSecurityHooks(app: FastifyInstance, options: SecurityHoo
       }
     }
 
-    const path = decodedRequestPath(request.url);
+    // MCP clients (Claude Desktop, the stdio bridge) authenticate with a bearer token only.
+    if (mcp) {
+      const token = bearerToken(headerValue(request, 'authorization'));
+      if (!tokensMatch(options.getToken(), token)) {
+        return sendApiError(reply, 401, 'UNAUTHORIZED', 'Missing or invalid bearer token.');
+      }
+      return;
+    }
+
     // API calls are never redirected: the launcher probes /api/health on 127.0.0.1 because
     // `localhost` may resolve to ::1 first on Windows while the server binds 127.0.0.1 only.
     if (isApiPath(path)) {

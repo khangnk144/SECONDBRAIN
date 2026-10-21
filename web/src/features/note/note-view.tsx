@@ -8,6 +8,8 @@ import { confirmDialog } from '../../lib/dialogs/dialog-requests';
 import { i18n } from '../../i18n';
 import { useShortcut } from '../../lib/shortcuts/use-shortcut';
 import { noteTitleFromPath } from '../../lib/vault-paths';
+import { useNoteAiActions } from '../ai-actions/use-note-ai-actions';
+import { NoteInboxAction } from '../ai-inbox/inbox-entry-points';
 import { ConflictScreen } from '../conflict/conflict-screen';
 import { DailyNavRow } from '../daily/daily-nav-row';
 import type { NoteSession } from '../note-session/note-session';
@@ -50,6 +52,14 @@ export function NoteView(props: NoteViewProps) {
   const sourceField = useRef<HTMLTextAreaElement>(null);
   const inSource = view.source !== null;
   const conflict = view.conflict;
+  // AI on a selection (toolbar menu, result panel, palette target).
+  const ai = useNoteAiActions({
+    session,
+    handle,
+    path: view.path,
+    sourceMode: inSource,
+    editable: !view.readOnly && conflict === null,
+  });
 
   const toggleSource = useCallback(() => {
     if (session.getView().conflict) return;
@@ -106,6 +116,7 @@ export function NoteView(props: NoteViewProps) {
         canToggleSource={conflict === null}
         onToggleSource={toggleSource}
         sourceField={sourceField}
+        extraItem={ai.toolbarItem}
       />
       <DailyNavRow path={view.path} />
       <header className="note-screen__header">
@@ -127,6 +138,8 @@ export function NoteView(props: NoteViewProps) {
           <SaveIndicator status={view.status} onRetry={() => session.retry()} />
         </div>
       </header>
+      {/* Under the title, not beside it: a long Inbox title keeps the whole row. */}
+      <NoteInboxAction path={view.path} beforeOpen={() => session.flush()} />
       <NoteBanners
         view={view}
         onDiscardDraft={() => void session.discardDraft()}
@@ -170,6 +183,7 @@ export function NoteView(props: NoteViewProps) {
       </div>
       {/* "Lưu vào" for documents dropped into the editor or source mode. */}
       <DocumentTargetChooserHost />
+      {ai.panel}
     </article>
   );
 }

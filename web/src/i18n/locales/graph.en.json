@@ -60,5 +60,14 @@
     "neighborsLabel": "Neighbours of {{title}}",
     "levelTwoLabel": "Notes on the second level",
     "openMap": "Open brain map"
+  },
+  "aiTouch": {
+    "title": "Recently updated by AI",
+    "from": "From",
+    "pagesLabel_one": "The page the AI just updated from {{title}}",
+    "pagesLabel_other": "Pages the AI just updated from {{title}}",
+    "announce_one": "The AI just updated {{count}} page from {{title}}.",
+    "announce_other": "The AI just updated {{count}} pages from {{title}}.",
+    "dismiss": "Hide this list"
   }
 }

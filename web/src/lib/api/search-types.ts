@@ -27,6 +27,8 @@ export interface SearchResult {
   matchedIn: 'title' | 'body' | 'filter' | 'recent';
   snippet: SearchSnippet | null;
   score: number;
+  /** A PDF hit (`class: 'source'`): the page of the best match (1-based). */
+  page?: number;
 }
 
 export interface SearchResponse {

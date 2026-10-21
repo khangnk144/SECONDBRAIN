@@ -272,6 +272,71 @@
   background: var(--paper);
 }
 
+/* "AI vừa cập nhật": the pages an ingest touched, in the AI's order (not animated). */
+.graph-touch {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.graph-touch__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.graph-touch__title svg {
+  flex: 0 0 auto;
+  color: var(--accent);
+}
+
+.graph-touch__event {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.graph-touch__source {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: max(12px, 0.78125rem);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.graph-touch__link {
+  min-height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.graph-touch__link:hover {
+  text-decoration: underline;
+}
+
+.graph-touch__pages {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.graph-touch__dismiss {
+  align-self: flex-start;
+}
+
 /* Local graph in the note's right panel. */
 .local-graph {
   display: flex;

@@ -15,6 +15,7 @@ const SAVE_REASONS = new Set([
   'unsupported-platform',
   'invalid-path',
   'shortcut-failed',
+  'consent-required',
 ]);
 
 /** A browser `fetch` that never reached the server. */

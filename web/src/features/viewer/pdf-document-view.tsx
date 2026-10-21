@@ -7,6 +7,8 @@ import type { PDFDocumentProxy } from './pdf-js';
 import { PdfPage, type PageSize } from './pdf-page';
 import { PdfToolbar } from './pdf-toolbar';
 import { rememberedView, rememberView, type PdfView } from './pdf-view-memory';
+import type { PdfPageRequest } from './pdf-viewer';
+import { openingPage, usePdfPageRequest } from './use-pdf-page-request';
 import { clampZoom, fitWidthZoom, PAGE_GAP, zoomIn, zoomOut } from './pdf-zoom';
 import { pdfViewerKeyAction } from './pdf-viewer-keys';
 import { pagesToDraw, useVisiblePages } from './use-visible-pages';
@@ -14,6 +16,8 @@ import { pagesToDraw, useVisiblePages } from './use-visible-pages';
 export interface PdfDocumentViewProps {
   doc: PDFDocumentProxy;
   path: VaultPath;
+  /** `&page=N`: open (or scroll) there once per navigation. */
+  pageRequest?: PdfPageRequest | null;
   onDownload: () => void;
   onOpenExternal: () => void;
 }
@@ -38,13 +42,14 @@ const sameSize = (a: PageSize, b: PageSize) =>
  * with the toolbar above. The reading position is kept as "page + how far into it", so zooming
  * or fitting the width keeps the same spot on screen.
  */
-export function PdfDocumentView({ doc, path, onDownload, onOpenExternal }: PdfDocumentViewProps) {
+export function PdfDocumentView(props: PdfDocumentViewProps) {
+  const { doc, path, pageRequest = null, onDownload, onOpenExternal } = props;
   const { t } = useTranslation();
   const pageCount = doc.numPages;
   const scroller = useRef<HTMLDivElement>(null);
   const [view, setView] = useState<PdfView>(() => {
     const saved = rememberedView(path);
-    return { ...saved, page: Math.min(Math.max(saved.page, 1), pageCount) };
+    return { ...saved, page: openingPage(path, pageRequest, pageCount, saved.page) };
   });
   const [baseSize, setBaseSize] = useState<PageSize | null>(null);
   const [sizes, setSizes] = useState<ReadonlyMap<number, PageSize>>(() => new Map());
@@ -123,6 +128,8 @@ export function PdfDocumentView({ doc, path, onDownload, onOpenExternal }: PdfDo
     if (element && page) element.scrollTop = offsetIn(element, page) - PAGE_GAP;
     setCurrent(target);
   };
+
+  usePdfPageRequest(path, pageRequest, pageCount, goToPage);
 
   const setZoom = (zoom: number) =>
     setView((v) => ({ ...v, zoom: clampZoom(zoom), fitWidth: false }));

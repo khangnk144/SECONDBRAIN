@@ -5,7 +5,7 @@
 import { deflateSync } from 'node:zlib';
 import type { Locator } from '@playwright/test';
 
-/** PDF 1.4, A4 pages, Helvetica; printable ASCII text only. Exact xref offsets. */
+/** PDF 1.4, A4 pages, Helvetica; printable ASCII text (`\n` = next row) only. Exact xref offsets. */
 export function multiPagePdf(lines: string[]): Buffer {
   const objects: string[] = [];
   const pageIds = lines.map((_, i) => 4 + i * 2);
@@ -13,9 +13,10 @@ export function multiPagePdf(lines: string[]): Buffer {
   objects[2] = `<< /Type /Pages /Kids [${pageIds.map((id) => `${id} 0 R`).join(' ')}] /Count ${lines.length} >>`;
   objects[3] = '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>';
   lines.forEach((line, i) => {
-    if (!/^[\x20-\x7e]*$/.test(line)) throw new Error('ASCII only');
-    const text = line.replace(/[\\()]/g, (c) => `\\${c}`);
-    const stream = `0 0 0 rg 56 640 483 120 re f\nBT /F1 24 Tf 56 580 Td (${text}) Tj ET\n`;
+    if (!/^[\x20-\x7e\n]*$/.test(line)) throw new Error('ASCII only');
+    // A page's `\n` starts a new text row (a 24 pt row holds about 45 characters).
+    const rows = line.split('\n').map((row) => `(${row.replace(/[\\()]/g, (c) => `\\${c}`)}) Tj`);
+    const stream = `0 0 0 rg 56 640 483 120 re f\nBT /F1 24 Tf 30 TL 56 580 Td ${rows.join(' T* ')} ET\n`;
     objects[pageIds[i]!] =
       '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] ' +
       `/Resources << /Font << /F1 3 0 R >> >> /Contents ${pageIds[i]! + 1} 0 R >>`;

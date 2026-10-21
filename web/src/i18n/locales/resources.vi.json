@@ -27,5 +27,23 @@
     "label": "Thao tác với {{name}}",
     "open": "Mở",
     "reveal": "Hiện trong thư mục"
+  },
+  "text": {
+    "pending": "Đang đọc chữ…",
+    "low": "Đọc được một phần chữ",
+    "none": "Không đọc được chữ",
+    "hints": {
+      "low": {
+        "sparse-text": "Một số trang có rất ít chữ (ví dụ trang chỉ có hình). Tìm kiếm và AI chỉ đọc được phần có chữ.",
+        "too-large": "Tệp quá dài nên chỉ đọc được phần đầu."
+      },
+      "none": {
+        "no-text": "Có thể đây là bản scan. AI và tìm kiếm sẽ không đọc được tệp này.",
+        "encrypted": "Tệp có mật khẩu. Hãy lưu một bản không có mật khẩu nếu muốn tìm trong tệp này.",
+        "damaged": "Tệp có thể bị hỏng. Thử mở nó bằng ứng dụng khác.",
+        "too-large": "Tệp quá lớn để đọc chữ.",
+        "timeout": "Đọc tệp này mất quá lâu nên đã dừng."
+      }
+    }
   }
 }

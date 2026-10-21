@@ -60,5 +60,14 @@
     "neighborsLabel": "Ghi chú kề của {{title}}",
     "levelTwoLabel": "Ghi chú ở cấp 2",
     "openMap": "Mở bản đồ não"
+  },
+  "aiTouch": {
+    "title": "AI vừa cập nhật",
+    "from": "Từ",
+    "pagesLabel_one": "Các trang AI vừa cập nhật từ {{title}}",
+    "pagesLabel_other": "Các trang AI vừa cập nhật từ {{title}}",
+    "announce_one": "AI vừa cập nhật {{count}} trang từ {{title}}.",
+    "announce_other": "AI vừa cập nhật {{count}} trang từ {{title}}.",
+    "dismiss": "Ẩn danh sách"
   }
 }

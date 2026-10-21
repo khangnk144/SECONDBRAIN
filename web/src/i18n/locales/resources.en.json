@@ -27,5 +27,23 @@
     "label": "Actions for {{name}}",
     "open": "Open",
     "reveal": "Show in folder"
+  },
+  "text": {
+    "pending": "Reading the text…",
+    "low": "Only part of the text could be read",
+    "none": "No text could be read",
+    "hints": {
+      "low": {
+        "sparse-text": "Some pages have very little text (for example, pages with only pictures). Search and AI only read the parts with text.",
+        "too-large": "The file is too long, so only its beginning was read."
+      },
+      "none": {
+        "no-text": "It may be a scan. AI and search can't read this file.",
+        "encrypted": "The file has a password. Save a copy without one to search inside it.",
+        "damaged": "The file may be damaged. Try opening it with another app.",
+        "too-large": "The file is too large to read its text.",
+        "timeout": "Reading this file took too long, so it was stopped."
+      }
+    }
   }
 }

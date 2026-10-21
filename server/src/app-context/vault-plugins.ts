@@ -15,6 +15,11 @@ export interface VaultPluginHost {
   /** Port the server listens on (deep links in notifications). */
   port: number;
   logger: AppLogger;
+  /**
+   * `<home>/.secondbrain`: machine-wide state outside every vault (settings, AI usage). Optional
+   * so older tests that build a host by hand still compile; plugins needing it fail clearly.
+   */
+  globalStateDir?: string;
 }
 
 export interface VaultPluginInstance {
@@ -32,3 +37,7 @@ export interface VaultPlugin<T extends VaultPluginInstance = VaultPluginInstance
 /** Names used by routes to find their plugin on the current context. */
 export const REMINDERS_PLUGIN = 'reminders';
 export const HISTORY_PLUGIN = 'history';
+/** M6: text of raw sources and attachments (SPEC F30), `SourceTextService`. Starts first. */
+export const SOURCES_PLUGIN = 'sources';
+/** M6: in-app AI (SPEC F33), `AiRuntime`: providers, budget, embedding jobs. */
+export const AI_PLUGIN = 'ai';

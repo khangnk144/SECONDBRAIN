@@ -15,6 +15,7 @@ import { noteLinkHandlers } from '../backlinks/open-note-at-line';
 import { formatFileDate, formatFileSize } from './format-file-facts';
 import type { ResourceEntry } from './resource-groups';
 import { ResourceRowMenu } from './resource-row-menu';
+import { ResourceTextState } from './resource-text-state';
 
 const KIND_ICONS: Record<ResourceKind, Icon> = {
   pdf: FilePdf,
@@ -26,7 +27,8 @@ const KIND_ICONS: Record<ResourceKind, Icon> = {
 
 /**
  * One file: kind icon, name (opens it: PDFs in the viewer, notes in the editor, other files are
- * downloaded), size and date, the notes that mention it, and the row menu.
+ * downloaded), size and date, what could be read of its text, the notes that mention it, and the
+ * row menu.
  */
 export function ResourceRow({ entry }: { entry: ResourceEntry }) {
   const { t, i18n } = useTranslation();
@@ -54,6 +56,7 @@ export function ResourceRow({ entry }: { entry: ResourceEntry }) {
           <span className="visually-hidden">{t(`resources.kind.${file.kind}`)}, </span>
           {facts.join(', ')}
         </p>
+        <ResourceTextState text={file.text} />
         <p className="resource-row__refs">
           {file.referencedBy.length === 0 ? (
             t('resources.noReferences')

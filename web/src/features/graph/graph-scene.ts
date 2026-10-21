@@ -38,6 +38,8 @@ export class GraphScene {
   /** The running signal goes from this level outward (-1: no signal). */
   signalFrom = -1;
   pinnedLabel = -1;
+  /** Nodes lit by "AI vừa chạm" (1 = lit), or null; owned by the view's touch effects. */
+  touched: Uint8Array | null = null;
   private readonly baseX: Float32Array;
   private readonly baseY: Float32Array;
   private readonly phase: Float32Array;
@@ -66,7 +68,13 @@ export class GraphScene {
       litDepth: this.litDepth,
       hover: this.hover,
       pinnedLabel: this.pinnedLabel,
+      touched: this.touched,
     });
+  }
+
+  setTouched(mask: Uint8Array | null): void {
+    this.touched = mask;
+    this.refreshHighlight();
   }
 
   /** Returns true when the hovered node changed. */
@@ -150,6 +158,7 @@ export class GraphScene {
       labelMark: new Uint32Array(this.model.nodes.length),
       labelPass: 0,
       labelExclusions: [],
+      touch: null,
     };
   }
 

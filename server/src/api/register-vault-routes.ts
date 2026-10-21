@@ -1,5 +1,8 @@
 import type { FastifyInstance } from 'fastify';
 import type { AppContext } from '../app-context/create-app-context.js';
+import type { GlobalSettings } from '../config/global-settings.js';
+import { registerAiRoutes } from './ai-routes.js';
+import { registerAiStatusRoutes } from './ai-status-routes.js';
 import { registerAttachmentRoutes } from './attachment-routes.js';
 import { registerCaptureRoute } from './capture-route.js';
 import { registerDailyRoutes } from './daily-routes.js';
@@ -29,7 +32,7 @@ export interface VaultRouteOptions {
   /** UI language of the global settings: template variables are written in it (F13.2). */
   uiLanguage?: () => TemplateLanguage;
   /** Global settings (the reminder time is reported even when the reminder plugin is off). */
-  settings?: () => { [key: string]: unknown };
+  settings?: () => GlobalSettings;
 }
 
 /**
@@ -64,4 +67,8 @@ export function registerVaultRoutes(
   registerHistoryRoutes(app, context);
   registerMaintenanceRoutes(app, context);
   registerReminderRoutes(app, context, { settings: options.settings });
+  if (options.settings) {
+    registerAiStatusRoutes(app, context, { settings: options.settings });
+    registerAiRoutes(app, context, { settings: options.settings });
+  }
 }

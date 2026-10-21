@@ -75,6 +75,8 @@ export const SETTINGS_ROUTE = '/settings';
 export const REMINDERS_ROUTE = '/reminders';
 export const RESOURCES_ROUTE = '/resources';
 export const FILE_ROUTE = '/file';
+/** "Hỏi ghi chú của bạn" (M6, chat with your notes). */
+export const ASK_ROUTE = '/ask';
 
 /** `/file?path=<encoded>`: the in-app viewer tab of a vault file (PDF). */
 export function fileRoute(path: VaultPath): string {

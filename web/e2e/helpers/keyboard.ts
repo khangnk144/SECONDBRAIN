@@ -1,7 +1,7 @@
 /// <reference lib="dom" />
 // Keyboard-only helpers: the keyboard-only specs never use `page.mouse` or clicks; they move with
 // Tab/arrows and read where focus is.
-import { expect, type Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 
 /** Short description of the focused element (tag, role, name or text), for assertions. */
 export function focusedInfo(page: Page) {
@@ -39,6 +39,23 @@ export async function pressUntilFocused(
   throw new Error(
     `"${selector}" not focused after ${max} × ${key}; focus is on ${JSON.stringify(info)}`,
   );
+}
+
+/** Like `pressUntilFocused`, for an element found by role or text (a `Locator`). */
+export async function pressUntilLocatorFocused(
+  page: Page,
+  target: Locator,
+  { key = 'Tab', max = 80 }: { key?: string; max?: number } = {},
+): Promise<number> {
+  for (let presses = 0; presses <= max; presses += 1) {
+    const focused = await target.evaluateAll((list) =>
+      list.some((el) => el === document.activeElement),
+    );
+    if (focused) return presses;
+    await page.keyboard.press(key);
+  }
+  const info = await focusedInfo(page);
+  throw new Error(`target not focused after ${max} × ${key}; focus is on ${JSON.stringify(info)}`);
 }
 
 /** The focused element matches `selector` (retries until it does). */

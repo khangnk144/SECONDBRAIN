@@ -112,7 +112,8 @@ test('an API key is only ever shown as …last4 (F18.2)', async ({ page }) => {
   await page.goto(`${own.origin}/#/settings`);
   const field = page.getByLabel('Khóa API Anthropic (Claude)');
   await field.fill(key);
-  await page.getByRole('button', { name: 'Lưu khóa' }).click();
+  // M6: each key field names its provider (the embeddings section has an OpenAI one too).
+  await page.getByRole('button', { name: 'Lưu khóa Anthropic (Claude)' }).click();
   await expect(page.getByText('Đã lưu khóa …WXYZ.')).toBeVisible();
   await expect(field).toHaveValue('');
   await page.reload();

@@ -20,7 +20,13 @@ export type ServerEvent =
   /** Another vault is open now: clients flush what they hold and reload. */
   | { type: 'vault:switched'; vaultId: string }
   /** `PUT /api/settings` changed the UI settings: other windows apply them at once. */
-  | { type: 'settings:changed'; ui: UiSettings };
+  | { type: 'settings:changed'; ui: UiSettings }
+  /** M6 (F34): an MCP ingest completed; `outputs` in the order they were listed. */
+  | { type: 'ai:touched'; source: VaultPath; outputs: VaultPath[] }
+  /** M6 (F33): the AI status changed (settings, budget, embedding progress); clients refetch it. */
+  | { type: 'ai:status'; embeddings: { state: string; done: number; total: number } }
+  /** M6 (F30): text extraction of a source finished (Documents view, search). */
+  | { type: 'source:extracted'; path: VaultPath; quality: 'ok' | 'low' | 'none' };
 
 /** The client-facing event for a vault change (app or external origin). */
 export function serverEventForChange(change: VaultChange): ServerEvent {

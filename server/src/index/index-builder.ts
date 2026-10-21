@@ -19,6 +19,8 @@ import { reresolveLinks } from './link-reresolve.js';
 import { PathCatalog, pathTargetKey } from './link-targets.js';
 import { isIndexedAsNote } from './note-record.js';
 import { buildRecordSafely } from './record-fallback.js';
+import { keepsSourceText } from './source-text-rows.js';
+import { cachedTextForFiles, indexablePages } from '../sources/source-cache.js';
 
 const BATCH = 64;
 
@@ -59,6 +61,7 @@ function finish(db: Database.Database): void {
   db.exec(`UPDATE links SET to_id = (SELECT id FROM notes WHERE path = links.to_path)
     WHERE to_path IS NOT NULL AND to_id IS NULL`);
   db.exec("INSERT INTO notes_fts(notes_fts) VALUES ('optimize')");
+  db.exec("INSERT INTO sources_fts(sources_fts) VALUES ('optimize')");
   db.exec('ANALYZE');
 }
 
@@ -75,6 +78,13 @@ export async function buildIndexFile(options: BuildOptions): Promise<BuildResult
     const others = listing.files.filter((f) => !isIndexedAsNote(f.path));
     const notePaths = listing.files.filter((f) => isIndexedAsNote(f.path)).map((f) => f.path);
     db.transaction(() => others.forEach((stat) => writer.writeFile(stat)))();
+    // PDF page text comes back from the sources cache (never extracted here, F30.4).
+    const pdfs = others.filter((stat) => keepsSourceText(stat.path));
+    const cached = pdfs.length > 0 ? await cachedTextForFiles(vault.paths.cacheDir, pdfs) : null;
+    db.transaction(() => {
+      for (const [path, { contentHash, entry }] of cached ?? [])
+        writer.sources.write(path, contentHash, indexablePages(entry));
+    })();
     const result: BuildResult = { paths: others.map((f) => f.path), notes: [] };
     const unreadable: VaultPath[] = [];
     let done = others.length;

@@ -5,6 +5,7 @@ import {
   useRef,
   type PointerEvent as ReactPointerEvent,
 } from 'react';
+import type { AiTouchPlay } from './graph-ai-touch-effect';
 import { useGraphPalette } from './graph-palette';
 import type { GraphScene } from './graph-scene';
 import type { GraphSelection } from './graph-selection';
@@ -29,6 +30,8 @@ export interface GraphCanvasProps {
   onNodeOpen?: (id: string) => void;
   /** Only with `?debug=fps`. */
   onFps?: (fps: number) => void;
+  /** "AI vừa chạm" playbacks (full map). */
+  aiTouches?: readonly AiTouchPlay[];
 }
 
 /** Areas of the canvas under its overlays (`data-graph-overlay` siblings), in canvas CSS px. */
@@ -129,6 +132,10 @@ export const GraphCanvas = forwardRef<GraphCanvasHandle, GraphCanvasProps>(
     useEffect(() => {
       viewRef.current?.setSelection(selection?.id ?? null, selection?.depth ?? 1);
     }, [scene, selection?.id, selection?.depth]);
+    const aiTouches = props.aiTouches;
+    useEffect(() => {
+      if (aiTouches) viewRef.current?.setAiTouches(aiTouches, Date.now());
+    }, [aiTouches]);
 
     useImperativeHandle(
       ref,

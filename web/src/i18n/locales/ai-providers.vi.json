@@ -1,0 +1,6 @@
+{
+  "anthropic": "Anthropic (Claude)",
+  "openai": "OpenAI",
+  "gemini": "Google Gemini",
+  "unknown": "nhà cung cấp AI"
+}

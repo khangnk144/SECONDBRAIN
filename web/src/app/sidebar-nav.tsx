@@ -1,6 +1,7 @@
 import {
   Bell,
   CalendarBlank,
+  ChatCircleText,
   FileText,
   GearSix,
   Graph,
@@ -13,7 +14,7 @@ import { useLayoutEffect, useRef } from 'react';
 import { NavLink, useLocation } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useReminderCount } from '../features/reminders/reminders-store';
-import { REMINDERS_ROUTE, RESOURCES_ROUTE, SETTINGS_ROUTE } from '../lib/app-navigation';
+import { ASK_ROUTE, REMINDERS_ROUTE, RESOURCES_ROUTE, SETTINGS_ROUTE } from '../lib/app-navigation';
 import { shortcutKeys } from '../lib/shortcuts/use-app-shortcuts';
 import { revealInRow } from './reveal-in-row';
 import './sidebar-nav.css';
@@ -27,7 +28,8 @@ interface NavItem {
     | 'nav.graph'
     | 'nav.tags'
     | 'sidebar-nav.reminders'
-    | 'sidebar-nav.resources';
+    | 'sidebar-nav.resources'
+    | 'ai-chat.nav';
   icon: Icon;
   badge?: 'reminders';
 }
@@ -38,6 +40,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/calendar', labelKey: 'nav.calendar', icon: CalendarBlank },
   { to: REMINDERS_ROUTE, labelKey: 'sidebar-nav.reminders', icon: Bell, badge: 'reminders' },
   { to: '/graph', labelKey: 'nav.graph', icon: Graph },
+  { to: ASK_ROUTE, labelKey: 'ai-chat.nav', icon: ChatCircleText },
   { to: '/tags', labelKey: 'nav.tags', icon: Tag },
   { to: RESOURCES_ROUTE, labelKey: 'sidebar-nav.resources', icon: FileText },
 ];

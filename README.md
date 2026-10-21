@@ -164,8 +164,8 @@ Mỗi mốc chỉ được tính là xong khi mọi tiêu chí nghiệm thu đ�
 |---|---|---|
 | M0 đến M3 | Khung app, kho ghi chú và chỉ mục, editor và liên kết, Hôm nay, lịch, tìm kiếm, bản đồ não | ✅ |
 | M4 | Nhắc nhở Windows, Cài đặt, tài liệu và trình xem PDF, lịch sử phiên bản, sao lưu, cài app (PWA) | ✅ bản 1.0 |
-| M5 | Bản đồ não tua thời gian, trang tổng hợp học kỳ, weekly review, sao lưu tự động, giao diện điện thoại, bản `.exe` không cần Node.js, tìm chữ trong PDF | Sắp tới |
-| M6 | AI: nối Claude qua MCP để nạp paper thành wiki nghiên cứu; chat với ghi chú của mình kèm trích dẫn | Sắp tới |
+| M6 | AI: chat với ghi chú của mình kèm trích dẫn, tìm theo nghĩa, gợi ý liên kết và tag, dọn Inbox giúp (AI đề xuất, bạn đồng ý mới đổi); nối Claude qua MCP để nạp paper thành wiki nghiên cứu; đọc chữ trong PDF | Tiếp theo |
+| M5 | Bản đồ não tua thời gian, trang tổng hợp học kỳ, weekly review, sao lưu tự động, giao diện điện thoại, bản `.exe` không cần Node.js | Sau đó |
 
 ## Gặp sự cố
 

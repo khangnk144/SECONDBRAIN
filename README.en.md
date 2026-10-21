@@ -166,8 +166,8 @@ A milestone counts as done only when every acceptance criterion has a test, or a
 |---|---|---|
 | M0 to M3 | Scaffold, vault and index, editor and links, Today, calendar, search, brain map | ✅ |
 | M4 | Windows reminders, Settings, documents and the PDF viewer, version history, backups, installable app (PWA) | ✅ version 1.0 |
-| M5 | Brain map timeline, a semester overview page, weekly review, scheduled backups, phone layout, a `.exe` that needs no Node.js, text search inside PDFs | Next |
-| M6 | AI: connect Claude through MCP to turn papers into a research wiki; chat with your own notes, with citations | Later |
+| M6 | AI: chat with your own notes with citations, search by meaning, link and tag suggestions, help sorting the Inbox (the AI proposes, you accept); connect Claude through MCP to turn papers into a research wiki; text from PDFs | Next |
+| M5 | Brain map timeline, a semester overview page, weekly review, scheduled backups, phone layout, a `.exe` that needs no Node.js | After that |
 
 ## Troubleshooting
 

@@ -385,3 +385,9 @@ Decision:
 - The shortcut sheet lists the PDF viewer keys as screen-local keys, from the viewer's own key list. English texts with counts use plural forms.
 Why: Never lose or misplace the user's text, never repeat a reminder, and make every screen recover and stay readable by itself.
 Spec sections affected: §4.10, §4.11, §4.13, F17, F18, F20, F21, F22.2, design.md §2.5, §7 (interpretations).
+
+## 2026-10-21 Milestone order: AI (M6) before Phase 2 (M5) (owner request)
+Context: SPEC §0 rule 2 and §12 build M5 (Phase 2) before M6 (Phase 3, AI). After M4 the owner asked to have the AI features first (auto-sorting the Inbox, suggestions, chat with her notes).
+Decision: The next milestone is **M6** (F32 MCP server with permissions and the ingest manifest, F33 in-app AI, F34 graph "AI touched" effect), then **M5** (Phase 2). Pulled forward from M5 because M6 needs it: **F30 PDF text extraction** (`read_source` returns page-numbered text and `extractionQuality`; F32.4 depends on it). Left for M5: the "não hôm nay" widget on Today (F24) – F34's count in that widget is added when the widget exists; F34's graph animation and side-panel list ship with M6. Milestone ids stay as in SPEC; version tags are chosen at each release (M4 = v1.0). Every other rule (DoD, AI proposes and the user accepts, nothing sent without consent) is unchanged.
+Why: The owner's explicit choice; M6 depends on Phase 1 only, apart from PDF text extraction.
+Spec sections affected: §0 rule 2, §12 (order), F30 (moved), F34 (widget count deferred).

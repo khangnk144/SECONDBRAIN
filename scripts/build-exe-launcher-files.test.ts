@@ -121,6 +121,17 @@ describe('tray helper script (F29.2, F29.3)', () => {
   });
 });
 
+describe('tray "Mở Second Brain" opens the app in its own window', () => {
+  it('tries the installed app of this port, then Edge or Chrome with --app, then the browser', () => {
+    const code = trayCode();
+    const open = code.slice(code.indexOf('function Open-SecondBrain'));
+    expect(open).toContain("$arguments -notmatch '--app-id='");
+    expect(open).toContain("Start-Process -FilePath $browser -ArgumentList ('--app=' + $AppUrl)");
+    expect(open.indexOf('--app-id=')).toBeLessThan(open.indexOf('msedge.exe'));
+    expect(open.indexOf('msedge.exe')).toBeLessThan(open.indexOf('chrome.exe'));
+  });
+});
+
 describe('"Tạo bản exe.cmd" (F29.1, F29.5)', () => {
   const file = 'launcher/Tạo bản exe.cmd';
   it('is UTF-8 without BOM, CRLF, switches the console to UTF-8 before any Vietnamese text', () => {

@@ -181,7 +181,7 @@ describe('launcher files', () => {
     expect(ps).toContain("$who = 'một chương trình khác'");
   });
 
-  it('opens the installed app when its Start menu shortcut exists, else the browser', () => {
+  it('opens the installed app when its Start menu shortcut exists, else an app window, else the browser', () => {
     const ps = read('start-second-brain.ps1').toString('utf8');
     const find = ps.slice(ps.indexOf('function Find-InstalledAppShortcut'));
     expect(find).toContain("Join-Path $env:APPDATA 'Microsoft\\Windows\\Start Menu\\Programs'");
@@ -199,9 +199,9 @@ describe('launcher files', () => {
     expect(find).toMatch(
       /\} elseif \(\$Port -ne \$DefaultPort\) \{(\r\n\s+#[^\r]*)*\r\n\s+continue/,
     );
-    expect(ps).toContain(
-      'if ($null -ne $shortcut) { Start-Process -FilePath $shortcut } else { Start-Process $url }',
-    );
+    expect(ps).toContain('if ($null -ne $shortcut) { Start-Process -FilePath $shortcut; return }');
+    // Without an installed app: Edge/Chrome in app mode, and the browser only as the last resort.
+    expect(ps).toMatch(/--app=' \+ \$url\) \} else \{ Start-Process \$url \}/);
   });
 
   it('start-hidden.vbs is ASCII with CRLF and starts the login action hidden, without waiting', () => {
@@ -217,6 +217,18 @@ describe('launcher files', () => {
     );
     expect(text).toContain('Set shell = CreateObject("WScript.Shell")');
     expect(text).toMatch(/^shell\.Run command, 0, False\r$/m);
+  });
+
+  it('opens the installed app, else Edge or Chrome in app mode (its own window), else the browser', () => {
+    const script = read('start-second-brain.ps1').toString('utf8');
+    const open = script.slice(script.indexOf('function Open-App'));
+    expect(open).toContain('Start-Process -FilePath $shortcut; return');
+    expect(open).toContain("Start-Process -FilePath $browser -ArgumentList ('--app=' + $url)");
+    expect(open.indexOf('Find-InstalledAppShortcut')).toBeLessThan(
+      open.indexOf('Find-AppModeBrowser'),
+    );
+    expect(script).toContain('Microsoft\\Edge\\Application\\msedge.exe');
+    expect(script).toContain('Google\\Chrome\\Application\\chrome.exe');
   });
 
   it('git keeps CRLF for the Windows scripts', () => {

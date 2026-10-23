@@ -127,8 +127,41 @@ function Invoke-SecondBrainPost([string]$Path, [string]$Json) {
   }
 }
 
+# Its own window, like the .exe and the launcher: the installed app (PWA) of this port, else
+# Edge or Chrome in app mode (no tabs, no address bar), else the default browser.
 function Open-SecondBrain {
-  try { Start-Process $AppUrl } catch { }
+  try {
+    $programs = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs'
+    $shell = New-Object -ComObject WScript.Shell
+    foreach ($name in @('Second Brain.lnk', 'Chrome Apps\Second Brain.lnk', 'Edge Apps\Second Brain.lnk')) {
+      $link = Join-Path $programs $name
+      if (-not (Test-Path -LiteralPath $link)) { continue }
+      $arguments = [string]$shell.CreateShortcut($link).Arguments
+      if ($arguments -notmatch '--app-id=') { continue }
+      if ($arguments -match '--app-url=("?)(http://[^"\s]+)') {
+        if (-not $Matches[2].StartsWith($AppUrl)) { continue }
+      } elseif ($Port -ne 4747) { continue }
+      Start-Process -FilePath $link
+      return
+    }
+    $browsers = @(
+      "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe",
+      "${env:ProgramFiles}\Microsoft\Edge\Application\msedge.exe",
+      "${env:LOCALAPPDATA}\Microsoft\Edge\Application\msedge.exe",
+      "${env:ProgramFiles}\Google\Chrome\Application\chrome.exe",
+      "${env:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe",
+      "${env:LOCALAPPDATA}\Google\Chrome\Application\chrome.exe"
+    )
+    foreach ($browser in $browsers) {
+      if (Test-Path -LiteralPath $browser) {
+        Start-Process -FilePath $browser -ArgumentList ('--app=' + $AppUrl)
+        return
+      }
+    }
+    Start-Process $AppUrl
+  } catch {
+    try { Start-Process $AppUrl } catch { }
+  }
 }
 
 # The capture box is one window at a time; its controls live in script variables because the

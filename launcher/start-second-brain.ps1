@@ -151,14 +151,36 @@ function Find-InstalledAppShortcut([int]$Port) {
   return $null
 }
 
+# Edge or Chrome, for opening the app in its own window when it is not installed as an app.
+function Find-AppModeBrowser {
+  if (-not $OnWindows) { return $null }
+  $candidates = @(
+    "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe",
+    "${env:ProgramFiles}\Microsoft\Edge\Application\msedge.exe",
+    "${env:LOCALAPPDATA}\Microsoft\Edge\Application\msedge.exe",
+    "${env:ProgramFiles}\Google\Chrome\Application\chrome.exe",
+    "${env:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe",
+    "${env:LOCALAPPDATA}\Google\Chrome\Application\chrome.exe"
+  )
+  foreach ($candidate in $candidates) {
+    if ($candidate -and (Test-Path -LiteralPath $candidate)) { return $candidate }
+  }
+  return $null
+}
+
 # Opens the installed app if there is one (a second launch focuses its open window, manifest
-# launch_handler "focus-existing"), else the default browser. The login action never opens anything.
+# launch_handler "focus-existing"), else Edge/Chrome in app mode, else the default browser.
+# The login action never opens anything.
 function Open-App([int]$Port) {
   if ($LoginMode) { return }
   $url = "http://localhost:$Port/"
   $shortcut = Find-InstalledAppShortcut $Port
   try {
-    if ($null -ne $shortcut) { Start-Process -FilePath $shortcut } else { Start-Process $url }
+    if ($null -ne $shortcut) { Start-Process -FilePath $shortcut; return }
+    # No installed app: Edge (part of Windows) or Chrome in app mode gives the app its own
+    # window without tabs or address bar; the default browser is the last resort.
+    $browser = Find-AppModeBrowser
+    if ($null -ne $browser) { Start-Process -FilePath $browser -ArgumentList ('--app=' + $url) } else { Start-Process $url }
   } catch {
     Write-Step "Mở $url trong trình duyệt để dùng app."
   }

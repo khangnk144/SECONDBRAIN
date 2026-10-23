@@ -8,14 +8,13 @@
 import type { VaultPlugin } from '../app-context/vault-plugins.js';
 import { resolveAppPaths } from '../config/app-paths.js';
 import { CliUsageError, parseCliOptions } from '../config/cli-args.js';
-import { spawnDetached } from '../api/reveal-command.js';
-import { openUrlCommand } from '../reminders/windows-toast.js';
 import { startServer } from '../runtime/start-server.js';
 import { createRunAtLoginService } from './run-at-login.js';
 import type { ExeFlags } from './exe-cli.js';
 import { EXE_MESSAGES, readExeLanguage, startupLogOf } from './exe-messages.js';
 import { showProblem } from './exe-problem.js';
 import { createInstallShortcuts, ensureInstallShortcuts } from './install-shortcuts.js';
+import { openAppWindow } from './open-app-window.js';
 import { findOwnServer } from './own-server.js';
 import { runtimeInfo, type RuntimeInfo } from './runtime-info.js';
 import { provideSystemStatus } from './system-info-route.js';
@@ -41,8 +40,9 @@ export interface ServerModeInput {
   env?: NodeJS.ProcessEnv;
 }
 
+/** Its own window: the installed app, else Edge/Chrome in app mode, else the browser. */
 export function defaultOpenApp(port: number, platform: NodeJS.Platform = process.platform): void {
-  spawnDetached(() => undefined)(openUrlCommand(platform, `http://localhost:${port}/`));
+  openAppWindow(port, { platform });
 }
 
 export async function runServerMode(input: ServerModeInput): Promise<number> {

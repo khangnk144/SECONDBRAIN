@@ -133,6 +133,15 @@ describe('"Tạo bản exe.cmd" (F29.1, F29.5)', () => {
     expect(firstNonAscii).toBeGreaterThan(text.indexOf('chcp 65001'));
   });
 
+  it('always runs npm install before the build, so libraries added by an update are there', () => {
+    const text = read(file).toString('utf8');
+    const install = text.indexOf('call npm install --no-fund --no-audit');
+    expect(install).toBeGreaterThan(-1);
+    expect(install).toBeLessThan(text.indexOf('call npm run build:exe'));
+    // Not only when node_modules is missing: an update adds devDependencies (resedit, postject).
+    expect(text).not.toContain('if not exist "node_modules');
+  });
+
   it('builds with npm run build:exe, copies the exe next to the app folder, pauses on errors', () => {
     const text = read(file).toString('utf8');
     expect(text).toContain('for %%I in ("%~dp0..\\..") do set "HOME_DIR=%%~fI"');

@@ -15,13 +15,13 @@ if errorlevel 1 (
   goto failed
 )
 pushd "%APP_DIR%"
-if not exist "node_modules\.package-lock.json" (
-  echo   Đang cài thư viện cho app, lần đầu mất vài phút...
-  call npm install --no-fund --no-audit
-  if errorlevel 1 (
-    popd
-    goto failed
-  )
+rem Always bring the libraries up to date first: a new version of the app may need new ones
+rem (for example the exe build tools), and npm does nothing when they are already there.
+echo   Đang kiểm tra thư viện của app, lần đầu sau khi cập nhật có thể mất vài phút...
+call npm install --no-fund --no-audit
+if errorlevel 1 (
+  popd
+  goto failed
 )
 call npm run build:exe
 if errorlevel 1 (

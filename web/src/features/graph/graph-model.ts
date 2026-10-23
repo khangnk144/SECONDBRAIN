@@ -46,6 +46,10 @@ export interface GraphModelNode extends SimulationNodeDatum {
   baseAlpha: number;
   /** Folded title for diacritic-insensitive search. */
   searchText: string;
+  /** Filter facts (SPEC F24.2, F24.3): normalized tags, last edit and creation (epoch ms). */
+  tags: readonly string[];
+  mtimeMs: number | null;
+  createdMs: number | null;
 }
 
 export interface GraphModel {
@@ -65,6 +69,9 @@ export interface GraphModel {
 function groupOf(value: string): GraphGroup {
   return (GRAPH_GROUPS as readonly string[]).includes(value) ? (value as GraphGroup) : 'other';
 }
+
+const finiteOrNull = (value: unknown): number | null =>
+  typeof value === 'number' && Number.isFinite(value) ? value : null;
 
 function toModelNode(node: GraphNode, i: number): GraphModelNode {
   const group = groupOf(node.group);
@@ -88,6 +95,9 @@ function toModelNode(node: GraphNode, i: number): GraphModelNode {
     radius: source ? SOURCE_RADIUS : nodeRadius(degree),
     baseAlpha: (orphan ? ORPHAN_ALPHA : 1) * (archived ? ARCHIVED_ALPHA : 1),
     searchText: foldText(node.title),
+    tags: Array.isArray(node.tags) ? node.tags.filter((tag) => typeof tag === 'string') : [],
+    mtimeMs: finiteOrNull(node.mtimeMs),
+    createdMs: finiteOrNull(node.createdMs),
   };
 }
 

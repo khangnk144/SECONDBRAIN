@@ -1,11 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import vi_ops from '../i18n/locales/operations.vi.json';
+import vi_semester from '../i18n/locales/semester.vi.json';
 import { useDialogStore, type DialogRequest } from './dialogs/dialog-requests';
 import { setAppNavigator } from './app-navigation';
 import {
   archiveNote,
   createNote,
   moveFolder,
+  moveNote,
   renameNote,
   trashFolder,
   trashNotes,
@@ -136,6 +138,26 @@ describe('note operations: dry run, confirm, undo (F2.2, F4, F20.2)', () => {
     mock.on('POST /api/note/rename', apiError(409, 'EXISTS', { path: 'b.md' }));
     await expect(renameNote('a.md', 'b')).resolves.toEqual({ ok: false, reason: 'failed' });
     expect(lastToast()).toMatchObject({ message: vi_ops.errors.exists, tone: 'error' });
+  });
+
+  it('(F25.2) renaming or moving the generated "Học kỳ này" page says why it is refused', async () => {
+    const refused = apiError(409, 'GENERATED_PAGE', {
+      path: 'Học kỳ này.md',
+      reason: 'generated-page',
+    });
+    mock.on('POST /api/note/rename', refused);
+    mock.on('POST /api/note/move', refused);
+    await expect(renameNote('Học kỳ này.md', 'Kỳ 1')).resolves.toEqual({
+      ok: false,
+      reason: 'failed',
+    });
+    expect(lastToast()).toMatchObject({ message: vi_semester.errors.generatedPage, tone: 'error' });
+    expect(lastToast()?.message).not.toBe(vi_ops.errors.generic);
+
+    useToastStore.setState({ toasts: [] });
+    await expect(moveNote('Học kỳ này.md', '4 Archive')).resolves.toMatchObject({ ok: false });
+    expect(lastToast()).toMatchObject({ message: vi_semester.errors.generatedPage, tone: 'error' });
+    expect(mock.callsTo('POST /api/note/move').length).toBeGreaterThan(0);
   });
 
   it('creates "Ghi chú mới" in Inbox with unique: true, opens it with &new=1, undo trashes it', async () => {

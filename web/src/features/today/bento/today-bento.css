@@ -1,0 +1,128 @@
+/*
+ * Bento Today (design.md §12.3–§12.6, bento-reference.dc.html): the 12-column grid and each
+ * tile's place and padding. The tile look itself (--tile, radius 26, 1 px gradient border, hover
+ * brightens the border; `.tile--tint` for "Ngày") is the shell's shared `.tile` primitive
+ * (styles/bento/bento-tiles.css). Below 960 px: two columns, every tile full width. Tokens only.
+ */
+.today-bento {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-tile);
+  min-width: 0;
+}
+
+.today-bento__grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--gap-tile);
+  min-width: 0;
+}
+
+.today-tile {
+  display: flex;
+  flex-direction: column;
+  grid-column: span 12;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: 22px 24px;
+}
+
+.today-tile--greeting {
+  grid-column: span 6;
+  justify-content: center;
+  gap: 10px;
+  padding: 26px 28px;
+}
+
+.today-tile--date {
+  grid-column: span 2;
+  justify-content: space-between;
+  min-height: 170px;
+  padding: 20px;
+}
+
+.today-tile--deadline {
+  grid-column: span 4;
+  gap: 10px;
+}
+
+.today-tile--strip {
+  padding: 20px 24px;
+}
+
+.today-tile--tasks {
+  grid-column: span 5;
+  grid-row: span 2;
+}
+
+.today-tile--projects {
+  grid-column: span 4;
+  gap: 14px;
+}
+
+.today-tile--brain {
+  position: relative;
+  grid-column: span 3;
+  gap: 10px;
+  padding: 22px;
+}
+
+.today-tile--capture {
+  grid-column: span 4;
+}
+
+.today-tile--writing {
+  grid-column: span 3;
+  gap: 10px;
+  padding: 22px;
+}
+
+.today-tile--error {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  color: var(--ink-2);
+}
+
+/* The weekly review (F26) spans the grid when it has something to show; empty, it takes no row. */
+.today-bento__review {
+  grid-column: span 12;
+  min-width: 0;
+}
+
+.today-bento__review:empty {
+  display: none;
+}
+
+/* The first-run question as a tile above the grid (it carries `.tile` in Bento). */
+.today-bento .sample-data-card {
+  margin: 0;
+  padding: 22px 24px;
+}
+
+@media (max-width: 959.98px) {
+  .today-bento__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .today-bento__grid > * {
+    grid-column: span 2;
+    grid-row: auto;
+  }
+
+  .today-tile--date {
+    min-height: 0;
+    gap: var(--space-1);
+  }
+}
+
+@media (max-width: 600px) {
+  .today-tile,
+  .today-tile--greeting,
+  .today-tile--strip,
+  .today-tile--brain,
+  .today-tile--writing,
+  .today-bento .sample-data-card {
+    padding: 18px 16px;
+  }
+}

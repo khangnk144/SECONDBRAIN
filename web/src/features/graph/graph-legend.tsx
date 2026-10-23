@@ -6,13 +6,16 @@ export interface GraphLegendProps {
   groups: readonly GraphGroup[];
   hasSources: boolean;
   hasOrphans: boolean;
+  /** Some notes pulse (edited in the last 24 h, F24.3); `still`: drawn with a ring instead. */
+  recent?: 'pulse' | 'still' | null;
 }
 
 /**
  * Legend under the map: one dot per group present (colors are the `--graph-*` tokens, see
- * graph.css), a hollow dot for documents and a line explaining faded orphan dots.
+ * graph.css), a hollow dot for documents, a line explaining faded orphan dots and one for the
+ * notes that pulse because they were edited in the last 24 hours.
  */
-export function GraphLegend({ groups, hasSources, hasOrphans }: GraphLegendProps) {
+export function GraphLegend({ groups, hasSources, hasOrphans, recent }: GraphLegendProps) {
   const { t } = useTranslation();
   if (groups.length === 0) return null;
   return (
@@ -37,6 +40,11 @@ export function GraphLegend({ groups, hasSources, hasOrphans }: GraphLegendProps
         ) : null}
       </ul>
       {hasOrphans ? <p className="graph-legend__note">{t('graph.legend.orphan')}</p> : null}
+      {recent ? (
+        <p className="graph-legend__note">
+          {recent === 'pulse' ? t('graph.legend.recentPulse') : t('graph.legend.recentStill')}
+        </p>
+      ) : null}
     </div>
   );
 }

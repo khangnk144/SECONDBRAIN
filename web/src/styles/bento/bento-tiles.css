@@ -1,0 +1,217 @@
+/*
+ * Tiles (design.md §12.4, F35.7). `.tile` is the shared primitive for any screen: --tile, radius
+ * 26, a 1 px gradient border, no shadow; hover only brightens the border. Modifiers:
+ * `.tile--tint` (the "Ngày" look: --tint with --on-tint text) and `.tile-inner` (a row or box
+ * inside a tile: --tile-2, radius 18). The other screens' cards and sections take the same look
+ * from here, so their feature CSS stays untouched. Today and the brain map only get the frame.
+ * Tokens only.
+ */
+:root[data-style='bento']
+  :is(
+    .tile,
+    .note-screen,
+    .calendar-screen,
+    .tasks-group,
+    .reminders-list,
+    .resource-group,
+    .tags-screen > .tag-tree,
+    .settings-section,
+    .placeholder-screen,
+    .ask-screen .ai-chat,
+    .pdf-scroller
+  ) {
+  --button-2-bg: var(--tile-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-tile);
+  background:
+    linear-gradient(var(--tile), var(--tile)) padding-box,
+    var(--tile-border) border-box;
+  color: var(--ink);
+}
+
+:root[data-style='bento']
+  :is(
+    .tile,
+    .note-screen,
+    .calendar-screen,
+    .tasks-group,
+    .reminders-list,
+    .resource-group,
+    .tags-screen > .tag-tree,
+    .settings-section,
+    .placeholder-screen,
+    .ask-screen .ai-chat
+  ):hover {
+  background:
+    linear-gradient(var(--tile), var(--tile)) padding-box,
+    var(--tile-border-hover) border-box;
+}
+
+/* `.tile.tile--tint` matches the specificity of the `:is(…)` frame above (its longest argument
+ * has two classes), so the tint wins by coming later. */
+:root[data-style='bento'] .tile.tile--tint,
+:root[data-style='bento'] .tile.tile--tint:hover {
+  border: 0;
+  background: var(--tint);
+  color: var(--on-tint);
+}
+
+:root[data-style='bento'] .tile-inner {
+  --button-2-bg: var(--tile);
+  --button-2-border: var(--line);
+  border-radius: var(--radius-inner);
+  background: var(--tile-2);
+}
+
+/* An empty list draws no tile. */
+:root[data-style='bento'] .reminders-list:empty {
+  display: none;
+}
+
+/* Paddings per screen; the 720 px measure of calm stays where the screen sets it. */
+:root[data-style='bento'] .note-screen {
+  max-width: calc(720px + 2 * var(--space-8) + 2px);
+  padding: 28px clamp(var(--space-4), 2.5vw, var(--space-8)) var(--space-8);
+}
+
+:root[data-style='bento'] .calendar-screen {
+  padding: var(--space-6);
+}
+
+:root[data-style='bento'] :is(.tasks-group, .resource-group, .tags-screen > .tag-tree) {
+  margin-top: 0;
+  padding: 18px var(--space-6);
+}
+
+:root[data-style='bento'] .tasks-screen__groups {
+  gap: var(--gap-tile);
+}
+
+:root[data-style='bento'] .reminders-list {
+  padding: var(--space-2) var(--space-6);
+}
+
+:root[data-style='bento'] .reminder-row {
+  border-bottom-color: var(--tile-line);
+}
+
+:root[data-style='bento'] .reminder-row:last-child {
+  border-bottom: 0;
+}
+
+:root[data-style='bento'] .resource-row {
+  border-top-color: var(--tile-line);
+}
+
+:root[data-style='bento'] .reminders-hint {
+  --button-2-bg: var(--tile-2);
+  border: 0;
+  border-radius: var(--radius-inner);
+  background: var(--tile);
+}
+
+:root[data-style='bento'] .settings-screen {
+  gap: var(--gap-tile);
+}
+
+:root[data-style='bento'] .settings-section {
+  padding: var(--space-6);
+}
+
+/*
+ * Settings sub-groups (reminder channels, scheduled backups, GitHub, search by meaning; review
+ * B7): inner boxes instead of calm's top and left hairlines – --tile-2 inside the section tile,
+ * --tile again one level deeper – with fields and secondary buttons on the other surface.
+ */
+:root[data-style='bento'] .settings-subsection {
+  --button-2-bg: var(--tile);
+  --button-2-border: var(--line);
+  padding: var(--space-4);
+  border: 0;
+  border-radius: var(--radius-inner);
+  background: var(--tile-2);
+}
+
+:root[data-style='bento'] .settings-subsection .settings-subsection {
+  --button-2-bg: var(--tile-2);
+  --button-2-border: transparent;
+  border-radius: var(--radius-control);
+  background: var(--tile);
+}
+
+:root[data-style='bento'] .settings-subsection .text-input {
+  background: var(--tile);
+}
+
+:root[data-style='bento'] .settings-subsection .settings-subsection .text-input {
+  background: var(--tile-2);
+}
+
+:root[data-style='bento'] :is(.placeholder-screen, .ask-screen .ai-chat) {
+  padding: var(--space-6);
+}
+
+:root[data-style='bento'] .ask-screen__starter {
+  border-color: transparent;
+  border-radius: var(--radius-pill);
+  background: var(--tile);
+}
+
+:root[data-style='bento'] .ai-chat__question {
+  border-color: transparent;
+  border-radius: var(--radius-control);
+  background: var(--tile-2);
+}
+
+/* Calendar: separate day cells, radius 18, on --tile-2; the opened day on the accent wash. */
+:root[data-style='bento'] .calendar-grid {
+  border-collapse: separate;
+  border-spacing: 6px;
+}
+
+:root[data-style='bento'] .calendar-cell {
+  border: 0;
+  border-radius: var(--radius-inner);
+  background: var(--tile-2);
+}
+
+:root[data-style='bento'] .calendar-cell.is-selected,
+:root[data-style='bento'] .calendar-cell.is-drop-target {
+  background: var(--accent-wash);
+}
+
+/* The PDF pages scroll inside a tile. */
+:root[data-style='bento'] .pdf-scroller {
+  border-radius: var(--radius-tile);
+}
+
+/* Right panel: every section is its own tile, radius 20, 12 px apart (design.md §12.2). */
+:root[data-style='bento'] :is(.right-panel > :not(.note-panel), .right-panel .note-panel > *) {
+  --button-2-bg: var(--tile-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius-panel-tile);
+  background:
+    linear-gradient(var(--tile), var(--tile)) padding-box,
+    var(--tile-border) border-box;
+}
+
+:root[data-style='bento'] .panel-link:hover,
+:root[data-style='bento'] .outline-link:hover {
+  background: var(--hover-wash);
+}
+
+/* Phones: tiles keep their look with less padding. */
+@media (max-width: 600px) {
+  :root[data-style='bento'] :is(.note-screen, .calendar-screen, .settings-section) {
+    padding: var(--space-4);
+  }
+
+  :root[data-style='bento'] :is(.tasks-group, .resource-group, .tags-screen > .tag-tree) {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  :root[data-style='bento'] .calendar-grid {
+    border-spacing: 3px;
+  }
+}

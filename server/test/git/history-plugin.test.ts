@@ -42,7 +42,9 @@ describe.skipIf(!HAS_GIT)('git version history plugin (F20.3)', () => {
     expect(tracked).toContain('CLAUDE.md');
     expect(tracked.some((file) => file.startsWith('.secondbrain/cache/'))).toBe(false);
     expect(tracked.some((file) => file.startsWith('.secondbrain/logs/'))).toBe(false);
-    expect(commitSubjects(vault.root, env)).toEqual([`auto: ${tracked.length} files`]);
+    // The message counts her files; app state under `.secondbrain/` is committed, not counted.
+    const counted = tracked.filter((file) => !file.startsWith('.secondbrain/')).length;
+    expect(commitSubjects(vault.root, env)).toEqual([`auto: ${counted} files`]);
     const status = service.status();
     expect(status).toMatchObject({ available: true });
     expect(status.lastCommitAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);

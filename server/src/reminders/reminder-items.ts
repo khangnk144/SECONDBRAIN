@@ -25,27 +25,36 @@ export function remindableItems(context: Pick<AppContext, 'deadlines'>): Deadlin
 const taskText = (path: string, title: string, due: string) =>
   JSON.stringify([path, title.normalize('NFC'), due]);
 
+/** What a fired reminder (or a Telegram/email message of it) says about its item. */
+export type FiredItem = Pick<ReminderEntry, 'itemId' | 'path' | 'title' | 'due'>;
+
 /**
- * Not dismissed, fired within the last 7 days, and its item still open with the same due date
- * (a task whose line moved is matched by note, text and date). Newest first.
+ * Whether a fired reminder still points at an open item with the same due date: the rule of the
+ * in-app list and of every later Telegram/email attempt (F17: done, rescheduled or deleted items
+ * are never reminded). A task whose line moved is matched by note, text and date.
  */
+export function stillOpenMatcher(open: readonly DeadlineItem[]): (fired: FiredItem) => boolean {
+  const dueById = new Map(open.map((item) => [item.id, item.date]));
+  const tasks = new Set(
+    open.filter((i) => i.kind === 'task').map((i) => taskText(i.path, i.title, i.date)),
+  );
+  return (fired) =>
+    dueById.get(fired.itemId) === fired.due ||
+    (fired.itemId.startsWith('task:') && tasks.has(taskText(fired.path, fired.title, fired.due)));
+}
+
+/** Not dismissed, fired within the last 7 days, and its item still open (see above). Newest first. */
 export function listReminders(
   entries: readonly ReminderEntry[],
   open: readonly DeadlineItem[],
   now: Date,
 ): ReminderEntry[] {
-  const dueById = new Map(open.map((item) => [item.id, item.date]));
-  const tasks = new Set(
-    open.filter((i) => i.kind === 'task').map((i) => taskText(i.path, i.title, i.date)),
-  );
+  const stillOpen = stillOpenMatcher(open);
   const cutoff = now.getTime() - LIST_WINDOW_DAYS * DAY_MS;
   return entries
     .filter((entry) => {
       if (entry.dismissed || Date.parse(entry.firedAt) < cutoff) return false;
-      if (dueById.get(entry.itemId) === entry.due) return true;
-      return (
-        entry.itemId.startsWith('task:') && tasks.has(taskText(entry.path, entry.title, entry.due))
-      );
+      return stillOpen(entry);
     })
     .sort(
       (a, b) =>

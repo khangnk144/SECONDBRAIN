@@ -12,12 +12,13 @@ const STRIP_DAYS = 60;
  * The strip's place while Today loads: the same caption, cells (weekday and day number, no dots
  * or labels yet) and legend with the same classes, so it has exactly the strip's height and
  * nothing below moves when the data arrives (F10.2). Static: no shimmer; hidden from assistive
- * technology (the summary line says it is loading).
+ * technology (the summary line says it is loading). `bento` matches the Bento strip's cells.
  */
-export function TodayStripSkeleton() {
+export function TodayStripSkeleton({ variant = 'calm' }: { variant?: 'calm' | 'bento' }) {
   const { t, i18n } = useTranslation();
   const rootRef = useRef<HTMLDivElement>(null);
-  const visibleDays = useStripVisibleDays(rootRef);
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const visibleDays = useStripVisibleDays(rootRef, { variant, scroller: scrollerRef });
   const today = useLocalDay();
   const days = useMemo(
     () => Array.from({ length: STRIP_DAYS }, (_, index) => isoAddDays(today, index)),
@@ -26,11 +27,23 @@ export function TodayStripSkeleton() {
   const style = { '--today-strip-days': visibleDays } as CSSProperties;
 
   return (
-    <div ref={rootRef} className="today-strip-placeholder" style={style} aria-hidden="true">
-      <p className="today-strip__caption">{t('today.strip.caption')}</p>
+    <div
+      ref={rootRef}
+      className={
+        variant === 'bento'
+          ? 'today-strip-placeholder today-strip--bento'
+          : 'today-strip-placeholder'
+      }
+      style={style}
+      aria-hidden="true"
+    >
+      {/* Bento: the tile's heading stands in for the caption. */}
+      {variant === 'bento' ? null : (
+        <p className="today-strip__caption">{t('today.strip.caption')}</p>
+      )}
       <div className="today-strip__frame">
         <div className="today-strip__row">
-          <div className="today-strip__scroller">
+          <div ref={scrollerRef} className="today-strip__scroller">
             <div className="today-strip__track">
               {days.map((date, index) => (
                 <span

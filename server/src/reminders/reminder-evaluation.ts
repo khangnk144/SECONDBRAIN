@@ -34,6 +34,20 @@ export interface EvaluationDeps {
   now: () => Date;
   /** False once the plugin is closing: nothing is announced for a vault that is going away. */
   isOpen: () => boolean;
+  /**
+   * M5 (F31.2): the reminders that fire now, once they are recorded and before any toast; the
+   * Telegram/email outbox enqueues them. A failure is logged and changes nothing else.
+   */
+  onFired?: (entries: readonly ReminderEntry[]) => Promise<unknown>;
+}
+
+async function notifyFired(deps: EvaluationDeps, entries: readonly ReminderEntry[]): Promise<void> {
+  if (!deps.onFired) return;
+  try {
+    await deps.onFired(entries);
+  } catch (error) {
+    deps.logger.warn(`Queueing Telegram/email reminders failed (${errorCodeOf(error)}).`);
+  }
 }
 
 async function safeDeliver(deps: EvaluationDeps, toast: ToastContent): Promise<ToastOutcome> {
@@ -105,6 +119,7 @@ export async function evaluateReminders(deps: EvaluationDeps): Promise<ReminderE
     for (const { key } of plan.superseded) draft.superseded.push({ key, recordedAt: firedAt });
   });
   if (entries.length === 0) return [];
+  await notifyFired(deps, entries);
 
   const outcomes = await deliverAll(deps, plan.fire, languageOf(settings.ui?.language));
   const final = entries.map((entry, i) => ({ ...entry, toast: outcomes[i] ?? 'failed' }));

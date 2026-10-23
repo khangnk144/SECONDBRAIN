@@ -1,19 +1,25 @@
 import { useId, useMemo, useState, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { GraphFilterMask } from './graph-filter-state';
 import type { GraphModel } from './graph-model';
-import { graphFolderLabel, graphNodeNameWithFolder } from './graph-node-names';
-import { searchGraphNodes } from './graph-search';
+import { graphFolderLabel, graphNodeListName } from './graph-node-names';
+import { filteredGraphNodes, searchGraphNodes } from './graph-search';
 
 export interface GraphNodeSearchProps {
   model: GraphModel | null;
   onSelect: (id: string) => void;
+  /** Active filter (F24.2): only matches are found; with an empty box they are all listed. */
+  filter?: GraphFilterMask | null;
+  /** Notes edited in the last 24 h, marked "sửa trong 24 giờ" (F24.3). */
+  recent?: ReadonlySet<string> | null;
 }
 
 /**
  * Search box of the side panel (combobox + listbox): ↑/↓ move through the matches, Enter
  * selects one (the canvas highlights it exactly as a click would), Escape clears the box.
+ * While a filter is on, the list shows its matches even before anything is typed.
  */
-export function GraphNodeSearch({ model, onSelect }: GraphNodeSearchProps) {
+export function GraphNodeSearch({ model, onSelect, filter, recent }: GraphNodeSearchProps) {
   const { t } = useTranslation();
   const baseId = useId();
   const listId = `${baseId}-list`;
@@ -21,7 +27,12 @@ export function GraphNodeSearch({ model, onSelect }: GraphNodeSearchProps) {
   const inputId = `${baseId}-input`;
   const [query, setQuery] = useState('');
   const [active, setActive] = useState(0);
-  const { results, total } = useMemo(() => searchGraphNodes(model, query), [model, query]);
+  const match = filter?.match ?? null;
+  const hasQuery = query.trim() !== '';
+  const { results, total } = useMemo(() => {
+    if (query.trim() !== '' || !match) return searchGraphNodes(model, query, match);
+    return filteredGraphNodes(model, match);
+  }, [model, query, match]);
   const activeIndex = results.length === 0 ? -1 : Math.min(active, results.length - 1);
   const optionId = (index: number) => `${baseId}-option-${index}`;
 
@@ -45,13 +56,14 @@ export function GraphNodeSearch({ model, onSelect }: GraphNodeSearchProps) {
     }
   };
 
-  const hasQuery = query.trim() !== '';
   let status = '';
   if (hasQuery) {
+    const none = match ? 'graph.panel.noMatchesFiltered' : 'graph.panel.noMatches';
     status =
-      total === 0
-        ? t('graph.panel.noMatches', { query: query.trim() })
-        : t('graph.panel.matches', { count: total });
+      total === 0 ? t(none, { query: query.trim() }) : t('graph.panel.matches', { count: total });
+  } else if (match) {
+    status =
+      total === 0 ? t('graph.panel.filterNone') : t('graph.panel.filterMatches', { count: total });
   }
 
   return (
@@ -90,23 +102,27 @@ export function GraphNodeSearch({ model, onSelect }: GraphNodeSearchProps) {
         className="graph-results"
         hidden={results.length === 0}
       >
-        {results.map((node, index) => (
-          <li
-            key={node.id}
-            id={optionId(index)}
-            role="option"
-            aria-selected={index === activeIndex}
-            aria-label={graphNodeNameWithFolder(t, node)}
-            className={
-              index === activeIndex ? 'graph-results__item is-active' : 'graph-results__item'
-            }
-            onMouseMove={() => setActive(index)}
-            onClick={() => choose(index)}
-          >
-            <span className="graph-results__title">{node.title}</span>
-            <span className="graph-results__folder">{graphFolderLabel(t, node)}</span>
-          </li>
-        ))}
+        {results.map((node, index) => {
+          const isRecent = recent?.has(node.id) === true;
+          return (
+            <li
+              key={node.id}
+              id={optionId(index)}
+              role="option"
+              aria-selected={index === activeIndex}
+              aria-label={graphNodeListName(t, node, isRecent)}
+              className={
+                index === activeIndex ? 'graph-results__item is-active' : 'graph-results__item'
+              }
+              onMouseMove={() => setActive(index)}
+              onClick={() => choose(index)}
+            >
+              <span className="graph-results__title">{node.title}</span>
+              <span className="graph-results__folder">{graphFolderLabel(t, node)}</span>
+              {isRecent ? <span className="graph-recent">{t('graph.panel.recent')}</span> : null}
+            </li>
+          );
+        })}
       </ul>
       {total > results.length ? (
         <p className="graph-panel__hint">

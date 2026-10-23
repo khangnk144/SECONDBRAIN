@@ -32,7 +32,8 @@ const sameUi = (a: UiPrefs, b: UiPrefs) =>
   a.language === b.language &&
   a.theme === b.theme &&
   a.palette === b.palette &&
-  a.fontSize === b.fontSize;
+  a.fontSize === b.fontSize &&
+  a.style === b.style;
 
 export const useSettingsStore = create<SettingsState>((set, get) => ({
   settings: null,

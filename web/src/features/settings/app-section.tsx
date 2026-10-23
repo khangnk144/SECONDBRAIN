@@ -3,9 +3,11 @@ import { useTranslation } from 'react-i18next';
 import type { SettingsResponse } from '../../lib/api/settings-types';
 import { InstallAppButton } from '../../pwa/install-app-button';
 import { useInstallPrompt } from '../../pwa/install-prompt-store';
+import { InstallInfoRow } from './install-info-row';
 import { QuitAppRow } from './quit-app-row';
 import { SaveStatus } from './save-status';
 import { SettingsField, SettingsSection } from './settings-section';
+import { TrayRow } from './tray-row';
 import { useSettingSave } from './use-setting-save';
 
 export const MIN_PORT = 1024;
@@ -106,6 +108,7 @@ export function AppSection({ settings }: { settings: SettingsResponse }) {
   return (
     <SettingsSection id="app" title={t('settings.app.title')}>
       <RunAtLoginSwitch system={settings.system} />
+      <TrayRow />
       <PortField settings={settings} />
       {showInstall ? (
         <div className="settings-field">
@@ -114,6 +117,7 @@ export function AppSection({ settings }: { settings: SettingsResponse }) {
           </div>
         </div>
       ) : null}
+      <InstallInfoRow />
       <QuitAppRow />
     </SettingsSection>
   );

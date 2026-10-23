@@ -1,0 +1,139 @@
+/*
+ * Bento rail (design.md §12.2, F35.2): an 84 px floating tile, the logo mark, eight places with
+ * a 20 px icon over a 10.5 px label, "Thư mục" and "Cài đặt" at the bottom. The same entries
+ * (`.rail-item`) fill the phone tab bar and the "Thêm" sheet (bento-responsive.css). Tokens only.
+ */
+/* Rail: full-height tile, the bottom group pushed down; it scrolls when the window is short. */
+:root[data-style='bento'] .rail {
+  position: sticky;
+  top: var(--page-margin);
+  display: flex;
+  flex: 0 0 var(--rail-w);
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  width: var(--rail-w);
+  height: calc(100vh - 2 * var(--page-margin));
+  overflow-y: auto;
+  padding: 14px 10px;
+  border-radius: var(--radius-tile);
+  background: var(--tile);
+  scrollbar-width: thin;
+}
+
+:root[data-style='bento'] .rail__logo {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-bottom: var(--space-2);
+  border-radius: var(--radius-square);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+:root[data-style='bento'] .rail__list {
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* "Thư mục" and "Cài đặt": their own list, pushed to the bottom by the places' list above. */
+:root[data-style='bento'] .rail__list.rail__list--bottom {
+  flex: none;
+  padding-top: var(--space-2);
+}
+
+/*
+ * One entry: icon 20 over a 10.5 px label. Selected: accent wash, accent icon, label in --ink at
+ * weight 600 (accent text on the wash is 4.49:1 in light "Hoa đào", below 4.5:1 for text).
+ */
+:root[data-style='bento'] .rail-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  width: 64px;
+  min-height: 56px;
+  padding: 6px 2px;
+  border: 0;
+  border-radius: var(--radius-inner);
+  background: transparent;
+  color: var(--ink-2);
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+
+:root[data-style='bento'] .rail-item:hover {
+  background: var(--hover-wash);
+  color: var(--ink);
+}
+
+/* The current place (and an open "Thư mục"): icon and label in the accent on its 18 % wash
+   (§12.2); --accent-ink is the accent with 4.5:1 on that wash in every palette. */
+:root[data-style='bento'] .rail-item.is-active,
+:root[data-style='bento'] .rail-item[aria-expanded='true'] {
+  background: var(--accent-wash);
+  color: var(--accent-ink);
+}
+
+:root[data-style='bento'] .rail-item.is-active .rail-item__label {
+  font-weight: 600;
+}
+
+:root[data-style='bento'] .rail-item.is-active .rail-item__icon,
+:root[data-style='bento'] .rail-item[aria-expanded='true'] .rail-item__icon {
+  color: var(--accent-ink);
+}
+
+:root[data-style='bento'] .rail-item:focus-visible {
+  /* Inside the entry: the rail and the row scroll, so an outer ring would be cut off. */
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+:root[data-style='bento'] .rail-item__icon {
+  position: relative;
+  display: inline-flex;
+}
+
+:root[data-style='bento'] .rail-item__label {
+  max-width: 100%;
+  font-size: max(10.5px, 0.65625rem);
+  line-height: 1.15;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+/* Reminder count on the bell: a small pill over the icon's corner (the name says it in words). */
+:root[data-style='bento'] .rail-item__badge {
+  position: absolute;
+  top: -6px;
+  left: 12px;
+  min-width: 18px;
+  padding: 0 5px;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+}

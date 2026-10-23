@@ -4,6 +4,7 @@ import type { GlobalSettings } from '../config/global-settings.js';
 import { registerAiRoutes } from './ai-routes.js';
 import { registerAiStatusRoutes } from './ai-status-routes.js';
 import { registerAttachmentRoutes } from './attachment-routes.js';
+import { registerBackupScheduleRoutes } from './backup-schedule-routes.js';
 import { registerCaptureRoute } from './capture-route.js';
 import { registerDailyRoutes } from './daily-routes.js';
 import { registerFilesRoute } from './files-route.js';
@@ -17,10 +18,14 @@ import { registerNoteMentionRoutes } from './note-mention-routes.js';
 import { registerNoteOperationRoutes } from './note-operation-routes.js';
 import { registerNoteRoutes } from './note-routes.js';
 import { registerNoteTaskRoutes } from './note-task-routes.js';
+import { registerNotifyRoutes } from './notify-routes.js';
+import type { ChannelDeps } from '../reminders/channels/channel-types.js';
 import { registerOpenExternalRoute } from './open-external-route.js';
 import { registerQueryRoutes } from './query-routes.js';
 import { registerReminderRoutes } from './reminder-routes.js';
 import { registerResourcesRoutes } from './resources-routes.js';
+import { registerReviewRoutes } from './review-routes.js';
+import { registerSemesterPageRoutes } from './semester-page-routes.js';
 import type { TemplateLanguage } from '../templates/template-variables.js';
 import type { RevealOptions } from './reveal-command.js';
 import { registerRevealRoute } from './reveal-route.js';
@@ -33,6 +38,8 @@ export interface VaultRouteOptions {
   uiLanguage?: () => TemplateLanguage;
   /** Global settings (the reminder time is reported even when the reminder plugin is off). */
   settings?: () => GlobalSettings;
+  /** M5 (F31): network of the Telegram/email test messages (tests inject fetch and SMTP). */
+  notify?: ChannelDeps;
 }
 
 /**
@@ -67,7 +74,12 @@ export function registerVaultRoutes(
   registerHistoryRoutes(app, context);
   registerMaintenanceRoutes(app, context);
   registerReminderRoutes(app, context, { settings: options.settings });
+  registerBackupScheduleRoutes(app, context, options.reveal);
+  // M5: weekly review (F26) and the generated "Học kỳ này" page (F25).
+  registerReviewRoutes(app, context);
+  registerSemesterPageRoutes(app, context, { settings: options.settings });
   if (options.settings) {
+    registerNotifyRoutes(app, context, { settings: options.settings, channels: options.notify });
     registerAiStatusRoutes(app, context, { settings: options.settings });
     registerAiRoutes(app, context, { settings: options.settings });
   }

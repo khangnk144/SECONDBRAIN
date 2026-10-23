@@ -30,6 +30,9 @@ export function operationErrorMessage(error: unknown, subject: OperationSubject 
       return i18n.t(
         subject === 'folder' ? 'operations.errors.folderNotFound' : 'operations.errors.notFound',
       );
+    // The "Học kỳ này" page the app writes itself (F25.2): rename/move from the tree is refused.
+    case 'GENERATED_PAGE':
+      return i18n.t('semester.errors.generatedPage');
     default:
       return i18n.t('operations.errors.generic');
   }

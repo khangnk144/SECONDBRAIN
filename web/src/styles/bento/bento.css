@@ -1,0 +1,11 @@
+/*
+ * Bento mềm (design.md §12): every rule under :root[data-style='bento'], so the calm style is
+ * untouched. Imported once by the app layout, after the calm layout styles.
+ */
+@import './bento-local-tokens.css';
+@import './bento-shell.css';
+@import './bento-rail.css';
+@import './bento-controls.css';
+@import './bento-tiles.css';
+@import './bento-overlays.css';
+@import './bento-responsive.css';

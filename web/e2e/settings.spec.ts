@@ -7,6 +7,7 @@
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
+import { runStyle } from './helpers/e2e-style.js';
 import { appReady } from './helpers/keyboard.js';
 import { makeTempHome, ownServer, type OwnServer } from './helpers/own-server.js';
 import { shot } from './helpers/screenshots.js';
@@ -80,15 +81,16 @@ test('appearance, name and language apply without reload and persist (F18.1)', a
       name: 'Today',
     })
     .click();
+  // Calm: "Good morning, Lan Anh." on one line; Bento: the name on its own line, no period.
   const greeting = page.getByRole('heading', { level: 1 });
-  await expect(greeting).toHaveText(
-    /^(Good (morning|midday|afternoon|evening)|Up late), Lan Anh\.$/,
-  );
+  const named = runStyle() === 'bento' ? /,\s*Lan Anh$/ : /, Lan Anh\.$/;
+  await expect(greeting).toHaveText(/^(Good (morning|midday|afternoon|evening)|Up late),/);
+  await expect(greeting).toHaveText(named);
   expect(await sameDocument(page)).toBe(true);
 
   // After a reload everything is as she left it.
   await page.reload();
-  await expect(greeting).toHaveText(/, Lan Anh\.$/);
+  await expect(greeting).toHaveText(named);
   expect(await sameDocument(page)).toBe(false);
   expect(await shownPrefs(page)).toEqual({ ...changed, lang: 'en' });
   const api = await own.api();
@@ -98,6 +100,8 @@ test('appearance, name and language apply without reload and persist (F18.1)', a
     theme: 'light',
     palette: 'hoa-dao',
     fontSize: 18,
+    // F35.1: the layout style is part of `ui` (the e2e home was seeded with the run's style).
+    style: runStyle(),
   });
 });
 

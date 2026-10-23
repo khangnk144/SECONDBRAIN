@@ -72,6 +72,39 @@ describe('launcher files', () => {
     expect(stopBody.indexOf('Test-IsOurServer')).toBeLessThan(stopBody.indexOf('Stop-Process'));
   });
 
+  it('(F29.1) the forced stop also recognises the single executable as our server', () => {
+    const ps = read('start-second-brain.ps1').toString('utf8');
+    const check = ps.slice(
+      ps.indexOf('function Test-IsOurServer'),
+      ps.indexOf('function Stop-SecondBrain'),
+    );
+    // The node, exe and helper patterns as written in the script (.NET -match ignores case).
+    const patterns = [...check.matchAll(/-(?:not)?match '([^']+)'/g)].map((m) => m[1] ?? '');
+    expect(patterns).toHaveLength(3);
+    const [, exe = '', helper = ''] = patterns;
+    const isOurServer = (commandLine: string) =>
+      /server[\\/]dist[\\/]index\.js/i.test(commandLine) ||
+      (new RegExp(exe, 'i').test(commandLine) && !new RegExp(helper, 'i').test(commandLine));
+    for (const server of [
+      '"C:\\Program Files\\nodejs\\node.exe" server/dist/index.js',
+      '"D:\\SECONDBRAIN\\Second Brain.exe"',
+      '"D:\\SECONDBRAIN\\Second Brain.exe" --login',
+      '"D:\\Đồ án\\Second Brain.exe" --login --home "D:\\Đồ án"',
+      '/home/lan/second-brain --home /home/lan/Ghi chú',
+    ]) {
+      expect(isOurServer(server), server).toBe(true);
+    }
+    for (const other of [
+      '"D:\\SECONDBRAIN\\Second Brain.exe" --mcp-stdio',
+      '"D:\\SECONDBRAIN\\Second Brain.exe" --stop',
+      '"C:\\Windows\\notepad.exe" "D:\\SECONDBRAIN\\Second Brain.exe"',
+      '"C:\\Tools\\Second Brain Helper.exe"',
+      'node /home/lan/second-brain.js',
+    ]) {
+      expect(isOurServer(other), other).toBe(false);
+    }
+  });
+
   it('holds launcher.lock while installing, building and starting', () => {
     const ps = read('start-second-brain.ps1').toString('utf8');
     expect(ps).toContain("Join-Path $StateDir 'launcher.lock'");

@@ -15,6 +15,8 @@ import { DailyNavRow } from '../daily/daily-nav-row';
 import type { NoteSession } from '../note-session/note-session';
 import type { SessionView } from '../note-session/note-session-types';
 import { PropertyBar } from '../properties/property-bar';
+import { GeneratedPageBanner } from '../semester/generated-page-banner';
+import { useGeneratedPage } from '../semester/use-generated-page';
 import { NoteBanners } from './note-banners';
 import { NoteEditorHost } from './note-editor-host';
 import { noteScreenDropHandlers } from './note-file-drop';
@@ -36,7 +38,10 @@ interface NoteViewProps {
 
 /** Note screen layout (design.md screen 2): title and save state, banners, properties, body. */
 export function NoteView(props: NoteViewProps) {
-  const { session, view, isNew, line, lineRequest, cursor = null } = props;
+  const { session, isNew, line, lineRequest, cursor = null } = props;
+  // F25.2: the generated "Học kỳ này" page is shown read-only (its writes are refused anyway).
+  const generated = useGeneratedPage(props.view.path);
+  const view = generated ? { ...props.view, readOnly: true } : props.view;
   const titleId = useId();
   const editor = useRef<MarkdownEditorHandle | null>(null);
   const [handle, setHandle] = useState<MarkdownEditorHandle | null>(null);
@@ -123,7 +128,7 @@ export function NoteView(props: NoteViewProps) {
         <NoteTitle
           id={titleId}
           title={noteTitleFromPath(view.path)}
-          editable={conflict === null}
+          editable={conflict === null && generated === null}
           autoSelect={isNew}
           // `new=1` is a one-time request: drop it so a reload does not select the title again.
           onAutoSelected={() => navigateTo(noteRoute(view.path), { replace: true })}
@@ -141,10 +146,11 @@ export function NoteView(props: NoteViewProps) {
       {/* Under the title, not beside it: a long Inbox title keeps the whole row. */}
       <NoteInboxAction path={view.path} beforeOpen={() => session.flush()} />
       <NoteBanners
-        view={view}
+        view={props.view}
         onDiscardDraft={() => void session.discardDraft()}
         onReviewKept={() => void session.reviewKept()}
       />
+      {generated ? <GeneratedPageBanner status={generated} /> : null}
       {conflict ? (
         <ConflictScreen
           conflict={conflict}

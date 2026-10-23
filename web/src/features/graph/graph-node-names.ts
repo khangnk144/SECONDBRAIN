@@ -17,3 +17,13 @@ export function graphNodeNameWithFolder(
 ): string {
   return t('graph.panel.nodeInFolder', { title: node.title, folder: graphFolderLabel(t, node) });
 }
+
+/** The same name for a node edited in the last 24 h: "…, sửa trong 24 giờ" (F24.3). */
+export function graphNodeListName(
+  t: TFunction,
+  node: Pick<GraphModelNode, 'title' | 'folder'>,
+  recent: boolean,
+): string {
+  const name = graphNodeNameWithFolder(t, node);
+  return recent ? t('graph.panel.nodeRecent', { name }) : name;
+}

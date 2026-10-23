@@ -4,9 +4,12 @@ import { reminderToast, type ToastContent } from '../../src/reminders/reminder-m
 import { POWERSHELL_APP_ID } from '../../src/reminders/toast-script.js';
 import {
   createWindowsToastDeliverer,
+  HIDDEN_SPAWN_OPTIONS,
   openUrlCommand,
   runHiddenProcess,
+  runHiddenProcessWith,
   type ProcessResult,
+  type WindowsToastOptions,
 } from '../../src/reminders/windows-toast.js';
 import { createMemoryLogger } from '../api/vault-test-app.js';
 
@@ -32,6 +35,7 @@ function fakeDeliverer(
   platform: NodeJS.Platform,
   result: ProcessResult,
   notifier: 'ok' | 'error' | 'click' | 'missing' | 'silent' = 'ok',
+  extra: Pick<WindowsToastOptions, 'runtime' | 'env'> = { runtime: 'source' },
 ) {
   const fakes: Fakes = { runs: [], loads: 0, opened: [], notifications: [] };
   const logger = createMemoryLogger();
@@ -48,6 +52,7 @@ function fakeDeliverer(
     },
   };
   const deliverer = createWindowsToastDeliverer({
+    ...extra,
     logger,
     platform,
     timeoutMs: 50,
@@ -121,6 +126,24 @@ describe('toast delivery: PowerShell, then node-notifier, then failed', () => {
     expect(click.fakes.opened).toEqual([TOAST.link]);
   });
 
+  it('(F29.1) the exe never falls back to node-notifier: SnoreToast would flash a console window', async () => {
+    const exeEnv = { SB_RUNTIME: 'exe', SB_EXE_PATH: 'D:\\SECONDBRAIN\\Second Brain.exe' };
+    for (const extra of [{ runtime: 'exe' as const }, { env: exeEnv }]) {
+      const { deliverer, fakes, logger } = fakeDeliverer('win32', EXIT_1, 'ok', extra);
+      expect(await deliverer.deliver(TOAST)).toBe('failed');
+      expect(fakes.runs).toHaveLength(1);
+      expect(fakes.loads).toBe(0);
+      expect(logger.lines.join('\n')).toContain('no fallback in the exe');
+    }
+    // Started from source (the launcher's console), the fallback stays.
+    const source = fakeDeliverer('win32', EXIT_1, 'ok', { env: {} });
+    expect(await source.deliverer.deliver(TOAST)).toBe('shown');
+    expect(source.fakes.loads).toBe(1);
+    // The PowerShell toast itself still works in the exe.
+    const shown = fakeDeliverer('win32', OK, 'ok', { runtime: 'exe' });
+    expect(await shown.deliverer.deliver(TOAST)).toBe('shown');
+  });
+
   it('opens links like reveal opens Explorer: argument arrays, never a shell', () => {
     expect(openUrlCommand('win32', TOAST.link)).toEqual({
       command: 'explorer.exe',
@@ -136,6 +159,31 @@ describe('toast delivery: PowerShell, then node-notifier, then failed', () => {
 });
 
 describe('the hidden process runner', () => {
+  it('(F29.1) starts the toast process without a console window and without a shell', async () => {
+    const calls: { command: string; args: readonly string[]; options: object }[] = [];
+    const fakeSpawn = (command: string, args: readonly string[], options: object) => {
+      calls.push({ command, args, options });
+      const child = {
+        kill: () => true,
+        on(event: string, listener: (code: number) => void) {
+          if (event === 'exit') queueMicrotask(() => listener(0));
+          return child;
+        },
+      };
+      return child as never;
+    };
+    const result = await runHiddenProcessWith(fakeSpawn, 'powershell.exe', ['-NoProfile'], 1000);
+    expect(result).toEqual({ exitCode: 0, timedOut: false });
+    expect(calls).toEqual([
+      {
+        command: 'powershell.exe',
+        args: ['-NoProfile'],
+        options: { shell: false, windowsHide: true, stdio: 'ignore' },
+      },
+    ]);
+    expect(HIDDEN_SPAWN_OPTIONS.windowsHide).toBe(true);
+  });
+
   it('reports the exit code, a spawn error, and kills a process at its timeout', async () => {
     const node = process.execPath;
     expect(await runHiddenProcess(node, ['-e', 'process.exit(3)'], 10_000)).toEqual({

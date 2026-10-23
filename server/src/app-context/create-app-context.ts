@@ -1,6 +1,7 @@
 import path from 'node:path';
 import type { GlobalSettings } from '../config/global-settings.js';
 import { findVaultOverlap, resolveVaultRoot } from '../config/vault-location.js';
+import type { ActivityService } from '../index/activity-service.js';
 import { createDeadlineService } from '../index/deadline-service.js';
 import { createIndexRelinkPlanner } from '../index/index-relink-planner.js';
 import type { DeadlineService, IndexService, RebuildProgress } from '../index/index-types.js';
@@ -46,6 +47,8 @@ export interface AppContext {
   readonly vault: VaultService;
   readonly index: IndexService;
   readonly deadlines: DeadlineService;
+  /** Touched notes per day, done tasks, added links (M5 Today, weekly review, brain tile). */
+  readonly activity: ActivityService;
   readonly hub: WebSocketHub;
   readonly sampleData: SampleDataService;
   readonly logger: AppLogger;

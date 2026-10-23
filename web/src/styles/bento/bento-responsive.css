@@ -1,0 +1,189 @@
+/*
+ * Bento below 960 px (F35.5): the rail is one row on top that scrolls sideways, the folder tree
+ * opens as a drawer, the right panel follows the screen. At 600 px or less (F28.1): a bottom tab
+ * bar replaces the rail and the right panel becomes a bottom sheet (shell-overlay.css). Never a
+ * horizontal page scroll: rows and wide content scroll inside themselves. Tokens only.
+ */
+@media (max-width: 959px) {
+  :root[data-style='bento'] .app-shell {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-4);
+    padding: var(--space-4);
+  }
+
+  :root[data-style='bento'] .rail {
+    position: static;
+    flex: none;
+    flex-direction: row;
+    width: auto;
+    height: auto;
+    overflow: hidden;
+    padding: 6px;
+  }
+
+  :root[data-style='bento'] .rail__logo {
+    display: none;
+  }
+
+  :root[data-style='bento'] .rail__list {
+    flex: 1 1 auto;
+    flex-direction: row;
+    width: auto;
+    min-width: 0;
+    overflow-x: auto;
+    scroll-padding-inline: 32px;
+    scrollbar-width: thin;
+  }
+
+  :root[data-style='bento'] .rail__list > li {
+    flex: none;
+  }
+
+  /* Places hidden past an edge: that edge fades out (flags from use-row-scroll.ts, review B8). */
+  :root[data-style='bento'] .rail__list[data-more-end='true'] {
+    mask-image: linear-gradient(to right, var(--ink) calc(100% - 32px), transparent);
+  }
+
+  :root[data-style='bento'] .rail__list[data-more-start='true'] {
+    mask-image: linear-gradient(to right, transparent, var(--ink) 32px);
+  }
+
+  :root[data-style='bento'] .rail__list[data-more-start='true'][data-more-end='true'] {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      var(--ink) 32px,
+      var(--ink) calc(100% - 32px),
+      transparent
+    );
+  }
+
+  /* "Thư mục" and "Cài đặt" never scroll away: they end the row after the scrolling places. */
+  :root[data-style='bento'] .rail__list.rail__list--bottom {
+    flex: none;
+    overflow: visible;
+    padding-top: 0;
+    padding-left: var(--space-2);
+    border-left: 1px solid var(--tile-line);
+  }
+
+  :root[data-style='bento'] .rail-item {
+    width: auto;
+    min-width: 64px;
+    min-height: 52px;
+    padding: 6px var(--space-2);
+  }
+
+  :root[data-style='bento'] .rail-item__label {
+    white-space: nowrap;
+  }
+
+  :root[data-style='bento'] .bento-column {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-4);
+  }
+
+  :root[data-style='bento'] .right-panel {
+    position: static;
+    flex: none;
+    width: auto;
+    max-height: none;
+  }
+
+  :root[data-style='bento'] .app-main {
+    padding-bottom: var(--space-4);
+  }
+
+  /* The rail row (≈ 64 px) and the margins sit above a full-height brain map. */
+  :root[data-style='bento'] .app-shell--immersive .app-main {
+    height: max(420px, calc(100vh - 116px));
+  }
+
+  /* Like calm (viewer.css): the page scrolls and the PDF pages get a fixed share. */
+  :root[data-style='bento'] .app-main:has(.file-viewer) {
+    height: auto;
+  }
+}
+
+@media (max-width: 600px) {
+  /* Room at the bottom for the tab bar and the phone's home indicator. */
+  :root[data-style='bento'] .app-shell {
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-3) calc(80px + env(safe-area-inset-bottom, 0px));
+  }
+
+  :root[data-style='bento'] .bottom-bar {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 20;
+    padding: 6px var(--space-2) calc(6px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid var(--tile-line);
+    border-radius: var(--radius-tile) var(--radius-tile) 0 0;
+    background: var(--tile);
+  }
+
+  :root[data-style='bento'] .bottom-bar__list {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: var(--space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  :root[data-style='bento'] .bottom-bar .rail-item {
+    width: 100%;
+    min-width: 0;
+    min-height: 56px;
+    padding: 6px 2px;
+  }
+
+  :root[data-style='bento'] .top-bar {
+    gap: var(--space-2);
+  }
+
+  :root[data-style='bento'] .top-bar__search {
+    flex-basis: 0;
+    padding: 0 var(--space-3);
+  }
+
+  /* No keyboard hint on a phone. */
+  :root[data-style='bento'] .top-bar__keys {
+    display: none;
+  }
+
+  :root[data-style='bento'] .top-bar__new {
+    padding: 0 var(--space-3);
+  }
+
+  :root[data-style='bento'] .app-shell--immersive .app-main {
+    height: max(360px, calc(100vh - 168px));
+  }
+
+  /* Toasts stay above the tab bar. */
+  :root[data-style='bento'] .toast-host {
+    right: var(--space-3);
+    bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+    left: var(--space-3);
+    max-width: none;
+  }
+}
+
+/* "Thêm": the other places as a grid of rail entries. */
+:root[data-style='bento'] .more-sheet__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+:root[data-style='bento'] .more-sheet .rail-item {
+  width: 100%;
+  min-height: 64px;
+}

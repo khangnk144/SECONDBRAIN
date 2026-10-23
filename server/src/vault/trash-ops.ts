@@ -17,6 +17,8 @@ const TRASH_REASONS: ReadonlySet<string> = new Set([
   'conflict',
   'sample-data',
   'restore-collision',
+  // F25.3: "Tạo lại" sets an edited copy of the generated "Học kỳ này" page aside.
+  'generated-replaced',
 ]);
 const MAX_RESTORE_SUFFIX = 9999;
 

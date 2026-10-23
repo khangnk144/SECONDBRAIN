@@ -73,7 +73,8 @@ export function SampleDataPrompt({ onCreated, focusAfter }: SampleDataPromptProp
   }
 
   return (
-    <section className="sample-data-card" aria-labelledby={headingId}>
+    // `tile`: the Bento tile look (styles/bento); calm has no rule for it.
+    <section className="sample-data-card tile" aria-labelledby={headingId}>
       <h2 id={headingId} className="sample-data-card__question">
         {t('today.sample.question')}
       </h2>

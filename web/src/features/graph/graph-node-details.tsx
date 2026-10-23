@@ -2,7 +2,7 @@ import { useEffect, useId, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { isNotePath } from '../../lib/vault-paths';
 import { neighborLevels, nodesAtLevel, type GraphModel, type GraphModelNode } from './graph-model';
-import { graphFolderLabel, graphNodeNameWithFolder } from './graph-node-names';
+import { graphFolderLabel, graphNodeListName } from './graph-node-names';
 import type { GraphSelection } from './graph-selection';
 
 /** Neighbours listed per level; a hub's long tail is summarized. */
@@ -15,32 +15,40 @@ export interface GraphNodeDetailsProps {
   onDepthChange: (depth: 1 | 2) => void;
   onOpen: (id: string) => void;
   onClear: () => void;
+  /** Notes edited in the last 24 h (F24.3). */
+  recent?: ReadonlySet<string> | null;
 }
 
 function NeighborList({
   nodes,
   onPick,
+  recent,
 }: {
   nodes: GraphModelNode[];
   onPick: (id: string) => void;
+  recent: ReadonlySet<string> | null;
 }) {
   const { t } = useTranslation();
   return (
     <>
       <ul className="graph-neighbors">
-        {nodes.slice(0, MAX_LISTED).map((node) => (
-          <li key={node.id}>
-            <button
-              type="button"
-              className="graph-neighbors__item"
-              aria-label={graphNodeNameWithFolder(t, node)}
-              onClick={() => onPick(node.id)}
-            >
-              <span className="graph-neighbors__title">{node.title}</span>
-              <span className="graph-neighbors__folder">{graphFolderLabel(t, node)}</span>
-            </button>
-          </li>
-        ))}
+        {nodes.slice(0, MAX_LISTED).map((node) => {
+          const isRecent = recent?.has(node.id) === true;
+          return (
+            <li key={node.id}>
+              <button
+                type="button"
+                className="graph-neighbors__item"
+                aria-label={graphNodeListName(t, node, isRecent)}
+                onClick={() => onPick(node.id)}
+              >
+                <span className="graph-neighbors__title">{node.title}</span>
+                <span className="graph-neighbors__folder">{graphFolderLabel(t, node)}</span>
+                {isRecent ? <span className="graph-recent">{t('graph.panel.recent')}</span> : null}
+              </button>
+            </li>
+          );
+        })}
       </ul>
       {nodes.length > MAX_LISTED ? (
         <p className="graph-panel__hint">{t('graph.more', { count: nodes.length - MAX_LISTED })}</p>
@@ -55,6 +63,7 @@ function NeighborList({
  */
 export function GraphNodeDetails(props: GraphNodeDetailsProps) {
   const { model, selection, onSelect, onDepthChange, onOpen, onClear } = props;
+  const recent = props.recent ?? null;
   const { t } = useTranslation();
   const headingId = useId();
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -91,6 +100,7 @@ export function GraphNodeDetails(props: GraphNodeDetailsProps) {
           {node.source ? t('graph.panel.source') : t('graph.panel.archived')}
         </p>
       ) : null}
+      {recent?.has(node.id) ? <p className="graph-recent">{t('graph.panel.recent')}</p> : null}
       <div className="graph-details__actions">
         <button type="button" className="button button--primary" onClick={() => onOpen(node.id)}>
           {isNotePath(node.id) ? t('graph.panel.open') : t('graph.panel.openSource')}
@@ -105,7 +115,7 @@ export function GraphNodeDetails(props: GraphNodeDetailsProps) {
       {first.length === 0 ? (
         <p className="graph-panel__hint">{t('graph.panel.orphan')}</p>
       ) : (
-        <NeighborList nodes={first} onPick={pick} />
+        <NeighborList nodes={first} onPick={pick} recent={recent} />
       )}
       {second.length > 0 ? (
         <label className="graph-details__toggle">
@@ -122,7 +132,7 @@ export function GraphNodeDetails(props: GraphNodeDetailsProps) {
           <h3 className="graph-details__heading">
             {t('graph.panel.levelTwoHeading', { count: second.length })}
           </h3>
-          <NeighborList nodes={second} onPick={pick} />
+          <NeighborList nodes={second} onPick={pick} recent={recent} />
         </>
       ) : null}
     </section>

@@ -136,8 +136,12 @@ export function stubWindow(width: number, reducedMotion = false): () => void {
 /**
  * Gives every `.today-strip` a layout width of `width` px (jsdom has no layout) and a
  * `ResizeObserver` the test can fire. `resize(next)` changes the width and notifies the observers.
+ * The scroller (what the Bento strip measures) gets the same width, less `overdueSpace` px.
  */
-export function stubStripWidth(width: number): { resize: (next: number) => void } {
+export function stubStripWidth(
+  width: number,
+  overdueSpace = 0,
+): { resize: (next: number) => void } {
   let current = width;
   const callbacks = new Set<() => void>();
   class FakeResizeObserver {
@@ -160,15 +164,17 @@ export function stubStripWidth(width: number): { resize: (next: number) => void 
   vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
     this: HTMLElement,
   ) {
-    if (!this.classList.contains('today-strip')) return original.call(this);
+    const scroller = this.classList.contains('today-strip__scroller');
+    if (!scroller && !this.classList.contains('today-strip')) return original.call(this);
+    const measured = scroller ? current - overdueSpace : current;
     return {
       x: 0,
       y: 0,
       top: 0,
       left: 0,
-      right: current,
+      right: measured,
       bottom: 120,
-      width: current,
+      width: measured,
       height: 120,
     } as DOMRect;
   });

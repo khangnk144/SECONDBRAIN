@@ -6,12 +6,14 @@
 import { GraphTouchEffects, type AiTouchPlay } from './graph-ai-touch-effect';
 import { GraphCamera } from './graph-camera';
 import { drawGraph, type FrameInput, type LabelRect } from './graph-draw';
+import { beginSceneFade, stepSceneFade, type GraphFade } from './graph-fade';
 import { FpsMeter } from './graph-fps-meter';
 import { pinnedFitLabels } from './graph-label-fit';
 import { isSettling, settleNow, tickLive } from './graph-layout';
 import { DRIFT_AMPLITUDE_PX } from './graph-motion';
 import { browserFrameScheduler, GraphMotionClock, type FrameScheduler } from './graph-motion-clock';
 import type { GraphPalette } from './graph-palette';
+import { pulseLevel, PULSE_STATIC } from './graph-pulse';
 import { GraphPointerInput, type PointerInputHost } from './graph-pointer-input';
 import type { GraphScene } from './graph-scene';
 import * as vp from './graph-viewport';
@@ -50,6 +52,8 @@ export class GraphView implements PointerInputHost {
   private labelExclusions: readonly LabelRect[] = [];
   /** "AI vừa chạm" playbacks (full map only). */
   private readonly touches = new GraphTouchEffects();
+  /** A change of week of the time scrubber fading in/out, or null. */
+  private fade: GraphFade | null = null;
 
   constructor(
     private readonly canvas: HTMLCanvasElement,
@@ -72,7 +76,12 @@ export class GraphView implements PointerInputHost {
     return this.options.mode === 'full' && !this.reducedMotion;
   }
 
-  setScene(scene: GraphScene, options: { intro: boolean; fit: boolean }): void {
+  /**
+   * Shows `scene`. With `fade` (a change of week on the time scrubber, positions shared with the
+   * previous scene) what appears fades in and what goes fades out, unless motion is reduced.
+   */
+  setScene(scene: GraphScene, options: { intro: boolean; fit: boolean; fade?: boolean }): void {
+    this.fade = beginSceneFade(this.scene, scene, options.fade === true && this.animated);
     this.scene = scene;
     this.input.reset();
     if (!this.animated && isSettling(scene.simulation)) settleNow(scene.simulation);
@@ -97,10 +106,24 @@ export class GraphView implements PointerInputHost {
     this.requestFrame();
   }
 
+  /** Filter matches of the current scene (F24.2); null clears. */
+  setFilter(mask: Uint8Array | null): void {
+    this.scene?.setFilter(mask);
+    this.requestFrame();
+  }
+
+  /** Notes that pulse (F24.3), indices into the current scene's model; null for none. */
+  setRecent(indices: Int32Array | null): void {
+    this.scene?.setRecent(indices);
+    this.requestFrame();
+  }
+
   setReducedMotion(reduced: boolean): void {
     this.reducedMotion = reduced;
     const scene = this.scene;
     if (this.animated || !scene) return;
+    if (this.fade) scene.setHidden(null, null);
+    this.fade = null;
     this.clock.stopIntro();
     if (this.clock.signalRunning) scene.finishSignal();
     this.clock.stopSignal();
@@ -256,8 +279,12 @@ export class GraphView implements PointerInputHost {
     // Quiet hub names on the full map, once the dots have opened out from the center.
     frame.ambientLabels = this.options.mode === 'full' && !clock.introRunning;
     frame.labelExclusions = this.labelExclusions;
+    frame.recent = scene.recent;
+    frame.pulse = this.animated ? pulseLevel(clock.driftClock) : PULSE_STATIC;
+    this.fade = stepSceneFade(this.fade, scene, now);
+    frame.fade = this.fade;
     drawGraph(ctx, frame);
     this.fps?.frame(now);
-    return clock.running || settling || this.animated || this.fps !== null;
+    return clock.running || settling || this.animated || this.fps !== null || this.fade !== null;
   }
 }

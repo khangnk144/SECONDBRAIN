@@ -5,8 +5,11 @@ import { openVaultHost, type VaultHost } from '../app-context/vault-host.js';
 import type { VaultPlugin } from '../app-context/vault-plugins.js';
 import { resolveAppPaths, type AppPaths } from '../config/app-paths.js';
 import { parseCliOptions, resolvePort } from '../config/cli-args.js';
-import { loadOrCreateGlobalSettings, saveGlobalSettings } from '../config/global-settings.js';
-import { storedApiKeys } from '../config/settings-sections.js';
+import {
+  loadOrCreateGlobalSettings,
+  saveGlobalSettings,
+  storedSecretValues,
+} from '../config/global-settings.js';
 import { createSettingsStore } from '../config/settings-store.js';
 import type { RunAtLoginService } from '../system/run-at-login.js';
 import { buildApp } from '../http/build-app.js';
@@ -61,7 +64,8 @@ export async function startServer(input: StartServerInput): Promise<StartResult>
   const { settings, created, corruptBackup } = await loadOrCreateGlobalSettings(paths.settingsFile);
   const logger = createVaultHandoverLogger({
     dir: paths.logsDir,
-    secrets: () => [settings.sessionToken, ...storedApiKeys(settings.ai)],
+    // API keys and the M5 channel secrets (GitHub token, bot token, SMTP password), read live.
+    secrets: () => [settings.sessionToken, ...storedSecretValues(settings)],
     echo: input.echoLogs,
   });
   if (created) logger.info('Created global settings with a new session token.');

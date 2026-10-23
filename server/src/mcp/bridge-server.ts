@@ -97,18 +97,26 @@ export async function isServerUp(port: number, fetchImpl: typeof fetch): Promise
 }
 
 /**
- * Starts the server in the background, detached from the bridge. Windows: the hidden launcher
- * (installs and builds when needed, then starts the server without a window); elsewhere: the
- * built server with this home.
+ * Starts the server in the background, detached from the bridge. The single executable (F29.1,
+ * `SB_RUNTIME=exe`): the executable itself with `--login` (no browser) and this home. Else on
+ * Windows: the hidden launcher (installs and builds when needed, then starts the server without
+ * a window); elsewhere: the built server with this home.
  */
 export function defaultStartServer(
   home: string,
   appDir: string,
   platform: NodeJS.Platform = process.platform,
+  env: NodeJS.ProcessEnv = process.env,
 ): () => void {
   return () => {
-    const child =
-      platform === 'win32'
+    const exePath = env.SB_RUNTIME === 'exe' ? env.SB_EXE_PATH : undefined;
+    const child = exePath
+      ? spawn(exePath, ['--login', '--home', home], {
+          detached: true,
+          stdio: 'ignore',
+          windowsHide: true,
+        })
+      : platform === 'win32'
         ? spawn('wscript.exe', [path.join(appDir, 'launcher', 'start-hidden.vbs')], {
             detached: true,
             stdio: 'ignore',

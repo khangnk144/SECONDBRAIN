@@ -7,16 +7,26 @@ import {
   normalizeMcp,
   normalizeReminders,
   normalizeSystem,
+  storedApiKeys,
   type AiSettings,
   type McpSettings,
   type ReminderSettings,
   type SystemSettings,
 } from './settings-sections.js';
+import {
+  normalizeBackup,
+  normalizeNotify,
+  storedM5Secrets,
+  type BackupSettings,
+  type NotifySettings,
+} from './settings-sections-m5.js';
 
 export type UiLanguage = 'vi' | 'en';
 export type UiTheme = 'dark' | 'light' | 'system';
 export type UiPalette = 'dau-tam' | 'hoa-dao' | 'oai-huong';
 export type UiFontSize = 14 | 16 | 18;
+/** design.md §12: "Bento mềm" (default since M5) or "Yên tĩnh" (the earlier layout). */
+export type UiStyle = 'bento' | 'calm';
 
 export interface UiSettings {
   name: string;
@@ -24,6 +34,7 @@ export interface UiSettings {
   theme: UiTheme;
   palette: UiPalette;
   fontSize: UiFontSize;
+  style: UiStyle;
 }
 
 /** Machine-wide settings in `<home>/.secondbrain/settings.json`. Unknown keys are preserved. */
@@ -37,6 +48,8 @@ export interface GlobalSettings {
   system: SystemSettings;
   ai: AiSettings;
   mcp: McpSettings;
+  backup: BackupSettings;
+  notify: NotifySettings;
   [extra: string]: unknown;
 }
 
@@ -46,12 +59,14 @@ export const DEFAULT_UI_SETTINGS: UiSettings = {
   theme: 'dark',
   palette: 'dau-tam',
   fontSize: 16,
+  style: 'bento',
 };
 
 const LANGUAGES: readonly UiLanguage[] = ['vi', 'en'];
 const THEMES: readonly UiTheme[] = ['dark', 'light', 'system'];
 const PALETTES: readonly UiPalette[] = ['dau-tam', 'hoa-dao', 'oai-huong'];
 const FONT_SIZES: readonly UiFontSize[] = [14, 16, 18];
+const STYLES: readonly UiStyle[] = ['bento', 'calm'];
 
 /** The values each UI setting accepts (the PUT /settings schema uses the same lists). */
 export const UI_CHOICES = {
@@ -59,6 +74,7 @@ export const UI_CHOICES = {
   theme: THEMES,
   palette: PALETTES,
   fontSize: FONT_SIZES,
+  style: STYLES,
 } as const;
 /** Longest greeting name, in code points. */
 export const UI_NAME_MAX = 80;
@@ -80,6 +96,7 @@ function normalizeUi(raw: unknown): UiSettings {
     theme: pick(THEMES, ui.theme, DEFAULT_UI_SETTINGS.theme),
     palette: pick(PALETTES, ui.palette, DEFAULT_UI_SETTINGS.palette),
     fontSize: pick(FONT_SIZES, ui.fontSize, DEFAULT_UI_SETTINGS.fontSize),
+    style: pick(STYLES, ui.style, DEFAULT_UI_SETTINGS.style),
   };
 }
 
@@ -98,7 +115,14 @@ export function normalizeSettings(raw: Record<string, unknown>): GlobalSettings 
     system: normalizeSystem(raw.system),
     ai: normalizeAi(raw.ai),
     mcp: normalizeMcp(raw.mcp),
+    backup: normalizeBackup(raw.backup),
+    notify: normalizeNotify(raw.notify),
   };
+}
+
+/** Every stored secret except the session token: API keys and the M5 channel secrets. */
+export function storedSecretValues(settings: GlobalSettings): string[] {
+  return [...storedApiKeys(settings.ai), ...storedM5Secrets(settings)];
 }
 
 export interface LoadSettingsResult {

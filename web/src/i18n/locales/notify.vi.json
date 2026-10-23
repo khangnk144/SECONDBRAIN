@@ -1,0 +1,83 @@
+{
+  "title": "Nhắc qua Telegram và email",
+  "intro": "Ngoài thông báo trên máy, app có thể gửi nhắc deadline đến điện thoại của bạn. Mỗi kênh tắt sẵn cho đến khi bạn bật.",
+  "test": "Gửi thử",
+  "testNamed": "Gửi thử qua {{channel}}",
+  "testBusy": "Đang gửi…",
+  "testDone": "Đã gửi tin nhắn thử. Xem {{channel}} của bạn nhé.",
+  "testFailed": "Chưa gửi được: {{reason}}",
+  "lastSent": "Lần gửi gần nhất: {{when}}",
+  "lastError": "Lần gửi gần nhất bị lỗi: {{reason}} App sẽ thử lại.",
+  "pending": "Đang chờ gửi: {{count}} tin.",
+  "dateFormat": "HH:mm DD/MM/YYYY",
+  "telegram": {
+    "title": "Telegram",
+    "enable": "Gửi nhắc nhở qua Telegram",
+    "missing": "Lưu mã bot và chat ID trước để bật.",
+    "botToken": "Mã bot (bot token)",
+    "botTokenName": "mã bot Telegram",
+    "chatId": "Chat ID",
+    "chatIdHint": "Một dãy số (nhóm có dấu - ở đầu) hoặc @tên_kênh.",
+    "howTo": "Cách lấy mã bot và chat ID",
+    "howToSteps": {
+      "one": "Trong Telegram, mở @BotFather, gửi /newbot rồi đặt tên cho bot.",
+      "two": "BotFather gửi lại mã bot dạng 123456789:AA…; dán mã đó vào ô Mã bot rồi bấm Lưu.",
+      "three": "Mở cuộc trò chuyện với bot của bạn và bấm Start (bot chỉ nhắn được cho người đã bấm Start).",
+      "four": "Mở @userinfobot và bấm Start: nó trả lời Id của bạn; dán dãy số đó vào ô Chat ID."
+    },
+    "consent": "Khi bật, app gửi tên deadline, ngày hạn và đường dẫn ghi chú đến chat {{chatId}} qua máy chủ của Telegram.",
+    "consentNoChat": "Khi bật, app gửi tên deadline, ngày hạn và đường dẫn ghi chú đến chat bạn nhập bên dưới, qua máy chủ của Telegram."
+  },
+  "email": {
+    "title": "Email",
+    "enable": "Gửi nhắc nhở qua email",
+    "missing": "Điền máy chủ SMTP, địa chỉ gửi, địa chỉ nhận (và mật khẩu nếu có tên đăng nhập) trước để bật.",
+    "host": "Máy chủ SMTP",
+    "hostPlaceholder": "smtp.gmail.com",
+    "port": "Cổng SMTP",
+    "portHint": "Thường là 587 cho STARTTLS, 465 cho TLS.",
+    "portInvalid": "Nhập một số từ 1 đến 65535.",
+    "security": "Bảo mật kết nối",
+    "securityChoices": {
+      "starttls": "STARTTLS",
+      "tls": "TLS",
+      "none": "Không mã hóa"
+    },
+    "user": "Tên đăng nhập",
+    "userHint": "Để trống nếu máy chủ không cần đăng nhập.",
+    "password": "Mật khẩu",
+    "passwordName": "mật khẩu email",
+    "passwordHint": "Với Gmail, dùng mật khẩu ứng dụng (App password), không dùng mật khẩu chính.",
+    "from": "Địa chỉ gửi",
+    "to": "Gửi đến",
+    "consent": "Khi bật, app gửi tên deadline, ngày hạn và đường dẫn ghi chú đến {{to}} qua máy chủ {{host}}.",
+    "consentIncomplete": "Khi bật, app gửi tên deadline, ngày hạn và đường dẫn ghi chú đến địa chỉ nhận, qua máy chủ SMTP bạn nhập bên dưới.",
+    "securityHint": "Không mã hóa chỉ dùng được với máy chủ trên chính máy này."
+  },
+  "failure": {
+    "auth": "Telegram không nhận mã bot. Kiểm tra lại mã từ @BotFather.",
+    "chat-not-found": "Telegram không tìm thấy chat này, hoặc bạn chưa bấm Start với bot. Kiểm tra chat ID rồi bấm Start.",
+    "rate-limit": "Telegram đang giới hạn số tin. Đợi một phút rồi thử lại.",
+    "network": "không kết nối được. Kiểm tra mạng rồi thử lại.",
+    "timeout": "máy chủ không trả lời kịp. Thử lại sau ít phút.",
+    "smtp-auth": "máy chủ email không nhận tên đăng nhập hoặc mật khẩu.",
+    "smtp-connect": "không kết nối được máy chủ email. Kiểm tra máy chủ, cổng và kiểu bảo mật.",
+    "rejected": "máy chủ email từ chối thư. Kiểm tra địa chỉ gửi và địa chỉ nhận.",
+    "not-configured": "điền đủ các ô của kênh này trước.",
+    "busy": "một tin thử khác đang được gửi.",
+    "interrupted": "app tắt giữa chừng khi đang gửi.",
+    "failed": "có lỗi không rõ. Thử lại sau ít phút.",
+    "tls-required": "máy chủ này không chạy trên máy bạn nên không gửi được khi không mã hóa. Chọn STARTTLS hoặc TLS."
+  },
+  "saveErrors": {
+    "chat-id-format": "Chat ID là một dãy số (nhóm có dấu - ở đầu) hoặc @tên_kênh.",
+    "bot-token-format": "Mã bot có dạng 123456789:AA… Dán lại đủ mã từ @BotFather.",
+    "host-format": "Nhập tên máy chủ, ví dụ smtp.gmail.com (không có https:// hay cổng).",
+    "email-format": "Nhập một địa chỉ email, ví dụ ban@truong.edu.vn.",
+    "control-characters": "Giá trị có ký tự không dùng được.",
+    "too-short": "Ô này không được để trống.",
+    "out-of-range": "Giá trị nằm ngoài khoảng cho phép.",
+    "pattern": "Giá trị này không đúng dạng.",
+    "tls-required": "Chỉ chọn Không mã hóa khi máy chủ SMTP chạy trên chính máy này (localhost, 127.0.0.1). Với máy chủ khác, chọn STARTTLS hoặc TLS để mật khẩu không bị gửi đi mà không mã hóa."
+  }
+}

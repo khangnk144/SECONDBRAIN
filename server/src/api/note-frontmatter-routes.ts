@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import type { AppContext } from '../app-context/create-app-context.js';
 import { planFrontmatterPatch } from '../markdown/frontmatter-patch.js';
 import { guardNotePath, revisionSchema, vaultPathSchema } from './vault-route-schemas.js';
+import { assertNotGeneratedPage } from '../semester/generated-page-registry.js';
 
 interface FrontmatterBody {
   path: string;
@@ -35,6 +36,7 @@ export function registerNoteFrontmatterRoutes(app: FastifyInstance, context: App
     },
     async (request) => {
       const { expectedRevision, set, unset } = request.body;
+      await assertNotGeneratedPage(context, guardNotePath(request.body.path)); // F25.2
       const result = await context.vault.patchWith(
         guardNotePath(request.body.path),
         expectedRevision,

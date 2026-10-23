@@ -1,0 +1,138 @@
+/*
+ * Bento controls (design.md §12.4, F35.7): primary button 46 px, radius 16, weight 600;
+ * secondary on --tile (--tile-2 inside a tile) without a border; inputs radius 16; chips 999;
+ * square checkboxes 20 px radius 7 (the real <input type=checkbox> stays on top, hit area
+ * 24 px); hover only brightens, never lifts. Tokens only.
+ */
+:root[data-style='bento'] .button {
+  min-height: 40px;
+  border-radius: var(--radius-control);
+  transition: background-color var(--dur) var(--ease);
+}
+
+:root[data-style='bento'] .button--primary {
+  min-height: var(--control-h);
+  padding: 0 18px;
+  font-size: 0.90625rem;
+  font-weight: 600;
+}
+
+:root[data-style='bento'] .button--secondary {
+  border-color: var(--button-2-border);
+  background: var(--button-2-bg);
+  color: var(--ink);
+}
+
+:root[data-style='bento'] .button--secondary:not(:disabled):hover {
+  background: linear-gradient(var(--hover-wash), var(--hover-wash)), var(--button-2-bg);
+}
+
+:root[data-style='bento'] .text-input {
+  min-height: 40px;
+  border-color: var(--tile-line);
+  border-radius: var(--radius-control);
+  background: var(--tile-2);
+}
+
+:root[data-style='bento'] .icon-button {
+  border-radius: var(--radius-square);
+}
+
+:root[data-style='bento'] .icon-button:hover {
+  background: var(--hover-wash);
+}
+
+:root[data-style='bento'] kbd {
+  border-color: transparent;
+  border-radius: var(--radius-s);
+  background: var(--tile-2);
+}
+
+/* Chips and pills: fully round. */
+:root[data-style='bento'] :is(.tag-pill, .property-chip, .property-tag, .date-chip) {
+  border-radius: var(--radius-pill);
+}
+
+/* Square checkbox: 20 px, radius 7, --ink-2 ring; ticked = accent with the --on-accent mark. */
+:root[data-style='bento'] :is(.deadline-check__box, .task-item__box) {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-check);
+}
+
+:root[data-style='bento'] .deadline-check__input:checked + .deadline-check__box::after,
+:root[data-style='bento'] .task-item__checkbox:checked + .task-item__box::after {
+  left: 6px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+}
+
+/*
+ * Every other checkbox (settings switches, "Bao gồm Archive", "Hiện thêm cấp 2", AI choices,
+ * review B2): the same square drawn on the real input itself (appearance: none), so the label,
+ * Space and the checked state stay native; its label row keeps the ≥ 24 px hit area.
+ */
+:root[data-style='bento'] input[type='checkbox']:not(.deadline-check__input, .task-item__checkbox) {
+  display: inline-grid;
+  flex: none;
+  place-content: center;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  border: 1.5px solid var(--ink-2);
+  border-radius: var(--radius-check);
+  background: transparent;
+  color: var(--on-accent);
+  cursor: pointer;
+  appearance: none;
+}
+
+:root[data-style='bento']
+  input[type='checkbox']:not(.deadline-check__input, .task-item__checkbox)::before {
+  content: '';
+  width: 5px;
+  height: 10px;
+  margin-top: -2px;
+  border: solid currentColor;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) scale(0);
+}
+
+:root[data-style='bento']
+  input[type='checkbox']:not(.deadline-check__input, .task-item__checkbox):checked {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+:root[data-style='bento']
+  input[type='checkbox']:not(.deadline-check__input, .task-item__checkbox):checked::before {
+  transform: rotate(45deg);
+}
+
+:root[data-style='bento']
+  input[type='checkbox']:not(.deadline-check__input, .task-item__checkbox):focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+:root[data-style='bento']
+  input[type='checkbox']:not(.deadline-check__input, .task-item__checkbox):disabled {
+  cursor: default;
+}
+
+/* Note tabs: soft pills on --tile; the open one on the accent wash. */
+:root[data-style='bento'] .tab {
+  border-color: transparent;
+  border-radius: var(--radius-control);
+  background: var(--tile);
+}
+
+:root[data-style='bento'] .tab.is-active {
+  background: var(--accent-wash);
+  color: var(--ink);
+}
+
+:root[data-style='bento'] .tab__open {
+  min-height: 36px;
+}

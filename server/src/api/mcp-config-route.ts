@@ -2,6 +2,7 @@ import { access } from 'node:fs/promises';
 import path from 'node:path';
 import type { FastifyInstance } from 'fastify';
 import type { GlobalSettings } from '../config/global-settings.js';
+import { runtimeInfo, type RuntimeInfo } from '../system/runtime-info.js';
 
 export interface McpConfigOptions {
   /** Current settings (the session token is the bearer token of the HTTP transport). */
@@ -13,6 +14,8 @@ export interface McpConfigOptions {
   homeDir?: string;
   /** Node binary Claude Desktop should run (default: the one running this server). */
   execPath?: string;
+  /** Exe or source (default: from the environment, F29.4). */
+  runtime?: RuntimeInfo;
 }
 
 export interface McpConfig {
@@ -31,19 +34,32 @@ export function bridgePath(appDir: string): string {
   return path.join(path.resolve(appDir), 'server', 'dist', 'mcp-stdio.js');
 }
 
-/** The two connection snippets of Settings "Kết nối Claude (MCP)" (SPEC F18, F32.1). */
-export async function mcpConfig(options: McpConfigOptions): Promise<McpConfig> {
+/** `{ command, args }` for Claude Desktop; the executable runs the bridge with `--mcp-stdio`. */
+async function stdioCommand(options: McpConfigOptions) {
+  const { exePath } = options.runtime ?? runtimeInfo();
+  if (exePath) {
+    // The executable's home is its own folder unless the server was started with another one.
+    const exeHome = path.dirname(exePath);
+    const home = options.homeDir ? path.resolve(options.homeDir) : exeHome;
+    const args = home === exeHome ? ['--mcp-stdio'] : ['--mcp-stdio', '--home', home];
+    return { stdio: { command: exePath, args }, bridgeBuilt: true };
+  }
   const bridge = bridgePath(options.appDir);
   const defaultHome = path.dirname(path.resolve(options.appDir));
   const home = options.homeDir ? path.resolve(options.homeDir) : defaultHome;
   const args = home === defaultHome ? [bridge] : [bridge, '--home', home];
-  const stdio = { command: options.execPath ?? process.execPath, args };
-  const url = `http://localhost:${options.port}/mcp`;
-  const authorization = `Bearer ${options.settings().sessionToken}`;
   const bridgeBuilt = await access(bridge).then(
     () => true,
     () => false,
   );
+  return { stdio: { command: options.execPath ?? process.execPath, args }, bridgeBuilt };
+}
+
+/** The two connection snippets of Settings "Kết nối Claude (MCP)" (SPEC F18, F32.1). */
+export async function mcpConfig(options: McpConfigOptions): Promise<McpConfig> {
+  const { stdio, bridgeBuilt } = await stdioCommand(options);
+  const url = `http://localhost:${options.port}/mcp`;
+  const authorization = `Bearer ${options.settings().sessionToken}`;
   return {
     stdio,
     stdioSnippet: JSON.stringify({ mcpServers: { [MCP_SERVER_KEY]: stdio } }, null, 2),

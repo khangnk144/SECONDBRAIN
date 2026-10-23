@@ -9,6 +9,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { expect, request as apiRequest, type APIRequestContext } from '@playwright/test';
 import { clientFor, shellToken, type AppApi } from './app-api.js';
+import { seedStyle, type E2eStyle } from './e2e-style.js';
 
 export interface OwnServer {
   readonly port: number;
@@ -37,6 +38,11 @@ export interface OwnServerOptions {
   home?: string;
   /** Extra environment (the AI specs point `SB_AI_*_URL` at the local mock provider). */
   env?: Record<string, string>;
+  /**
+   * Layout style written into the home's settings before each start (F35.1). Default: the run's
+   * style (`SB_E2E_STYLE`, else calm, which every spec before M5 expects) for a home without one.
+   */
+  style?: E2eStyle;
 }
 
 export function makeTempHome(label: string): string {
@@ -82,6 +88,7 @@ export function ownServer(port: number, options: OwnServerOptions = {}): OwnServ
     async start() {
       if (child) throw new Error('server already started');
       expect(await healthy(origin), `port ${port} is already answering`).toBe(false);
+      seedStyle(home, options.style);
       const started = spawn(
         'node',
         [path.join(appDir, 'server', 'dist', 'index.js'), '--port', String(port), '--home', home],

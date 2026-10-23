@@ -15,7 +15,7 @@ export function removeDir(dir: string): void {
 }
 
 export const SHELL_TEMPLATE = `<!doctype html>
-<html lang="__SB_LANG__" data-theme="__SB_THEME__" data-palette="__SB_PALETTE__" data-font-size="__SB_FONT_SIZE__">
+<html lang="__SB_LANG__" data-theme="__SB_THEME__" data-palette="__SB_PALETTE__" data-font-size="__SB_FONT_SIZE__" data-style="__SB_STYLE__">
 <head>
 <meta charset="utf-8">
 <meta name="sb-token" content="__SB_TOKEN__">

@@ -16,6 +16,21 @@ export interface CommitResult {
 
 const nulCount = (output: Buffer) => output.toString('utf8').split('\0').filter(Boolean).length;
 
+/** App bookkeeping (`events.jsonl`, reminders…) that changes alongside the notes. */
+const STATE_PREFIX = '.secondbrain/';
+
+/**
+ * Files the commit message counts: the notes and attachments she changed. App state that moves
+ * with them (e.g. one `note_edited` line per note per day, F35.9, written whenever the indexer
+ * gets to it) is committed but not counted, so the message does not depend on that timing; a
+ * commit of app state only counts its state files.
+ */
+function countedFiles(output: Buffer): number {
+  const names = output.toString('utf8').split('\0').filter(Boolean);
+  const userFiles = names.filter((name) => !name.startsWith(STATE_PREFIX)).length;
+  return userFiles > 0 ? userFiles : names.length;
+}
+
 /**
  * Removes `index.lock` when it is older than `staleMs` (a git process that crashed or was killed
  * left it behind); a fresher lock belongs to a running git and is kept. Only that one file is
@@ -65,8 +80,8 @@ export async function commitVaultChanges(
   // Exit 1 = some files could not be read (still a commit of the rest); 128 (a lock) throws.
   await git.run(['add', '-A', '--ignore-errors'], { okExitCodes: [1] });
   const staged = await git.run(['diff', '--cached', '--name-only', '-z']);
-  const files = nulCount(staged.stdout);
-  if (files === 0) return null;
+  if (nulCount(staged.stdout) === 0) return null;
+  const files = countedFiles(staged.stdout);
   await git.run(['commit', '-q', '--no-verify', '-m', message(files)]);
   const head = await lastCommit(git);
   return head ? { ...head, files } : null;

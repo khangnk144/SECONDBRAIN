@@ -10,6 +10,7 @@ import { rmSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 import { localIso } from './helpers/app-api.js';
 import { appCopyWithBuildId, currentBuildId } from './helpers/app-copy.js';
+import { runStyle } from './helpers/e2e-style.js';
 import { appReady } from './helpers/keyboard.js';
 import { noteBody, noteHash } from './helpers/note-page.js';
 import { makeTempHome, ownServer, type OwnServer } from './helpers/own-server.js';
@@ -98,8 +99,20 @@ test('manifest, service worker, offline shell with banner, reconnect, shell upda
   await expect(page.getByRole('navigation', { name: 'Điều hướng chính' })).toBeVisible();
   await shot(page, 'pwa-offline-banner');
 
-  // Started without the server: the folder list and Today's tasks say they could not load.
-  await expect(page.getByText('Chưa tải được danh sách thư mục.')).toBeVisible();
+  // Started without the server: the folder list and Today's tasks say they could not load. In
+  // Bento the folders are behind "Thư mục" on Today (a drawer).
+  if (runStyle() === 'bento') {
+    await page
+      .getByRole('navigation', { name: 'Điều hướng chính' })
+      .getByRole('button', { name: 'Thư mục' })
+      .click();
+    const drawer = page.getByRole('dialog', { name: 'Thư mục' });
+    await expect(drawer.getByText('Chưa tải được danh sách thư mục.')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(drawer).toHaveCount(0);
+  } else {
+    await expect(page.getByText('Chưa tải được danh sách thư mục.')).toBeVisible();
+  }
   await page.evaluate(
     () => ((window as unknown as { __offlineBoot: boolean }).__offlineBoot = true),
   );

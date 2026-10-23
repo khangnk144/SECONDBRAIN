@@ -22,7 +22,9 @@ export type ApiErrorCode =
   | 'AI_BUDGET'
   | 'AI_PROVIDER_ERROR'
   /** 409 (F32.4): a source without usable text cannot be marked as ingested. */
-  | 'NEEDS_REVIEW';
+  | 'NEEDS_REVIEW'
+  /** 409 (F25.2): the "Học kỳ này" page is written by the app only (`semester/`). */
+  | 'GENERATED_PAGE';
 
 export interface ApiErrorBody {
   error: { code: ApiErrorCode; message: string; details?: unknown };

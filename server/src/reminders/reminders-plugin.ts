@@ -2,7 +2,10 @@
  * Server-side reminder scheduler (SPEC F17, G1): a per-vault plugin, so it runs while the
  * launcher keeps the server alive, with or without an app window. It evaluates at start (catch-up
  * after a shutdown), every 60 s, and right away after a wake (the wall clock jumped well beyond
- * the expected tick, or the date changed). Evaluations never overlap.
+ * the expected tick, or the date changed). Evaluations never overlap. The Telegram/email outbox
+ * is drained after each evaluation but outside its queue, one drain at a time (a request during
+ * a drain runs one more pass): a slow SMTP server never holds up the next check and its toasts.
+ * Closing aborts a send in flight instead of waiting up to a minute for it.
  */
 import { errorCodeOf } from '../app-context/app-context-errors.js';
 import {
@@ -12,6 +15,9 @@ import {
 } from '../app-context/vault-plugins.js';
 import type { AtomicWriteHooks } from '../fs/atomic-write-file.js';
 import { toLocalDate } from '../lib/local-date.js';
+import type { ChannelDeps } from './channels/channel-types.js';
+import { startNotifyOutbox, type NotifyStatusSource } from './notify-outbox-service.js';
+import { stillDueMatcher } from './notify-outbox-relevance.js';
 import { evaluateReminders } from './reminder-evaluation.js';
 import { listReminders, remindableItems } from './reminder-items.js';
 import { openReminderStore } from './reminder-store.js';
@@ -39,6 +45,8 @@ export interface RemindersPluginOptions {
   platform?: NodeJS.Platform;
   /** Test-only faults for writes of `reminders.json`. */
   storeHooks?: AtomicWriteHooks;
+  /** M5 (F31): network of the Telegram/email channels (tests inject fetch and the SMTP transport). */
+  notify?: ChannelDeps;
 }
 
 const nodeTimers: ReminderTimers = {
@@ -53,7 +61,7 @@ const nodeTimers: ReminderTimers = {
 async function startReminders(
   host: VaultPluginHost,
   options: RemindersPluginOptions,
-): Promise<ReminderService> {
+): Promise<ReminderService & NotifyStatusSource> {
   const { context, logger } = host;
   const now = options.now ?? context.now;
   const store = await openReminderStore({
@@ -66,6 +74,21 @@ async function startReminders(
     options.deliver ?? createWindowsToastDeliverer({ logger, platform: options.platform });
   let closed = false;
   let queue: Promise<ReminderEntry[]> = Promise.resolve([]);
+  const closing = new AbortController();
+  const outbox = await startNotifyOutbox({
+    stateDir: context.vault.paths.stateDir,
+    settings: host.settings,
+    port: host.port,
+    now,
+    logger,
+    isOpen: () => !closed,
+    channels: options.notify,
+    // F17 for every retry: a done, rescheduled or deleted item is never sent.
+    async stillDue() {
+      await context.settled();
+      return stillDueMatcher(remindableItems(context));
+    },
+  });
   const deps = {
     context,
     store,
@@ -75,10 +98,30 @@ async function startReminders(
     logger,
     now,
     isOpen: () => !closed,
+    onFired: (entries: readonly ReminderEntry[]) => outbox.onFired(entries),
   };
 
-  const enqueue = (): Promise<ReminderEntry[]> => {
-    queue = queue.then(async () => {
+  // F31.2: what fired now and the retries that are due (never throws), single-flight.
+  let draining: Promise<void> | null = null;
+  let drainAgain = false;
+  const requestDrain = (): Promise<void> => {
+    drainAgain = true;
+    draining ??= (async () => {
+      try {
+        while (drainAgain && !closed) {
+          drainAgain = false;
+          await outbox.drain(closing.signal);
+        }
+      } finally {
+        draining = null;
+      }
+    })();
+    return draining;
+  };
+
+  /** One evaluation in the queue, then a drain outside it; resolves after both. */
+  const enqueue = async (): Promise<ReminderEntry[]> => {
+    const evaluation = queue.then(async () => {
       if (closed) return [];
       try {
         return await evaluateReminders(deps);
@@ -87,7 +130,10 @@ async function startReminders(
         return [];
       }
     });
-    return queue;
+    queue = evaluation;
+    const fired = await evaluation;
+    if (!closed) await requestDrain();
+    return fired;
   };
 
   const timers = options.timers ?? nodeTimers;
@@ -122,11 +168,14 @@ async function startReminders(
     runNow: enqueue,
     time: () => reminderTimeOf(host.settings()),
     toastSupported: deliverer.supported,
+    notifyStatus: () => outbox.status(),
     async close() {
       if (closed) return;
       closed = true;
       timers.clearInterval(handle);
+      closing.abort(); // a Telegram/email send in flight stops now (counted as interrupted)
       await queue;
+      await draining;
     },
   };
 }

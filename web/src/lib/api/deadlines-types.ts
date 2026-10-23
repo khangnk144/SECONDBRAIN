@@ -3,6 +3,7 @@
  * `server/src/index/index-types.ts` and `server/src/index/deadline-types.ts`, plus the task patch
  * and reschedule routes. Dates are local calendar dates `YYYY-MM-DD`, never instants.
  */
+import type { GraphGroup } from './graph-types';
 import type { ContentClass, VaultPath } from './vault-types';
 
 /** SPEC §4.7: `done` when ticked or the note has `status: done`; else by days left. */
@@ -79,6 +80,43 @@ export interface TodayView {
   /** Open tasks due today or overdue, then the undated tasks of today's Daily note. */
   todayTasks: TaskEntry[];
   projects: ProjectSummary[];
+  /**
+   * M5: what was written lately ("7 ngày ghi chép", the encouragement line, "Não hôm nay").
+   * `null` when the server could not read it; absent from servers older than M5 (and mocks).
+   */
+  activity?: TodayActivity | null;
+}
+
+/** A note on Today's "Não hôm nay" map; `group` is the brain map's colour group. */
+export interface TodayBrainNode {
+  path: VaultPath;
+  title: string;
+  group: GraphGroup;
+}
+
+/** `GET /api/today` `activity.brain` (F24.4): counts of today's events and a small map. */
+export interface TodayBrain {
+  /** Notes created today. */
+  notesNew: number;
+  /** Notes created or edited today (equals today's "7 ngày ghi chép" bar). */
+  notesTouched: number;
+  /** Links added today (unique linking note → target pairs). */
+  linksAdded: number;
+  /** Pages the AI wrote today (F34). */
+  aiTouched: number;
+  /** At most 24, most connected first. */
+  nodes: TodayBrainNode[];
+  /** Links among `nodes`; `from` is the linking note. */
+  edges: { from: VaultPath; to: VaultPath }[];
+}
+
+/** `GET /api/today` `activity` (F35.9). Computed on the server from the index and the event log. */
+export interface TodayActivity {
+  /** The 7 local days ending today, oldest first: notes created or edited that day. */
+  days: { date: string; count: number }[];
+  /** Tasks ticked yesterday in user notes. */
+  doneYesterday: number;
+  brain: TodayBrain;
 }
 
 /** `GET /api/calendar?month=YYYY-MM`. */

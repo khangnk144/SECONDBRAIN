@@ -29,6 +29,7 @@ const REASONS = new Set([
   'restore-collision',
   'history-restore',
   'template-upgrade',
+  'generated-replaced',
 ]);
 
 type Loose = Record<string, unknown>;

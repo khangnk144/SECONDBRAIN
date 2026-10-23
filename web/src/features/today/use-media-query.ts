@@ -12,6 +12,8 @@ export function useMediaQuery(query: string): boolean {
     const list = window.matchMedia(query);
     const update = () => setMatches(list.matches);
     update();
+    // Some test stubs (and very old engines) answer without listener methods.
+    if (typeof list.addEventListener !== 'function') return;
     list.addEventListener('change', update);
     return () => list.removeEventListener('change', update);
   }, [query]);

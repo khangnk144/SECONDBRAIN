@@ -9,6 +9,7 @@ import {
   type HistoryStatus,
 } from '../git/history-types.js';
 import { VaultError } from '../vault/vault-types.js';
+import { assertNotGeneratedPage } from '../semester/generated-page-registry.js';
 import {
   guardNotePath,
   pathQuerySchema,
@@ -120,6 +121,7 @@ export function registerHistoryRoutes(app: FastifyInstance, context: AppContext)
     },
     async (request, reply) => {
       const path = guardNotePath(request.body.path);
+      await assertNotGeneratedPage(context, path); // F25.2
       const history = availableHistory(context, reply);
       if (!history) return reply;
       const { commit, expectedRevision } = request.body;

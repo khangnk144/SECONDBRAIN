@@ -175,7 +175,7 @@ describe('Settings screen (F18.1)', () => {
     installSettingsRoutes(
       mock,
       settingsResponse({
-        system: { runAtLogin: false, runAtLoginSupported: false, platform: 'other' },
+        system: { runAtLogin: false, runAtLoginSupported: false, platform: 'other', tray: true },
       }),
     );
     renderSettings();

@@ -14,9 +14,11 @@ import {
 } from './graph-highlight';
 import { drawAiTouchHalos, drawAiTouchLabels, drawAiTouchMarks } from './graph-ai-touch-draw';
 import type { TouchFrame } from './graph-ai-touch-effect';
+import type { GraphFade } from './graph-fade';
 import { drawLabels } from './graph-labels';
 import type { GraphModel } from './graph-model';
 import type { GraphPalette } from './graph-palette';
+import { drawPulseGlow, drawPulseRings } from './graph-pulse';
 import type { Viewport } from './graph-viewport';
 
 /** SPEC F16: edges at 25 % opacity. */
@@ -62,6 +64,12 @@ export interface FrameInput {
   labelExclusions: readonly LabelRect[];
   /** "AI vừa chạm" playbacks on screen (full map only), or null. */
   touch: TouchFrame | null;
+  /** Notes edited in the last 24 h (indices sorted by group), or null (F24.3). */
+  recent: Int32Array | null;
+  /** Breath of their pulse, 0 → 1, or `PULSE_STATIC` (-1) for the still reduced-motion look. */
+  pulse: number;
+  /** A change of week fading in and out (time scrubber), or null. */
+  fade: GraphFade | null;
 }
 
 export interface LabelRect {
@@ -184,9 +192,12 @@ export function drawGraph(ctx: CanvasRenderingContext2D, f: FrameInput): void {
 
   drawAiTouchHalos(ctx, f);
   drawBuckets(ctx, f, false, GLOW_EXTRA_PX / view.scale, GLOW_ALPHA, EMPHASIS_GLOW_ALPHA);
+  drawPulseGlow(ctx, f);
   drawBuckets(ctx, f, false, 0, 1, 1);
   ctx.lineWidth = 1.25 / view.scale;
   drawBuckets(ctx, f, true, 0, 1, 1);
+  drawPulseRings(ctx, f);
+  f.fade?.draw(ctx, f);
 
   drawSignals(ctx, f);
   drawAiTouchMarks(ctx, f);

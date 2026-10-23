@@ -1,0 +1,182 @@
+/*
+ * "Tổng kết tuần" (SPEC F26): a quiet section on calm Today and the `#/review` screen (plain
+ * lists, no card, design.md §4/§5), a full-width tile on Bento Today (the shared `.tile` frame;
+ * the four parts as inner boxes, design.md §12.4). Tokens only.
+ */
+.weekly-review {
+  min-width: 0;
+}
+
+.weekly-review--section {
+  margin-top: var(--space-6);
+}
+
+.weekly-review__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+}
+
+.weekly-review__title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+.weekly-review__range {
+  margin: 0;
+  font-size: max(12px, 0.8125rem);
+  color: var(--ink-2);
+}
+
+.weekly-review__groups {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4) var(--space-6);
+  margin-top: var(--space-2);
+}
+
+@media (min-width: 600px) {
+  .weekly-review__groups {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.weekly-review__group {
+  min-width: 0;
+}
+
+.weekly-review__group-title {
+  margin: 0 0 var(--space-1);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+.weekly-review__sentence {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--ink);
+}
+
+.weekly-review__hint {
+  margin: var(--space-1) 0 0;
+  font-size: max(12px, 0.8125rem);
+  color: var(--ink-2);
+}
+
+.weekly-review__action {
+  margin-top: var(--space-2);
+}
+
+.weekly-review__list {
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.weekly-review__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--space-2);
+  min-width: 0;
+}
+
+/* A note (or task) that opens like a link: real button, at least 24 px to hit. */
+.weekly-review__note {
+  min-height: 24px;
+  max-width: 100%;
+  padding: 2px 0;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.9375rem;
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.weekly-review__note:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.weekly-review__meta {
+  font-size: max(12px, 0.8125rem);
+  color: var(--ink-2);
+}
+
+.weekly-review__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  margin-top: var(--space-1);
+  border-radius: var(--radius-s);
+  font-size: 0.875rem;
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.weekly-review__note:focus-visible,
+.weekly-review__link:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.weekly-review__foot,
+.weekly-review__error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.weekly-review__error p {
+  margin: 0;
+}
+
+@media (pointer: coarse) {
+  .weekly-review__note,
+  .weekly-review__link {
+    min-height: 40px;
+  }
+}
+
+/* Bento: the tile frame comes from `.tile`; here only its inside. */
+:root[data-style='bento'] .weekly-review--tile {
+  padding: 22px 24px;
+}
+
+:root[data-style='bento'] .weekly-review--tile .weekly-review__title {
+  font-size: 15.5px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+:root[data-style='bento'] .weekly-review--tile .weekly-review__groups {
+  gap: var(--gap-panel-tile);
+  margin-top: var(--space-3);
+}
+
+@media (min-width: 960px) {
+  :root[data-style='bento'] .weekly-review--tile .weekly-review__groups {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+:root[data-style='bento'] .weekly-review--tile .weekly-review__group {
+  --button-2-bg: var(--tile);
+  --button-2-border: var(--line);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-inner);
+  background: var(--tile-2);
+}

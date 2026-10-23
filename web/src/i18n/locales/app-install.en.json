@@ -1,0 +1,23 @@
+{
+  "tray": {
+    "label": "Tray icon and system-wide shortcut",
+    "hint": "The Second Brain icon in the taskbar corner opens the app, captures a note or quits. Ctrl+Alt+Q opens quick capture even while you are in another app.",
+    "starting": "Starting the tray icon…",
+    "running": "Running. Press Ctrl+Alt+Q anywhere to capture a note to Inbox.",
+    "hotkeyTaken": "Another app already uses Ctrl+Alt+Q. The tray icon still works: right-click it and choose Quick capture.",
+    "off": "Off. Turn it on for the tray icon and Ctrl+Alt+Q.",
+    "failed": "The tray icon stopped several times, so the app paused restarting it. Turn this switch off and on to try again."
+  },
+  "install": {
+    "label": "How the app runs",
+    "exe": "Running as the .exe app",
+    "source": "Running from the source code",
+    "exePath": "File: {{path}}",
+    "sourceHint": "To use a single .exe file: double-click \"Tạo bản exe\" in the app\\launcher folder.",
+    "smartScreen": "The first time you open the .exe, Windows may say \"Windows protected your PC\". Click \"More info\", then \"Run anyway\" (the file is not signed).",
+    "shortcuts": "Recreate desktop shortcuts",
+    "shortcutsHint": "Puts a Second Brain shortcut on the desktop and in the Start menu.",
+    "shortcutsDone": "Recreated the shortcuts on the desktop and in the Start menu.",
+    "shortcutsFailed": "Windows did not let the app create the shortcuts. Try again, or make a shortcut to the .exe by hand."
+  }
+}

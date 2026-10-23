@@ -1,0 +1,40 @@
+/* "Não hôm nay" mini map (calm block and Bento tile): the brain map's group colours, tokens only. */
+.brain-map {
+  display: block;
+  overflow: visible;
+}
+
+.brain-map__edges line {
+  stroke: var(--graph-areas);
+  stroke-opacity: 0.5;
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+}
+
+.brain-map__node--projects {
+  fill: var(--graph-projects);
+}
+
+.brain-map__node--areas {
+  fill: var(--graph-areas);
+}
+
+.brain-map__node--resources {
+  fill: var(--graph-resources);
+}
+
+.brain-map__node--wiki {
+  fill: var(--graph-wiki);
+}
+
+.brain-map__node--daily {
+  fill: var(--graph-daily);
+}
+
+/* "Other" is the map's quiet colour: a thin ring keeps the dot visible on a tile. */
+.brain-map__node--other {
+  fill: var(--graph-other);
+  stroke: var(--ink-2);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}

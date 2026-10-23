@@ -84,6 +84,9 @@ export function createIndexReader(db: Database.Database) {
         'SELECT tag FROM tags WHERE note_id = (SELECT id FROM notes WHERE path = ?) ORDER BY rowid',
       )
       .pluck(),
+    allNoteTags: db.prepare(
+      'SELECT n.path AS path, t.tag AS tag FROM tags t JOIN notes n ON n.id = t.note_id ORDER BY t.rowid',
+    ),
     tags: db.prepare(
       `SELECT t.tag AS tag, t.tag_norm AS norm, MIN(t.rowid) AS first, COUNT(*) AS count
        FROM tags t JOIN notes n ON n.id = t.note_id
@@ -140,6 +143,15 @@ export function createIndexReader(db: Database.Database) {
     },
     noteTags(path: VaultPath): string[] {
       return s.noteTags.all(path) as string[];
+    },
+    noteTagsByPath(): Map<VaultPath, string[]> {
+      const byPath = new Map<VaultPath, string[]>();
+      for (const { path, tag } of s.allNoteTags.all() as { path: VaultPath; tag: string }[]) {
+        const tags = byPath.get(path);
+        if (tags) tags.push(tag);
+        else byPath.set(path, [tag]);
+      }
+      return byPath;
     },
     tags(): TagCount[] {
       const rows = s.tags.all() as (TagCount & { first: number })[];

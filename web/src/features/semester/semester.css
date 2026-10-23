@@ -1,0 +1,30 @@
+/* "Trang Học kỳ này" in Settings and the note banner of the generated page (SPEC F25). Tokens only. */
+.semester-page-row__actions {
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.semester-page-row__actions:empty {
+  display: none;
+}
+
+.generated-page-banner__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  border-radius: var(--radius-s);
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.generated-page-banner__link:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (pointer: coarse) {
+  .generated-page-banner__link {
+    min-height: 40px;
+  }
+}

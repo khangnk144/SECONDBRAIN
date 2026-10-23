@@ -1,6 +1,8 @@
 import type { FastifyInstance, FastifyReply } from 'fastify';
+import { errorCodeOf } from '../app-context/app-context-errors.js';
 import type { AppContext } from '../app-context/create-app-context.js';
-import type { SearchQuery } from '../index/index-types.js';
+import type { SearchQuery, TodayActivity } from '../index/index-types.js';
+import { buildTodayActivity } from '../index/today-activity.js';
 import { toLocalDate } from '../lib/local-date.js';
 
 interface SearchQuerystring {
@@ -63,9 +65,25 @@ export function registerQueryRoutes(app: FastifyInstance, context: AppContext): 
     return context.index.linkTargets();
   });
 
+  // The deadline view plus today's activity (M5). Activity that cannot be read (an I/O error on
+  // the event log) never costs the deadlines: it is `null` and the tiles say so.
   app.get('/api/today', async (_request, reply) => {
     noStore(reply);
-    return context.deadlines.today();
+    const view = context.deadlines.today();
+    let activity: TodayActivity | null = null;
+    try {
+      activity = await buildTodayActivity(
+        {
+          activity: context.activity,
+          index: context.index,
+          ingestDir: context.vault.paths.ingestDir,
+        },
+        view.date,
+      );
+    } catch (error) {
+      context.logger.warn(`Today activity unavailable (${errorCodeOf(error)}).`);
+    }
+    return { ...view, activity };
   });
 
   app.get<{ Querystring: { month?: string; includeArchive: boolean } }>(

@@ -1,8 +1,8 @@
-import { beforeEach, describe, expect, it, type Mock } from 'vitest';
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 import type { Navigator } from './app-navigation';
 import { resetAppState } from './testing/reset-app-state';
 import { expectTabRemoval, MAX_TABS, useTabsStore } from './tabs-store';
-import { startTabsSync } from './tabs-sync';
+import { expectRecreate, RECREATE_GRACE_MS, startTabsSync } from './tabs-sync';
 import { useToastStore } from './toast-store';
 import { useVaultStore } from './vault-store';
 import { emitServerEvent } from './ws/server-event-bus';
@@ -156,6 +156,23 @@ describe('tabs store (F23.1)', () => {
     emitServerEvent({ type: 'note:deleted', path: '2 Areas/Mới/Bài 1.md' });
     expect(paths()).toEqual([]);
     expect(toastMessages()).toHaveLength(before);
+    stop();
+  });
+
+  it('(D2) a note the app replaces in place keeps its tab for a while; later deletions close it', () => {
+    const stop = startTabsSync();
+    const page = 'Học kỳ này.md';
+    tabs().openNote(page);
+    const now = Date.now();
+    expectRecreate('học kỳ này.md'.normalize('NFD'), now);
+    emitServerEvent({ type: 'note:deleted', path: page });
+    expect(paths()).toEqual([page]);
+    expect(activePath()).toBe(page);
+    // Past the grace time a deletion closes the tab as usual.
+    const spy = vi.spyOn(Date, 'now').mockReturnValue(now + RECREATE_GRACE_MS + 1);
+    emitServerEvent({ type: 'note:deleted', path: page });
+    expect(paths()).toEqual([]);
+    spy.mockRestore();
     stop();
   });
 

@@ -12,6 +12,10 @@ import {
   denseNoteContent,
   denseTitle,
 } from './helpers/dense-fixture.js';
+import { calmOnly } from './helpers/calm-only.js';
+
+// Calm layout (`.today__summary`, `.today__pair`): the Bento dense checks are in bento-today.spec.ts.
+calmOnly();
 
 test.afterEach(async ({ page }) => resetVault(await appApi(page)));
 

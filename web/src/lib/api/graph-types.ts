@@ -1,6 +1,7 @@
 /**
  * `GET /api/graph` and `GET /api/graph/local`, mirrored by hand from the server's graph route
- * (SPEC F16, §4.2 graph column). Filters (folder, tag, since) arrive in Phase 2.
+ * (SPEC F16, F24, §4.2 graph column). The map filters on the client with the shared predicate
+ * (`features/graph/graph-filter.ts`), so it never asks the API for `matches`.
  */
 import type { ContentClass, VaultPath } from './vault-types';
 
@@ -29,6 +30,12 @@ export interface GraphNode {
   degree: number;
   /** No link in or out (degree 0). */
   orphan: boolean;
+  /** `GET /graph` only, notes: last modification (epoch ms). */
+  mtimeMs?: number;
+  /** `GET /graph` only, notes the app saw created: when (epoch ms). */
+  createdMs?: number;
+  /** `GET /graph` only: tags in normalized form (SPEC §4.14); empty for sources. */
+  tags?: string[];
 }
 
 /** One per unordered pair of linked files; resolved links only, never a self-link. */
@@ -40,6 +47,8 @@ export interface GraphEdge {
 export interface GraphResponse {
   nodes: GraphNode[];
   edges: GraphEdge[];
+  /** Only with filter parameters (`folder`, `group`, `tag`, `since`): ids of matching nodes. */
+  matches?: string[];
 }
 
 /** Hops followed (both link directions) around the note in `GET /graph/local`. */

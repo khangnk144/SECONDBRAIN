@@ -1,8 +1,9 @@
 /// <reference lib="dom" />
 // Sidebar tree end to end, keyboard only (SPEC F2.2, F2.4): F2 renames with relink after the
 // confirm dialog lists the linking note, Delete moves the note to the trash, and both undo
-// through the journal from the 10 s toast.
+// through the journal from the 10 s toast. (In Bento the tree is the folder pane of a note route.)
 import { expect, test } from '@playwright/test';
+import { runStyle } from './helpers/e2e-style.js';
 import { cleanupNotes, trackNote, vaultApi } from './helpers/vault-api.js';
 
 test.afterEach(async ({ page }) => cleanupNotes(page));
@@ -13,7 +14,14 @@ test('rename with F2 and delete with Delete, both undone from the toast (F2.2)',
   const api = await vaultApi(page);
   await api.createNote('1 Projects/Cây e2e.md', '# Cây\n');
   await api.createNote('1 Projects/Liên kết cây.md', 'Xem [[Cây e2e]].\n');
-  await page.goto('/');
+  if (runStyle() === 'bento') {
+    // Bento shows the tree in the folder pane beside the rail on note routes: open a third note.
+    const other = '0 Inbox/Mở cây e2e.md';
+    await api.createNote(other, '# Mở cây\n');
+    await page.goto(`/#/note?path=${encodeURIComponent(other)}`);
+  } else {
+    await page.goto('/');
+  }
   await page.reload();
 
   const tree = page.getByRole('tree');

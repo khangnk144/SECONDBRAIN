@@ -13,8 +13,8 @@ export function resolveTheme(theme: ThemePreference, win: Window = window): 'dar
 const followers = new WeakMap<Document, () => void>();
 
 /**
- * Applies theme, palette, font size and language to <html> (the CSS reads the data attributes,
- * so every screen restyles at once, without a reload). With 'system' it keeps following OS theme
+ * Applies theme, palette, font size, style (`data-style`, F35.1) and language to <html> (the CSS
+ * reads the data attributes, so every screen restyles at once, without a reload). With 'system' it keeps following OS theme
  * changes until prefs are applied again. Returns a cleanup function that stops following.
  */
 export function applyUiPrefs(prefs: UiPrefs, doc: Document = document): () => void {
@@ -28,6 +28,7 @@ export function applyUiPrefs(prefs: UiPrefs, doc: Document = document): () => vo
   apply();
   root.dataset.palette = prefs.palette;
   root.dataset.fontSize = String(prefs.fontSize);
+  root.dataset.style = prefs.style;
   root.lang = prefs.language;
 
   if (prefs.theme !== 'system' || typeof win.matchMedia !== 'function') return () => {};

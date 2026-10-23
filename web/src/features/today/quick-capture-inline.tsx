@@ -1,12 +1,7 @@
-import { useId, useRef, useState, type KeyboardEvent } from 'react';
+import { useId } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { captureToInbox } from '../../lib/capture-flow';
 import { shortcutKeys } from '../../lib/shortcuts/use-app-shortcuts';
-
-/** Enter while an input method is still composing a character (macOS Vietnamese, IMEs) is not "save". */
-function isComposing(event: KeyboardEvent<HTMLTextAreaElement>): boolean {
-  return event.nativeEvent.isComposing || event.keyCode === 229;
-}
+import { useInlineCapture } from './use-inline-capture';
 
 /**
  * "Ghi nhanh" on Today (SPEC F12): Enter saves the text to Inbox, Shift+Enter starts a new line.
@@ -17,25 +12,7 @@ export function QuickCaptureInline() {
   const { t } = useTranslation();
   const headingId = useId();
   const hintId = useId();
-  const [text, setText] = useState('');
-  const [saving, setSaving] = useState(false);
-  const busy = useRef(false);
-
-  async function save() {
-    if (busy.current || text.trim() === '') return;
-    busy.current = true;
-    setSaving(true);
-    const path = await captureToInbox(text);
-    busy.current = false;
-    setSaving(false);
-    if (path !== null) setText('');
-  }
-
-  function onKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
-    if (event.key !== 'Enter' || event.shiftKey || isComposing(event)) return;
-    event.preventDefault();
-    void save();
-  }
+  const { text, setText, saving, onKeyDown } = useInlineCapture();
 
   return (
     <section className="today__section" aria-labelledby={headingId}>

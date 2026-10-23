@@ -37,7 +37,13 @@
     "openSource": "Mở tài liệu",
     "clear": "Bỏ chọn",
     "selected_one": "Đã chọn {{title}}, {{count}} ghi chú kề.",
-    "selected_other": "Đã chọn {{title}}, {{count}} ghi chú kề."
+    "selected_other": "Đã chọn {{title}}, {{count}} ghi chú kề.",
+    "filterMatches_one": "{{count}} ghi chú khớp bộ lọc",
+    "filterMatches_other": "{{count}} ghi chú khớp bộ lọc",
+    "filterNone": "Không có ghi chú nào khớp bộ lọc. Thử bỏ bớt một điều kiện nhé.",
+    "noMatchesFiltered": "Không có ghi chú nào tên \"{{query}}\" trong bộ lọc này.",
+    "recent": "sửa trong 24 giờ",
+    "nodeRecent": "{{name}}, sửa trong 24 giờ"
   },
   "legend": {
     "label": "Chú thích",
@@ -48,7 +54,9 @@
     "daily": "Daily",
     "other": "Khác",
     "source": "Tài liệu",
-    "orphan": "Chấm mờ là ghi chú mồ côi, chưa có liên kết."
+    "orphan": "Chấm mờ là ghi chú mồ côi, chưa có liên kết.",
+    "recentPulse": "Chấm đập nhẹ là ghi chú sửa trong 24 giờ qua.",
+    "recentStill": "Chấm có vòng là ghi chú sửa trong 24 giờ qua."
   },
   "local": {
     "title": "Bản đồ cục bộ",
@@ -69,5 +77,36 @@
     "announce_one": "AI vừa cập nhật {{count}} trang từ {{title}}.",
     "announce_other": "AI vừa cập nhật {{count}} trang từ {{title}}.",
     "dismiss": "Ẩn danh sách"
+  },
+  "filters": {
+    "label": "Bộ lọc",
+    "folders": "Lọc theo thư mục",
+    "tag": "Thẻ",
+    "anyTag": "Mọi thẻ",
+    "time": "Lọc theo thời gian",
+    "time_all": "Mọi lúc",
+    "time_today": "Hôm nay",
+    "time_7d": "7 ngày qua",
+    "time_30d": "30 ngày qua",
+    "clear": "Bỏ lọc"
+  },
+  "time": {
+    "label": "Tua thời gian",
+    "slider": "Tuần đang xem",
+    "dateFormat": "DD/MM/YYYY",
+    "week": "Tuần {{date}}",
+    "weekNow": "Tuần {{date}}, bây giờ",
+    "notes_one": "{{count}} ghi chú",
+    "notes_other": "{{count}} ghi chú",
+    "links_one": "{{count}} liên kết",
+    "links_other": "{{count}} liên kết",
+    "counts": "{{notes}}, {{links}}",
+    "valueText": "{{week}}: {{counts}}",
+    "play": "Phát",
+    "stop": "Dừng",
+    "reducedMotion": "Phát đang tắt vì máy bạn bật giảm chuyển động. Dùng phím mũi tên trái, phải để xem từng tuần.",
+    "approximate": "Tuần này có trước lúc app bắt đầu theo dõi kho, nên lịch sử chỉ ước tính theo ngày tạo ghi chú.",
+    "single": "Lịch sử bản đồ bắt đầu từ tuần này. Vài tuần nữa quay lại tua để xem bộ não lớn lên nhé.",
+    "emptyWeek": "Tuần này bản đồ còn trống. Kéo thanh tua sang phải để xem các tuần sau."
   }
 }

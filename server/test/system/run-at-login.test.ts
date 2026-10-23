@@ -120,3 +120,34 @@ describe('run at login creates and removes only our shortcut (F18.6)', () => {
     expect(scripts).toEqual([]);
   });
 });
+
+describe('run at login with the single executable (F29.4)', () => {
+  let root: string;
+  beforeEach(() => {
+    root = makeTempDir('sb startup exe Khởi động');
+  });
+  afterEach(() => removeDir(root));
+
+  it('(F29.4) targets "<exe>" --login when the app runs as the exe', async () => {
+    const startupDir = path.join(root, 'Startup');
+    const exePath = 'D:\\SECONDBRAIN Đồ án\\Second Brain.exe';
+    const scripts: string[] = [];
+    const runAtLogin = createRunAtLoginService({
+      appDir: APP_DIR,
+      platform: 'win32',
+      env: { SystemRoot: 'C:\\Windows', SB_RUNTIME: 'exe', SB_EXE_PATH: exePath },
+      startupDir,
+      runPowerShell: async (encoded) => {
+        const script = decode(encoded);
+        scripts.push(script);
+        writeFileSync(path.join(startupDir, STARTUP_SHORTCUT_NAME), 'lnk');
+      },
+    });
+    await runAtLogin.setEnabled(true);
+    expect(scripts[0]).toContain("$link.TargetPath = 'D:\\SECONDBRAIN Đồ án\\Second Brain.exe'");
+    expect(scripts[0]).toContain("$link.Arguments = '--login'");
+    expect(scripts[0]).toContain("$link.WorkingDirectory = 'D:\\SECONDBRAIN Đồ án'");
+    expect(scripts[0]).not.toContain('start-hidden.vbs');
+    expect(await runAtLogin.isEnabled()).toBe(true);
+  });
+});

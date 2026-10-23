@@ -1,0 +1,40 @@
+{
+  "command": "Open the This semester page",
+  "timeFormat": "MMM D, YYYY, h:mm A",
+  "settings": {
+    "label": "This semester page",
+    "hint": "A page {{name}} at the root of your vault that lists your courses and the projects in progress. The app keeps it up to date, so you never edit it by hand.",
+    "trashed": "The This semester page is in the trash."
+  },
+  "state": {
+    "ok": "The app keeps {{name}} up to date. Last update: {{time}}.",
+    "edited": "{{name}} was edited outside the app, so the app no longer overwrites it. Click Regenerate for a fresh page (the edited copy goes to the trash).",
+    "missing": "{{name}} was deleted. Click Regenerate if you want it back.",
+    "pending": "{{name}} could not be created yet. Click Regenerate to try again.",
+    "offKept": "{{name}} stays in your vault as an ordinary note."
+  },
+  "actions": {
+    "open": "Open page",
+    "regenerate": "Regenerate",
+    "trash": "Move page to trash"
+  },
+  "done": {
+    "enable": "Turned on. {{name}} is at the root of your vault.",
+    "disable": "Turned off. {{name}} stays in your vault.",
+    "regenerate": "{{name}} was made again.",
+    "trash": "{{name}} is in the trash."
+  },
+  "banner": {
+    "generated": "The app makes this page by itself. To change it, edit your course and project notes.",
+    "edited": "This page was edited outside the app, so the app no longer updates it. Click Regenerate for a fresh page (the edited copy goes to the trash).",
+    "settings": "Settings"
+  },
+  "errors": {
+    "generatedPage": "The app makes the This semester page, so it cannot be edited, renamed or moved. To keep it as an ordinary note, turn the page off in Settings."
+  },
+  "confirm": {
+    "title": "Regenerate the This semester page?",
+    "body": "The current page was edited outside the app. That copy goes to the trash (you can restore it), then the app makes a fresh page from your course and project notes.",
+    "cancel": "Keep it"
+  }
+}

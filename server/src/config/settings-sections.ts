@@ -18,6 +18,8 @@ export interface ReminderSettings {
 export interface SystemSettings {
   /** What the user asked for; the Startup shortcut on disk is the truth GET reports. */
   runAtLogin: boolean;
+  /** "Biểu tượng khay và phím tắt" (SPEC F29.2): the Windows tray helper; default on. */
+  tray: boolean;
 }
 
 /** When she agreed to send note text to a provider (SPEC F33 consent). Tied to that provider. */
@@ -80,7 +82,7 @@ export function normalizeReminders(raw: unknown): ReminderSettings {
 
 export function normalizeSystem(raw: unknown): SystemSettings {
   const section = record(raw);
-  return { ...section, runAtLogin: section.runAtLogin === true };
+  return { ...section, runAtLogin: section.runAtLogin === true, tray: section.tray !== false };
 }
 
 function normalizeApiKeys(raw: unknown): Partial<Record<AiProvider, string>> {

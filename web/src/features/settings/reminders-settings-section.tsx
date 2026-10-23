@@ -7,6 +7,7 @@ import {
   useNotificationPermission,
 } from '../reminders/notification-permission';
 import { useRemindersStore } from '../reminders/reminders-store';
+import { NotifyChannelsSection } from './notify-channels-section';
 import { SaveStatus } from './save-status';
 import { SettingsField, SettingsSection } from './settings-section';
 import { useSettingSave } from './use-setting-save';
@@ -116,6 +117,7 @@ export function RemindersSettingsSection({ time }: { time: string }) {
     <SettingsSection id="reminders" title={t('settings.reminders.title')}>
       <ReminderTimeField time={time} />
       <NotificationPermissionRow />
+      <NotifyChannelsSection />
       <p className="settings-section__link">
         <Link to={REMINDERS_ROUTE}>{t('settings.reminders.openList')}</Link>
       </p>

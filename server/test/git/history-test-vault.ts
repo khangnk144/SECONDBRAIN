@@ -109,5 +109,8 @@ export async function editNote(
   const { context } = vault;
   if (!(await context.vault.stat(notePath))) await context.vault.create(notePath, text);
   else await context.vault.write(notePath, text, (await context.vault.read(notePath)).revision);
+  // The indexer then logs the edit in `events.jsonl` (`note_edited`, F35.9); wait for it so the
+  // next commit holds the note and that line together, never a second state-only commit.
+  await context.settled();
   await service.idle();
 }

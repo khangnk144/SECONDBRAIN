@@ -106,6 +106,30 @@ describe('brain graph API (F16.2, F16.6)', () => {
     ]);
   });
 
+  it('(FIX-B) a repeated GET reuses the built body until a note changes; tags come in one query', async () => {
+    const first = await t.call('GET', '/api/graph');
+    const again = await t.call('GET', '/api/graph');
+    expect(again.body).toBe(first.body);
+    expect(again.headers['content-type']).toMatch(/^application\/json/);
+    expect(again.headers['cache-control']).toBe('no-store');
+    const stamp = t.context.index.changeStamp?.();
+    const NEW = '0 Inbox/Mới #thẻ.md';
+    writeFileSync(path.join(t.vaultRoot, ...NEW.split('/')), '#đồ-án [[Giải tích 1]]\n');
+    await t.context.index.updateFile(NEW);
+    expect(t.context.index.changeStamp?.()).not.toBe(stamp);
+    const after = (await t.call('GET', '/api/graph')).json() as {
+      nodes: (Node & { tags: string[] })[];
+    };
+    expect(after.nodes.find((n) => n.id === NEW)).toMatchObject({ tags: ['dồ-án'], orphan: false });
+    expect(after.nodes.find((n) => n.id === GT)?.degree).toBe(4);
+    // A filter is applied on the kept body.
+    const filtered = (await t.call('GET', '/api/graph?tag=%23%C4%91%E1%BB%93-%C3%A1n')).json() as {
+      matches: string[];
+    };
+    expect(filtered.matches).toEqual([NEW]);
+    expect(t.context.index.noteTagsByPath?.().get(NEW)).toEqual(t.context.index.noteTags(NEW));
+  });
+
   it('a note that is not drawn has an empty local graph; an unknown note is 404', async () => {
     for (const p of ['Templates/Mẫu.md', 'CLAUDE.md', '3 Resources/web/Bài viết.md']) {
       const res = await t.call('GET', `/api/graph/local?${q(p)}`);

@@ -1,0 +1,38 @@
+/* `#/review` (SPEC F26.2): one calm column, week buttons on one row; Bento parts as tiles. Tokens only. */
+.review-screen {
+  max-width: 720px;
+}
+
+.review-screen__weeks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin: var(--space-3) 0 var(--space-4);
+}
+
+.review-screen__range {
+  margin: 0;
+  min-width: 8rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.review-screen .weekly-review__groups {
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+}
+
+.review-screen .weekly-review__group-title {
+  font-size: 1.125rem;
+}
+
+:root[data-style='bento'] .review-screen .weekly-review__group {
+  --button-2-bg: var(--tile-2);
+  padding: var(--space-4) var(--space-6);
+  border: 1px solid transparent;
+  border-radius: var(--radius-tile);
+  background:
+    linear-gradient(var(--tile), var(--tile)) padding-box,
+    var(--tile-border) border-box;
+}

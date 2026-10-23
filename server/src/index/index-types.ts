@@ -5,6 +5,7 @@
  */
 import type { ContentClass, LinkCatalog } from '../markdown/markdown-types.js';
 import type { VaultPath } from '../vault/vault-types.js';
+import type { ActivityNoteRow, DoneTaskRow } from './activity-rows.js';
 import type { LinkTargets } from './link-target-list.js';
 import type { GraphRows } from './view-row-queries.js';
 
@@ -137,6 +138,11 @@ export interface IndexService {
   backlinks(path: VaultPath): BacklinkRef[];
   outlinks(path: VaultPath): OutlinkRef[];
   noteTags(path: VaultPath): string[];
+  /**
+   * Every note's tags in one query (path → tags in note order), for answers that need all of
+   * them (the graph's node facts). Optional so test doubles need not implement it.
+   */
+  noteTagsByPath?(): Map<VaultPath, string[]>;
   tags(): TagCount[];
   /** Catalog of every indexed path for link resolution (relink, autocomplete). */
   linkCatalog(): LinkCatalog;
@@ -150,6 +156,12 @@ export interface IndexService {
   notesLinkingByTitleOrPath(paths: VaultPath[]): VaultPath[];
   /** Resolves once every index change queued so far (and any queued meanwhile) is applied. */
   settled(): Promise<void>;
+  /**
+   * Changes whenever what the queries answer may have changed (a change task started or ended,
+   * a rebuild swapped the database): equal stamps mean equal answers, so a caller may keep a
+   * built answer (the graph). Optional so test doubles need not implement it (no caching then).
+   */
+  changeStamp?(): string;
   /** Every note and other file a link can target (F4 autocomplete). */
   linkTargets(): LinkTargets;
   /**
@@ -188,6 +200,10 @@ export interface IndexService {
   graphRows(): GraphRows;
   /** Paths of the notes in the `Daily` folder (prev/next daily navigation, F13.3). */
   dailyNotePaths(): VaultPath[];
+  /** Notes of the classes whose touches count for activity (user, archived, wiki). */
+  activityNotes(): ActivityNoteRow[];
+  /** Done tasks (`✅` date in `[from, to]`) of user notes, newest first (activity service). */
+  doneTasksBetween(from: string, to: string): DoneTaskRow[];
   close(): void;
 }
 
@@ -224,3 +240,40 @@ export type {
   TodayView,
   Urgency,
 } from './deadline-types.js';
+
+// M5 (F35.9, F24.4): the activity part of `GET /api/today`, built in `today-activity.ts`.
+
+/** A note on Today's "Não hôm nay" map; `group` is the brain map's colour group. */
+export interface TodayBrainNode {
+  path: VaultPath;
+  title: string;
+  group: 'projects' | 'areas' | 'resources' | 'wiki' | 'daily' | 'other';
+}
+
+/** A resolved link between two nodes of the map; `from` is the linking note. */
+export interface TodayBrainEdge {
+  from: VaultPath;
+  to: VaultPath;
+}
+
+export interface TodayBrain {
+  /** Notes created today (current paths; deleted ones dropped). */
+  notesNew: number;
+  /** Notes created or edited today (the same count as today's "7 ngày ghi chép" bar). */
+  notesTouched: number;
+  /** Unique linking-note → target pairs of today's `link_added` lines. */
+  linksAdded: number;
+  /** Pages the AI wrote today: outputs of today's succeeded ingest runs (F34). */
+  aiTouched: number;
+  /** At most 24 notes touched, linked or AI-written today, most connected first. */
+  nodes: TodayBrainNode[];
+  edges: TodayBrainEdge[];
+}
+
+export interface TodayActivity {
+  /** The 7 local days ending today, oldest first: notes created or edited that day. */
+  days: { date: string; count: number }[];
+  /** Tasks with `✅` = yesterday in user notes. */
+  doneYesterday: number;
+  brain: TodayBrain;
+}

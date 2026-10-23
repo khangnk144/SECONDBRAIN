@@ -1,0 +1,23 @@
+{
+  "tray": {
+    "label": "Biểu tượng khay và phím tắt toàn hệ thống",
+    "hint": "Biểu tượng Second Brain ở góc thanh tác vụ để mở app, ghi nhanh hoặc thoát. Ctrl+Alt+Q mở ô ghi nhanh cả khi bạn đang ở ứng dụng khác.",
+    "starting": "Đang bật biểu tượng khay…",
+    "running": "Đang chạy. Bấm Ctrl+Alt+Q ở bất cứ đâu để ghi nhanh vào Inbox.",
+    "hotkeyTaken": "Phím tắt Ctrl+Alt+Q đang được ứng dụng khác dùng. Biểu tượng khay vẫn chạy: bấm chuột phải vào nó rồi chọn Ghi nhanh.",
+    "off": "Đang tắt. Bật lên để có biểu tượng khay và phím Ctrl+Alt+Q.",
+    "failed": "Biểu tượng khay dừng nhiều lần nên app tạm thôi mở lại. Tắt rồi bật công tắc này để thử lại."
+  },
+  "install": {
+    "label": "Cách app đang chạy",
+    "exe": "Đang chạy bằng ứng dụng .exe",
+    "source": "Đang chạy từ mã nguồn",
+    "exePath": "Tệp: {{path}}",
+    "sourceHint": "Muốn dùng một tệp .exe: bấm đúp \"Tạo bản exe\" trong thư mục app\\launcher.",
+    "smartScreen": "Lần đầu mở tệp .exe, Windows có thể báo \"Windows đã bảo vệ PC của bạn\". Bấm \"Thông tin bổ sung\" rồi \"Vẫn chạy\" (tệp chưa được ký số).",
+    "shortcuts": "Tạo lại lối tắt trên màn hình",
+    "shortcutsHint": "Đặt lối tắt Second Brain trên màn hình và trong menu Start.",
+    "shortcutsDone": "Đã tạo lại lối tắt trên màn hình và trong menu Start.",
+    "shortcutsFailed": "Windows chưa cho tạo lối tắt. Bạn thử lại, hoặc tạo lối tắt bằng tay từ tệp .exe."
+  }
+}

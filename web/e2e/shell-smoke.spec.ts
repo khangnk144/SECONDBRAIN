@@ -1,10 +1,13 @@
 /// <reference lib="dom" />
 /// <reference lib="dom.iterable" />
-// Smoke test of the UI shell served at the canonical origin: dark theme, sidebar, bundled font,
-// security headers and the session token flow.
+// Smoke test of the UI shell served at the canonical origin: dark theme, sidebar (the rail in a
+// Bento run), bundled font, security headers and the session token flow.
 import { expect, test, type Page } from '@playwright/test';
+import { runStyle } from './helpers/e2e-style.js';
 
 const SIDEBAR_LABELS_VI = ['Hôm nay', 'Việc cần làm', 'Lịch', 'Bản đồ não'];
+/** The page background of the dark theme in the run's style (design.md §10, §12.8). */
+const DARK_BG = runStyle() === 'bento' ? '#15101A' : '#1C1622';
 
 function hexToRgb(hex: string): string {
   const h = hex.trim().replace('#', '');
@@ -54,11 +57,17 @@ test('dark shell with sidebar, bundled font and strict headers at the canonical 
   }));
   expect(token).not.toBe('__SB_TOKEN__');
   expect(token.length).toBeGreaterThanOrEqual(20);
-  expect(bg.trim().toUpperCase()).toBe('#1C1622');
+  expect(bg.trim().toUpperCase()).toBe(DARK_BG);
   expect(bodyBg).toBe(hexToRgb(bg));
 
+  // The main places: the calm sidebar's labels, or the Bento rail's entries (full names).
+  const nav = page.getByRole('navigation', { name: 'Điều hướng chính' });
   for (const label of SIDEBAR_LABELS_VI) {
-    await expect(page.getByText(label, { exact: true }).first()).toBeVisible();
+    if (runStyle() === 'bento') {
+      await expect(nav.getByRole('link', { name: label, exact: true })).toBeVisible();
+    } else {
+      await expect(page.getByText(label, { exact: true }).first()).toBeVisible();
+    }
   }
 
   const fontLoaded = await page.evaluate(async () => {

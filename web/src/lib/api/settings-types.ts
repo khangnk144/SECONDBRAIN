@@ -4,6 +4,14 @@
  */
 import type { UiPrefs } from '../ui-prefs';
 import type { EmbeddingProvider } from './ai-types';
+import type { BackupSettingsView, NotifySettingsView, SettingsPatchM5 } from './settings-m5-types';
+
+export type {
+  BackupSettingsView,
+  EmailSecurity,
+  NotifySettingsView,
+  SettingsPatchM5,
+} from './settings-m5-types';
 
 export type AiProvider = 'anthropic' | 'openai' | 'gemini';
 export const AI_PROVIDERS: readonly AiProvider[] = ['anthropic', 'openai', 'gemini'];
@@ -43,7 +51,13 @@ export interface SettingsResponse {
   restartRequired: boolean;
   ui: UiPrefs;
   reminders: { time: string };
-  system: { runAtLogin: boolean; runAtLoginSupported: boolean; platform: 'windows' | 'other' };
+  system: {
+    runAtLogin: boolean;
+    runAtLoginSupported: boolean;
+    platform: 'windows' | 'other';
+    /** "Biểu tượng khay và phím tắt" switch as stored (F29.2). */
+    tray: boolean;
+  };
   vault: VaultInfo | null;
   ai: {
     provider: AiProvider;
@@ -63,13 +77,15 @@ export interface SettingsResponse {
     monthlyTokenLimit: number;
   };
   mcp: { allowNoteEdits: boolean };
+  backup: BackupSettingsView;
+  notify: NotifySettingsView;
 }
 
 /** `PUT /api/settings`: only the fields that change (the server refuses unknown keys). */
-export interface SettingsPatch {
+export interface SettingsPatch extends SettingsPatchM5 {
   ui?: Partial<UiPrefs>;
   reminders?: { time?: string };
-  system?: { runAtLogin?: boolean };
+  system?: { runAtLogin?: boolean; tray?: boolean };
   port?: number;
   ai?: {
     provider?: AiProvider;

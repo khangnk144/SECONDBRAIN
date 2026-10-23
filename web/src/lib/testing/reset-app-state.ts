@@ -22,6 +22,7 @@ import { resetShortcuts } from '../shortcuts/shortcut-registry';
 import { useTabsStore } from '../tabs-store';
 import { resetChatStore } from '../../features/ai-chat/chat-store';
 import { resetInboxTidy } from '../../features/ai-inbox/inbox-tidy-store';
+import { resetTreeReveal } from '../../features/sidebar/tree-reveal';
 import { resetAiTouchStore } from '../../features/graph/graph-ai-touch';
 import { resetAiStatusStore } from '../ai-status-store';
 import { resetToasts } from '../toast-store';
@@ -53,6 +54,7 @@ export async function resetAppState(vaultId: string | null = 'vault-a'): Promise
   resetAiTouchStore();
   resetChatStore();
   resetInboxTidy();
+  resetTreeReveal();
   setPageReload(null);
   resetPdfViews();
   resetHistoryDialog();

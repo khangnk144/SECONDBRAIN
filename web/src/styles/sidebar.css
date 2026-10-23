@@ -121,3 +121,29 @@
     display: none;
   }
 }
+
+/* Phones (F28.1): the sidebar lives in a drawer; there it is a column again, folders shown. */
+@media (max-width: 600px) {
+  .sidebar-nav__item,
+  .sidebar-search {
+    min-height: 40px;
+  }
+
+  .shell-overlay__body .sidebar-nav ul {
+    flex-direction: column;
+    overflow-x: visible;
+  }
+
+  /* The drawer scrolls as a whole: the sidebar and its folder tree take their full height
+     (a 0-based flex basis left the tree 0 px high, review B9). */
+  .shell-overlay__body:has(> .sidebar),
+  .shell-overlay__body > .sidebar {
+    flex: none;
+  }
+
+  .shell-overlay__body .sidebar-folders {
+    display: flex;
+    flex: none;
+    overflow-y: visible;
+  }
+}

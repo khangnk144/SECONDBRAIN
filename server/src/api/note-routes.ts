@@ -8,6 +8,7 @@ import { VaultError, type NoteRead, type VaultPath } from '../vault/vault-types.
 import { toLocalDate } from '../lib/local-date.js';
 import type { TemplateLanguage } from '../templates/template-variables.js';
 import { newNoteContent } from './new-note-content.js';
+import { assertNotGeneratedPage } from '../semester/generated-page-registry.js';
 import {
   guardNotePath,
   pathQuerySchema,
@@ -97,6 +98,7 @@ export function registerNoteRoutes(
     async (request) => {
       const { content, expectedRevision, conflictCopy } = request.body;
       const path = guardNotePath(request.body.path);
+      await assertNotGeneratedPage(context, path); // F25.2
       // "Giữ bản của tôi": the disk version shown by the conflict UI goes to the trash first.
       const result = conflictCopy
         ? await context.vault.writeKeepingConflictCopy(path, content, expectedRevision)

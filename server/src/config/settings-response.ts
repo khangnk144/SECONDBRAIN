@@ -6,6 +6,12 @@ import {
   type AiSettings,
   type McpSettings,
 } from './settings-sections.js';
+import {
+  publicBackup,
+  publicNotify,
+  type BackupResponse,
+  type NotifyResponse,
+} from './settings-response-m5.js';
 
 export interface VaultInfo {
   /** Absolute path of the open vault. */
@@ -30,11 +36,19 @@ export interface SettingsResponse {
   restartRequired: boolean;
   ui: UiSettings;
   reminders: { time: string };
-  system: { runAtLogin: boolean; runAtLoginSupported: boolean; platform: 'windows' | 'other' };
+  system: {
+    runAtLogin: boolean;
+    runAtLoginSupported: boolean;
+    platform: 'windows' | 'other';
+    /** The stored "tray icon and global hotkey" switch (F29.2). */
+    tray: boolean;
+  };
   /** Null only in API-only builds without a vault (tests). */
   vault: VaultInfo | null;
   ai: Omit<AiSettings, 'apiKeys'> & { keys: Record<AiProvider, ApiKeyStatus> };
   mcp: McpSettings;
+  backup: BackupResponse;
+  notify: NotifyResponse;
 }
 
 /** What the response needs besides the stored settings. */
@@ -55,8 +69,8 @@ export function maskApiKey(key: unknown): ApiKeyStatus {
 }
 
 export function publicUi(ui: UiSettings): UiSettings {
-  const { name, language, theme, palette, fontSize } = ui;
-  return { name, language, theme, palette, fontSize };
+  const { name, language, theme, palette, fontSize, style } = ui;
+  return { name, language, theme, palette, fontSize, style };
 }
 
 /**
@@ -81,6 +95,7 @@ export function buildSettingsResponse(
       runAtLogin: runtime.runAtLogin.enabled,
       runAtLoginSupported: runtime.runAtLogin.supported,
       platform: runtime.platform === 'win32' ? 'windows' : 'other',
+      tray: settings.system.tray,
     },
     vault: runtime.vault ? { ...runtime.vault } : null,
     ai: {
@@ -99,5 +114,7 @@ export function buildSettingsResponse(
       monthlyTokenLimit: ai.monthlyTokenLimit,
     },
     mcp: { allowNoteEdits: mcpSettingsOf(settings).allowNoteEdits },
+    backup: publicBackup(settings.backup, maskApiKey, runtime.vault?.defaultPath ?? null),
+    notify: publicNotify(settings.notify, maskApiKey),
   };
 }

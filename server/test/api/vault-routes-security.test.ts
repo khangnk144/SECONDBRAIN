@@ -1,7 +1,23 @@
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import WebSocket from 'ws';
 import { TEST_TOKEN } from '../helpers/test-environment.js';
 import { createVaultTestApp, q, type VaultTestApp } from './vault-test-app.js';
+
+/** `METHOD url` of every route the app registers (HEAD twins left out), seen by `onRoute`. */
+const registered = vi.hoisted(() => new Set<string>());
+vi.mock('fastify', async (importOriginal) => {
+  const original = await importOriginal<typeof import('fastify')>();
+  const create = (options?: object) => {
+    const app = original.default(options as never);
+    app.addHook('onRoute', (route) => {
+      for (const method of [route.method].flat()) {
+        if (method !== 'HEAD') registered.add(`${method} ${route.url}`);
+      }
+    });
+    return app;
+  };
+  return { ...original, default: create, fastify: create };
+});
 
 const PORT = 4790;
 const REV = '0'.repeat(64);
@@ -138,7 +154,35 @@ const ROUTES: {
   },
   { method: 'POST', url: '/api/ai/search', payload: { q: 'ma trận' } },
   { method: 'GET', url: '/api/mcp/config' },
+  // M5 (Bento mềm + Phase 2).
+  { method: 'GET', url: '/api/graph/history' },
+  { method: 'GET', url: '/api/review/week?end=2026-10-25' },
+  { method: 'GET', url: '/api/semester-page' },
+  { method: 'POST', url: '/api/semester-page', payload: { action: 'enable' } },
+  { method: 'GET', url: '/api/backup/schedule' },
+  { method: 'POST', url: '/api/backup/schedule/run' },
+  { method: 'POST', url: '/api/backup/schedule/open-folder' },
+  { method: 'POST', url: '/api/backup/github/push' },
+  { method: 'GET', url: '/api/notify/status' },
+  { method: 'POST', url: '/api/notify/test', payload: { channel: 'telegram' } },
+  { method: 'GET', url: '/api/system' },
+  { method: 'POST', url: '/api/system/shortcuts' },
 ];
+
+/** Registered routes left out of ROUTES on purpose, each with where its security is tested. */
+const NOT_LISTED: Record<string, string> = {
+  'GET /api/health': 'answers without a token by design (launcher, exe); tested below',
+  'GET /ws': 'WebSocket upgrade with the token in the query; tested below',
+  'GET /mcp': 'own bearer token; test/mcp/mcp-http-security.test.ts',
+  'POST /mcp': 'own bearer token; test/mcp/mcp-http-security.test.ts',
+  'DELETE /mcp': 'own bearer token; test/mcp/mcp-http-security.test.ts',
+};
+
+/** `/api/journal/:id/undo` → a pattern the listed sample URL must match. */
+function routePattern(url: string): RegExp {
+  const escaped = url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`^${escaped.replace(/:[^/]+/g, '[^/]+')}$`);
+}
 
 const label = (route: (typeof ROUTES)[number]) => `${route.method} ${route.url.split('?')[0]}`;
 
@@ -152,6 +196,19 @@ describe('security on every vault route (SPEC §11)', () => {
     });
   });
   afterAll(async () => t?.close());
+
+  it('lists every route the app registers: a new route must join ROUTES (or NOT_LISTED)', () => {
+    expect(registered.size).toBeGreaterThan(ROUTES.length);
+    const missing = [...registered].filter((key) => {
+      if (key in NOT_LISTED) return false;
+      const [method, url = ''] = key.split(' ');
+      const pattern = routePattern(url);
+      return !ROUTES.some((r) => r.method === method && pattern.test(r.url.split('?')[0] ?? ''));
+    });
+    expect(missing).toEqual([]);
+    // Nothing listed is stale: every entry is a route the app really has.
+    for (const key of Object.keys(NOT_LISTED)) expect(registered.has(key)).toBe(true);
+  });
 
   const send = (route: (typeof ROUTES)[number], headers: Record<string, string>) =>
     t.app.inject({

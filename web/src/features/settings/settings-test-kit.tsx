@@ -6,6 +6,7 @@ import type { FetchMock } from '../../lib/testing/fetch-mock';
 import { DEFAULT_UI_PREFS } from '../../lib/ui-prefs';
 import { DialogHost } from '../dialogs/dialog-host';
 import { applyAiPatch, installAiRoutes, type StatusExtras } from './ai-settings-test-kit';
+import { applyM5Patch } from './settings-m5-test-kit';
 import { SettingsScreen } from './settings-screen';
 
 export function settingsResponse(overrides: Partial<SettingsResponse> = {}): SettingsResponse {
@@ -15,7 +16,7 @@ export function settingsResponse(overrides: Partial<SettingsResponse> = {}): Set
     restartRequired: false,
     ui: { ...DEFAULT_UI_PREFS },
     reminders: { time: '08:00' },
-    system: { runAtLogin: false, runAtLoginSupported: true, platform: 'windows' },
+    system: { runAtLogin: false, runAtLoginSupported: true, platform: 'windows', tray: true },
     vault: {
       path: 'D:\\SECONDBRAIN\\vault',
       id: 'vault-a',
@@ -40,6 +41,34 @@ export function settingsResponse(overrides: Partial<SettingsResponse> = {}): Set
       monthlyTokenLimit: 2_000_000,
     },
     mcp: { allowNoteEdits: false },
+    backup: {
+      schedule: {
+        enabled: false,
+        folder: null,
+        time: '21:00',
+        keep: 14,
+        defaultFolder: 'D:\\SECONDBRAIN\\Backups',
+      },
+      github: {
+        enabled: false,
+        remoteUrl: null,
+        branch: 'main',
+        token: { set: false, last4: null },
+      },
+    },
+    notify: {
+      telegram: { enabled: false, chatId: null, botToken: { set: false, last4: null } },
+      email: {
+        enabled: false,
+        host: null,
+        port: 587,
+        security: 'starttls',
+        user: null,
+        from: null,
+        to: null,
+        password: { set: false, last4: null },
+      },
+    },
     ...overrides,
   };
 }
@@ -62,11 +91,13 @@ export function installSettingsRoutes(
     if (patch.ui) next.ui = { ...next.ui, ...patch.ui };
     if (patch.reminders?.time) next.reminders.time = patch.reminders.time;
     if (patch.system?.runAtLogin !== undefined) next.system.runAtLogin = patch.system.runAtLogin;
+    if (patch.system?.tray !== undefined) next.system.tray = patch.system.tray;
     if (patch.port !== undefined) {
       next.configuredPort = patch.port;
       next.restartRequired = patch.port !== next.port;
     }
     if (patch.mcp?.allowNoteEdits !== undefined) next.mcp.allowNoteEdits = patch.mcp.allowNoteEdits;
+    applyM5Patch(next, patch);
     if (patch.ai) {
       const ai = applyAiPatch(next.ai, patch.ai);
       if (!('provider' in ai)) return ai; // refused: nothing changes

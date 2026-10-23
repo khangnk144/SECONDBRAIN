@@ -6,6 +6,7 @@ import type Database from 'better-sqlite3';
 import { toLocalDate } from '../lib/local-date.js';
 import type { LinkCatalog } from '../markdown/markdown-types.js';
 import type { VaultPath } from '../vault/vault-types.js';
+import { activityRowQueries } from './activity-rows.js';
 import { notesWithOpenItems } from './due-filter.js';
 import { createIndexReader, type IndexReader } from './index-reader.js';
 import type { RetrievalHit, RetrievalQuery, SearchQuery, SearchResult } from './index-types.js';
@@ -28,10 +29,13 @@ export interface LiveIndex {
 export abstract class IndexQueries {
   protected live: LiveIndex | null = null;
   protected readonly catalog = new PathCatalog();
+  /** Connections attached so far: a rebuild's swap is a change of everything. */
+  protected attached = 0;
 
   constructor(protected readonly now: () => Date) {}
 
   protected attach(db: Database.Database): void {
+    this.attached += 1;
     this.live = {
       db,
       reader: createIndexReader(db),
@@ -50,6 +54,7 @@ export abstract class IndexQueries {
   backlinks = (p: VaultPath) => this.current.reader.backlinks(p);
   outlinks = (p: VaultPath) => this.current.reader.outlinks(p);
   noteTags = (p: VaultPath) => this.current.reader.noteTags(p);
+  noteTagsByPath = () => this.current.reader.noteTagsByPath();
   tags = () => this.current.reader.tags();
   linkCatalog = (): LinkCatalog => this.catalog.get();
   linkingNotes = (p: VaultPath) => this.current.reader.linkingNotes(p);
@@ -67,6 +72,9 @@ export abstract class IndexQueries {
   sourceTextHash = (p: VaultPath) => this.current.writer.sources.hashOf(p);
   graphRows = () => this.current.views.graphRows();
   dailyNotePaths = () => this.current.views.dailyNotePaths();
+  activityNotes = () => activityRowQueries(this.current.db).notes();
+  doneTasksBetween = (from: string, to: string) =>
+    activityRowQueries(this.current.db).doneTasks(from, to);
 
   search(query: SearchQuery): SearchResult[] {
     const today = () => toLocalDate(this.now());

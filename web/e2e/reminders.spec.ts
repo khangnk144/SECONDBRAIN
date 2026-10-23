@@ -123,7 +123,8 @@ test('S2: a deadline 3 days ahead is reminded at the set time, listed, counted, 
   await expect(row).toContainText('Còn 3 ngày');
   const counted = nav.getByRole('link', { name: 'Nhắc nhở, 1 nhắc nhở' });
   await expect(counted).toBeVisible();
-  await expect(counted.locator('.sidebar-nav__badge')).toHaveText('1');
+  // The badge of the calm sidebar or of the Bento rail.
+  await expect(counted.locator('.sidebar-nav__badge, .rail-item__badge')).toHaveText('1');
   await shot(page, 'reminders-list');
 
   const listed = await api.get<ReminderList>('/api/reminders');
@@ -145,7 +146,7 @@ test('S2: a deadline 3 days ahead is reminded at the set time, listed, counted, 
   await row.getByRole('button', { name: `Bỏ qua nhắc nhở “${reminder.title}”` }).click();
   await expect(row).toHaveCount(0);
   await expect(nav.getByRole('link', { name: 'Nhắc nhở', exact: true })).toBeVisible();
-  await expect(page.locator('.sidebar-nav__badge')).toHaveCount(0);
+  await expect(page.locator('.sidebar-nav__badge, .rail-item__badge')).toHaveCount(0);
   expect((await api.get<ReminderList>('/api/reminders')).reminders).toHaveLength(0);
   const store = JSON.parse(
     readFileSync(path.join(server.vaultDir, '.secondbrain', 'state', 'reminders.json'), 'utf8'),

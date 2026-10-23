@@ -1,0 +1,53 @@
+{
+  "title": "Tổng kết tuần",
+  "command": "Tổng kết tuần",
+  "range": "{{from}} – {{to}}",
+  "rangeDay": "D/M",
+  "inbox": {
+    "heading": "Inbox",
+    "count_one": "Inbox có {{count}} ghi chú.",
+    "count_other": "Inbox có {{count}} ghi chú.",
+    "empty": "Inbox sạch rồi. Alt+Q để ghi nhanh bất cứ lúc nào.",
+    "tidy": "Dọn Inbox",
+    "tidyWithAi": "Mở hộp gợi ý chỗ để của AI cho các ghi chú trong Inbox.",
+    "tidyWithoutAi": "Mở cây thư mục ở Inbox để bạn xếp các ghi chú vào thư mục."
+  },
+  "notes": {
+    "heading": "Ghi chép",
+    "count_one": "Bạn đã tạo hoặc sửa {{count}} ghi chú.",
+    "count_other": "Bạn đã tạo hoặc sửa {{count}} ghi chú.",
+    "none": "Tuần này chưa có ghi chú nào. Viết vài dòng nhé?",
+    "created": "mới",
+    "edited": "đã sửa",
+    "more_one": "Còn {{count}} ghi chú nữa.",
+    "more_other": "Còn {{count}} ghi chú nữa."
+  },
+  "tasks": {
+    "heading": "Việc đã xong",
+    "count_one": "Bạn đã xong {{count}} việc.",
+    "count_other": "Bạn đã xong {{count}} việc.",
+    "none": "Tuần này chưa có việc nào được đánh dấu xong.",
+    "inNote": "trong {{title}}",
+    "more_one": "Còn {{count}} việc nữa.",
+    "more_other": "Còn {{count}} việc nữa."
+  },
+  "upcoming": {
+    "heading": "Tuần tới",
+    "count_one": "Tuần tới có {{count}} deadline.",
+    "count_other": "Tuần tới có {{count}} deadline.",
+    "none": "Tuần tới chưa có deadline nào.",
+    "open": "Mở Việc cần làm"
+  },
+  "seeAll": "Xem tất cả",
+  "later": "Để sau",
+  "laterDone": "Đã ẩn tổng kết tuần đến Chủ nhật sau. Bảng lệnh vẫn mở được nó.",
+  "loadError": "Không tải được tổng kết tuần. Bạn thử lại nhé.",
+  "retry": "Thử lại",
+  "loading": "Đang tải tổng kết tuần…",
+  "screen": {
+    "weeks": "Chọn tuần",
+    "previous": "Tuần trước",
+    "next": "Tuần sau",
+    "thisWeek": "Về tuần này"
+  }
+}

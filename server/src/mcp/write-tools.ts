@@ -16,6 +16,7 @@ import {
   WIKI_LOG_PATH,
 } from './wiki-files.js';
 import { appendToFile } from './vault-append.js';
+import { assertNotGeneratedPage } from '../semester/generated-page-registry.js';
 
 const pathArg = z.string().min(1).max(4096);
 const revisionArg = z.string().regex(/^[0-9a-f]{64}$/, 'a revision is 64 lowercase hex characters');
@@ -208,6 +209,7 @@ export function registerWriteTools(host: ToolHost, deps: McpDeps): void {
       const path = guardVaultPath(input);
       const exists = (await vault.stat(path)) !== null;
       await permit(deps, 'write_note', path, !exists);
+      await assertNotGeneratedPage(deps.context, path); // F25.2: GENERATED_PAGE
       checkSize(content);
       return done(deps, await vault.write(path, content, expectedRevision), false);
     },

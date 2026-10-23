@@ -2,15 +2,15 @@ import { useId, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ProjectSummary } from '../../lib/api/deadlines-types';
 import type { VaultPath } from '../../lib/api/vault-types';
-import { createNote } from '../../lib/note-create-operation';
 import { ProjectCard } from './project-card';
 import { useProjectDoneDismissals } from './project-done-dismissals';
 import { useFocusRescue } from './use-focus-rescue';
+import { createCourseProject } from './use-mark-project-done';
+
+export { COURSE_PROJECT_TEMPLATE, PROJECTS_FOLDER } from './use-mark-project-done';
 
 /** Cards shown before "Xem thêm n đồ án" (the dashboard stays calm; the rest expands inline). */
 export const MAX_PROJECT_CARDS = 6;
-export const PROJECTS_FOLDER = '1 Projects';
-export const COURSE_PROJECT_TEMPLATE = 'Templates/Course project.md';
 
 export interface ProjectsSectionProps {
   projects: ProjectSummary[];
@@ -54,11 +54,7 @@ export function ProjectsSection({ projects, onMarkedDone, refresh }: ProjectsSec
     if (creating.current) return;
     creating.current = true;
     setCreatingState(true);
-    await createNote({
-      folder: PROJECTS_FOLDER,
-      template: COURSE_PROJECT_TEMPLATE,
-      title: t('today.projects.newTitle'),
-    });
+    await createCourseProject(t('today.projects.newTitle'));
     creating.current = false;
     setCreatingState(false);
   }

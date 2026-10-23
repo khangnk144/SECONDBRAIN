@@ -422,11 +422,16 @@ function Get-ProcessCommandLine([int]$ProcessId) {
   return $null
 }
 
-# Our server is "node ... server\dist\index.js"; anything else with a reused PID is left alone.
+# Our server is "node ... server\dist\index.js", or the single executable started as a server
+# ("Second Brain.exe", "second-brain" on Linux: the exe process runs the server itself, F29.1);
+# its --mcp-stdio bridge and --stop helper are not servers. Anything else with a reused PID is
+# left alone.
 function Test-IsOurServer([int]$ProcessId) {
   $commandLine = Get-ProcessCommandLine $ProcessId
   if ($null -eq $commandLine) { return $false }
-  return ($commandLine -match 'server[\\/]dist[\\/]index\.js')
+  if ($commandLine -match 'server[\\/]dist[\\/]index\.js') { return $true }
+  $isExe = $commandLine -match '^\s*"?([^"]*[\\/])?(Second Brain\.exe|second-brain)"?(\s|$)'
+  return ($isExe -and ($commandLine -notmatch '\s--(mcp-stdio|stop)(\s|$)'))
 }
 
 function Stop-SecondBrain {

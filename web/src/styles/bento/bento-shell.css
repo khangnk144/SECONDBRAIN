@@ -1,0 +1,156 @@
+/*
+ * Bento frame (design.md §12.2, F35.2/F35.3): page margin 20, the rail (bento-rail.css), the
+ * 260 px "Thư mục" pane on note and file routes, the main column (top bar, banners, tab row,
+ * screen) and the right panel, whose sections are 20 px tiles 12 px apart. Tokens only.
+ * Narrow and phone widths: bento-responsive.css.
+ */
+:root[data-style='bento'] .app-shell {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--page-margin);
+  min-height: 100vh;
+  padding: var(--page-margin);
+}
+
+/* "Thư mục" pane: a full-height tile; only the tree scrolls. */
+:root[data-style='bento'] .folder-pane {
+  position: sticky;
+  top: var(--page-margin);
+  display: flex;
+  flex: 0 0 var(--folder-pane-w);
+  flex-direction: column;
+  width: var(--folder-pane-w);
+  height: calc(100vh - 2 * var(--page-margin));
+  padding: var(--space-4) var(--space-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-tile);
+  background:
+    linear-gradient(var(--tile), var(--tile)) padding-box,
+    var(--tile-border) border-box;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+:root[data-style='bento'] .folder-pane .tree-item.is-active,
+:root[data-style='bento'] .folder-drawer .tree-item.is-active {
+  background: var(--accent-wash);
+}
+
+/* Main column: the screen and, beside it, the right panel. */
+:root[data-style='bento'] .bento-column {
+  display: flex;
+  flex: 1 1 0;
+  align-items: flex-start;
+  gap: var(--page-margin);
+  min-width: 0;
+}
+
+:root[data-style='bento'] .app-main {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0 0 var(--space-8);
+}
+
+:root[data-style='bento'] .app-main__inner {
+  max-width: none;
+}
+
+/* Top bar: search field 46 px, radius 16, on --tile; "Ghi chú mới" beside it. */
+:root[data-style='bento'] .top-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--gap-tile);
+}
+
+:root[data-style='bento'] .top-bar__search {
+  display: flex;
+  flex: 1 1 320px;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  height: var(--control-h);
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--tile);
+  color: var(--ink-2);
+  font-size: 0.90625rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+:root[data-style='bento'] .top-bar__search:hover {
+  background: linear-gradient(var(--hover-wash), var(--hover-wash)), var(--tile);
+  color: var(--ink);
+}
+
+:root[data-style='bento'] .top-bar__placeholder {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:root[data-style='bento'] .top-bar__keys {
+  flex: none;
+  padding: 3px 8px;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: var(--tile-2);
+  color: var(--ink-2);
+}
+
+:root[data-style='bento'] .top-bar__new {
+  flex: none;
+  gap: var(--space-2);
+  white-space: nowrap;
+}
+
+:root[data-style='bento'] .bento-tabs {
+  display: flex;
+  min-width: 0;
+  margin-bottom: var(--gap-tile);
+}
+
+/* Right panel: no border of its own; each section is a tile (bento-tiles.css). */
+:root[data-style='bento'] .right-panel {
+  position: sticky;
+  top: var(--page-margin);
+  flex: 0 0 var(--panel-w);
+  width: var(--panel-w);
+  height: auto;
+  max-height: calc(100vh - 2 * var(--page-margin));
+  padding: 0;
+  border: 0;
+}
+
+:root[data-style='bento'] .right-panel .note-panel {
+  gap: var(--gap-panel-tile);
+}
+
+/* Writing focus: the rail, folder pane and right panel fade like calm's side panes. */
+:root[data-style='bento'] .rail,
+:root[data-style='bento'] .folder-pane {
+  transition: opacity var(--dur) var(--ease);
+}
+
+:root[data-style='bento'] .app-shell--writing .rail,
+:root[data-style='bento'] .app-shell--writing .folder-pane {
+  opacity: 0.6;
+}
+
+/* Immersive route (the brain map) and the file viewer: the column fills the window height. */
+:root[data-style='bento'] .app-shell--immersive .app-main,
+:root[data-style='bento'] .app-main:has(.file-viewer) {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 2 * var(--page-margin));
+  padding: 0;
+}
+
+:root[data-style='bento'] .app-shell--immersive .app-main__inner {
+  flex: 1;
+  min-height: 0;
+}

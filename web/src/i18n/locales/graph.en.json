@@ -37,7 +37,13 @@
     "openSource": "Open document",
     "clear": "Clear selection",
     "selected_one": "Selected {{title}}, {{count}} neighbour.",
-    "selected_other": "Selected {{title}}, {{count}} neighbours."
+    "selected_other": "Selected {{title}}, {{count}} neighbours.",
+    "filterMatches_one": "{{count}} note matches the filters",
+    "filterMatches_other": "{{count}} notes match the filters",
+    "filterNone": "No note matches the filters. Try removing one of them.",
+    "noMatchesFiltered": "No note named \"{{query}}\" within these filters.",
+    "recent": "edited in the last 24 hours",
+    "nodeRecent": "{{name}}, edited in the last 24 hours"
   },
   "legend": {
     "label": "Legend",
@@ -48,7 +54,9 @@
     "daily": "Daily",
     "other": "Other",
     "source": "Documents",
-    "orphan": "Faded dots are orphan notes without links."
+    "orphan": "Faded dots are orphan notes without links.",
+    "recentPulse": "Gently pulsing dots are notes edited in the last 24 hours.",
+    "recentStill": "Ringed dots are notes edited in the last 24 hours."
   },
   "local": {
     "title": "Local graph",
@@ -69,5 +77,36 @@
     "announce_one": "The AI just updated {{count}} page from {{title}}.",
     "announce_other": "The AI just updated {{count}} pages from {{title}}.",
     "dismiss": "Hide this list"
+  },
+  "filters": {
+    "label": "Filters",
+    "folders": "Filter by folder",
+    "tag": "Tag",
+    "anyTag": "Any tag",
+    "time": "Filter by time",
+    "time_all": "Any time",
+    "time_today": "Today",
+    "time_7d": "Last 7 days",
+    "time_30d": "Last 30 days",
+    "clear": "Clear filters"
+  },
+  "time": {
+    "label": "Time travel",
+    "slider": "Week shown",
+    "dateFormat": "D MMM YYYY",
+    "week": "Week of {{date}}",
+    "weekNow": "Week of {{date}}, now",
+    "notes_one": "{{count}} note",
+    "notes_other": "{{count}} notes",
+    "links_one": "{{count}} link",
+    "links_other": "{{count}} links",
+    "counts": "{{notes}}, {{links}}",
+    "valueText": "{{week}}: {{counts}}",
+    "play": "Play",
+    "stop": "Stop",
+    "reducedMotion": "Play is off because your device asks for reduced motion. Use the left and right arrow keys to step through the weeks.",
+    "approximate": "This week is from before the app watched the vault, so its history is estimated from the notes' creation dates.",
+    "single": "The map's history starts this week. Come back in a few weeks to watch your brain grow.",
+    "emptyWeek": "The map was still empty this week. Move the slider to the right to see later weeks."
   }
 }

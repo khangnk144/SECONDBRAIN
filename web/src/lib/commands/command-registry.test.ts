@@ -22,6 +22,20 @@ import { useChatStore } from '../../features/ai-chat/chat-store';
 import { AI_EDITOR_ACTIONS } from '../../features/ai-actions/ai-action-kinds';
 import { registerAiActionTarget } from '../../features/ai-actions/ai-action-target';
 import { resetInboxTidy, useInboxTidy } from '../../features/ai-inbox/inbox-tidy-store';
+import { useSemesterPageStore } from '../../features/semester/semester-page-store';
+import { noteRoute } from '../app-navigation';
+
+/** The generated "Học kỳ này" page is on (its command is listed only then). */
+const SEMESTER_PAGE = {
+  available: true,
+  enabled: true,
+  path: 'Học kỳ này.md',
+  state: 'ok' as const,
+  exists: true,
+  edited: false,
+  ours: true,
+  lastGeneratedAt: null,
+};
 
 let navigate: ReturnType<typeof vi.fn<Navigator>>;
 let mock: FetchMock;
@@ -82,6 +96,10 @@ const EFFECTS: Record<string, () => Promise<void> | void> = {
     expect(useInboxTidy.getState().mode).toEqual({ kind: 'all' });
     resetInboxTidy();
   },
+  // M5 (F26.2, F25): the weekly review screen; the generated page while it is on.
+  'weekly-review': () => expect(navigate).toHaveBeenLastCalledWith('/review', undefined),
+  'open-semester-page': () =>
+    expect(navigate).toHaveBeenLastCalledWith(noteRoute(SEMESTER_PAGE.path), undefined),
   'ask-ai': () => {
     expect(navigate).toHaveBeenLastCalledWith('/ask', undefined);
     expect(useChatStore.getState().focus?.threadId).toBe('ask');
@@ -144,6 +162,12 @@ describe('command registry (F8.4)', () => {
       body: { ui: { ...useUiPrefsStore.getState().prefs, ...(call.body as { ui: object }).ui } },
     }));
     mock.on('POST /api/shutdown', { status: 202, body: { ok: true } });
+    mock.on('GET /api/semester-page', { body: SEMESTER_PAGE });
+    useSemesterPageStore.setState({
+      vaultId: 'vault-a',
+      status: SEMESTER_PAGE,
+      loadedAt: Date.now(),
+    });
     sourceToggle.mockReset();
     downloads = [];
     vi.stubGlobal(

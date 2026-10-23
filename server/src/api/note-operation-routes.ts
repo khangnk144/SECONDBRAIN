@@ -4,6 +4,7 @@ import { isNotePath } from '../markdown/content-classes.js';
 import { guardVaultPath } from '../security/path-guard.js';
 import { VaultError, type VaultPath } from '../vault/vault-types.js';
 import { revisionSchema, vaultPathSchema } from './vault-route-schemas.js';
+import { assertNotGeneratedPage } from '../semester/generated-page-registry.js';
 
 interface RenameBody {
   path: string;
@@ -66,6 +67,7 @@ export function registerNoteOperationRoutes(app: FastifyInstance, context: AppCo
     },
     async (request) => {
       const path = guardVaultPath(request.body.path);
+      await assertNotGeneratedPage(context, path); // F25.2: the page keeps its place
       const newPath = guardVaultPath(request.body.newPath);
       if (isNotePath(path) !== isNotePath(newPath)) {
         throw new VaultError('VALIDATION', 'A rename cannot turn a note into another file type.', {
@@ -102,6 +104,7 @@ export function registerNoteOperationRoutes(app: FastifyInstance, context: AppCo
     },
     async (request) => {
       const path = guardVaultPath(request.body.path);
+      await assertNotGeneratedPage(context, path); // F25.2: the page keeps its place
       const folder = guardFolder(request.body.folder);
       const { expectedRevision, relink = true, dryRun = false } = request.body;
       if (dryRun) return context.vault.previewMove(path, folder, { expectedRevision, relink });

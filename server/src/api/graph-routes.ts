@@ -1,21 +1,49 @@
 import type { FastifyInstance } from 'fastify';
 import type { AppContext } from '../app-context/create-app-context.js';
+import {
+  graphFilterQuerySchema,
+  parseGraphFilterQuery,
+  type GraphFilterQuery,
+} from '../graph/graph-filter-query.js';
+import { replayEventLog } from '../graph/graph-history-log.js';
+import { exactCreationTimes } from '../graph/graph-history-state.js';
+import { withMatches, withNodeFacts } from '../graph/graph-node-facts.js';
+import { cachedGraphBody } from '../graph/graph-response-cache.js';
 import { buildGraph, localGraph } from '../graph/vault-graph.js';
 import { guardVaultPath } from '../security/path-guard.js';
 import { notFound } from '../vault/vault-errors.js';
+import { registerGraphHistoryRoutes } from './graph-history-routes.js';
 import { vaultPathSchema } from './vault-route-schemas.js';
 
 /**
- * The brain graph (SPEC F16 Phase 1) from the index: `GET /graph` the whole vault, `GET
- * /graph/local` the neighbourhood of one note (depth 1 or 2) for the note's right pane. The
- * folder/tag/time filters are Phase 2. A note that exists but is not drawn (a template, a control
- * doc, an unlinked raw source) has an empty local graph; an unknown path is 404.
+ * The brain graph (SPEC F16, F24) from the index: `GET /graph` the whole vault with each note's
+ * filter facts (mtime, tags, creation) and, when `folder`/`group`/`tag`/`since` are given, the
+ * ids that match (`matches`; the map dims the rest, so nothing is removed); `GET /graph/local`
+ * the neighbourhood of one note (depth 1 or 2) for the note's right pane (the whole-vault body is
+ * kept while the index and the event log stay the same, `graph-response-cache.ts`); `GET /graph/history`
+ * for the time scrubber. A note that exists but is not drawn (a template, a control doc, an
+ * unlinked raw source) has an empty local graph; an unknown path is 404.
  */
 export function registerGraphRoutes(app: FastifyInstance, context: AppContext): void {
-  app.get('/api/graph', async (_request, reply) => {
-    reply.header('cache-control', 'no-store');
-    return buildGraph(context.index.graphRows());
-  });
+  app.get<{ Querystring: GraphFilterQuery }>(
+    '/api/graph',
+    { schema: { querystring: graphFilterQuerySchema } },
+    async (request, reply) => {
+      const filter = parseGraphFilterQuery(request.query);
+      const events = await context.activity.events();
+      const { body, json } = cachedGraphBody(context.index, events, () =>
+        withNodeFacts(
+          buildGraph(context.index.graphRows()),
+          context.index,
+          exactCreationTimes(replayEventLog(events)),
+        ),
+      );
+      reply.header('cache-control', 'no-store');
+      if (filter !== null) return withMatches(body, filter);
+      reply.type('application/json; charset=utf-8');
+      return reply.send(json());
+    },
+  );
 
   app.get<{ Querystring: { path: string; depth: 1 | 2 } }>(
     '/api/graph/local',
@@ -40,4 +68,6 @@ export function registerGraphRoutes(app: FastifyInstance, context: AppContext): 
       return localGraph(graph, path, request.query.depth);
     },
   );
+
+  registerGraphHistoryRoutes(app, context);
 }

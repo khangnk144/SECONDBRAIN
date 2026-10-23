@@ -83,10 +83,11 @@ export const settled = (page: Page) =>
 
 /**
  * The app has read its per-vault state (panes, tabs) and the folder tree: a shortcut pressed
- * before that can be undone by the hydration that follows `GET /health`.
+ * before that can be undone by the hydration that follows `GET /health`. The shell says so with
+ * `data-ready` in both styles (the tree itself is hidden on Bento's Today).
  */
 export async function appReady(page: Page): Promise<void> {
-  await expect(page.getByRole('tree').getByRole('treeitem').first()).toBeVisible();
+  await expect(page.locator('.app-shell[data-ready="true"]')).toBeAttached();
 }
 
 /** A note opened with `&cursor=N` has placed the caret and dropped the parameter. */

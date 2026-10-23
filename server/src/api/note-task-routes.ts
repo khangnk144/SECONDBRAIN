@@ -12,6 +12,7 @@ import { revisionOf } from '../vault/vault-errors.js';
 import type { PatchPlanner } from '../vault/vault-operation-types.js';
 import { isVaultError, VaultError, type VaultPath } from '../vault/vault-types.js';
 import { guardNotePath, revisionSchema, vaultPathSchema } from './vault-route-schemas.js';
+import { assertNotGeneratedPage } from '../semester/generated-page-registry.js';
 
 interface TaskBody {
   path: string;
@@ -119,6 +120,7 @@ export function registerNoteTaskRoutes(app: FastifyInstance, context: AppContext
     async (request) => {
       const { expectedRevision, line, expectedText, done, due } = request.body;
       const path = guardNotePath(request.body.path);
+      await assertNotGeneratedPage(context, path); // F25.2
       if ((done === undefined) === (due === undefined)) {
         throw invalid('done-or-due', 'Give either "done" or "due".');
       }
@@ -164,6 +166,7 @@ export function registerNoteTaskRoutes(app: FastifyInstance, context: AppContext
     async (request) => {
       const { expectedRevision, target } = request.body;
       const path = guardNotePath(request.body.path);
+      await assertNotGeneratedPage(context, path); // F25.2
       const date = checkDate(request.body.date);
       let planner: PatchPlanner;
       // A task target also answers its new line, so the view can act on it again at once.

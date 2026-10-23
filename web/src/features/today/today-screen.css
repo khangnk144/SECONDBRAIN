@@ -29,6 +29,56 @@
   outline: none;
 }
 
+/* Date, greeting and summary; the small "não hôm nay" block sits top right (design.md screen 6). */
+.today__head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2) var(--space-6);
+}
+
+@media (min-width: 600px) {
+  .today__head {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+}
+
+.today__head-main {
+  min-width: 0;
+}
+
+.today-brain-line {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  justify-self: start;
+  max-width: 14rem;
+  min-height: 24px;
+  margin-top: 2px;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-m);
+  color: var(--ink-2);
+  font-size: max(12px, 0.8125rem);
+  line-height: 1.4;
+  text-decoration: none;
+}
+
+.today-brain-line:hover {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.today-brain-line:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.today-brain-line__map {
+  flex: none;
+  width: 56px;
+  height: 28px;
+}
+
 /* One line is reserved while loading, so nothing jumps when the sentence arrives. */
 .today__summary {
   min-height: 1.65em;

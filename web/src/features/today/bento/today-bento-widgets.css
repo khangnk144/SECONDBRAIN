@@ -1,0 +1,405 @@
+/*
+ * Bento Today widgets (design.md §12.3, §12.6): task rows, progress rings, the brain tile, quick
+ * capture and the writing bars, with the first-paint motion (F35.8). Tokens only.
+ */
+
+/* Hôm nay */
+.today-tasks,
+.today-tasks__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.today-tasks__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.today-task {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 52px;
+  padding: 6px 14px 6px 10px;
+  border-radius: var(--radius-control);
+  background: var(--tile-2);
+}
+
+.today-task.is-done {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--tile-line);
+}
+
+/* The checkbox is the shared one (deadline-check), square in Bento (styles/bento). */
+
+.today-task__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.today-task__open {
+  font-size: 0.90625rem;
+  line-height: 1.35;
+}
+
+.today-task__title {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.today-task.is-done .today-task__open {
+  color: var(--ink-2);
+}
+
+.today-task__sub {
+  color: var(--ink-2);
+  font-size: max(12px, 0.75rem);
+  line-height: 1.35;
+}
+
+.today-task__sub--urgent {
+  color: var(--urgent-text);
+}
+
+.today-tasks__more {
+  margin: 0 0 0 var(--space-2);
+  font-size: max(12px, 0.8125rem);
+}
+
+.today-tasks__cheer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+  padding: 12px 14px;
+  border-radius: var(--radius-control);
+  background: var(--chip-mint);
+  color: var(--ink);
+  font-size: 0.84375rem;
+  line-height: 1.4;
+}
+
+.today-tasks__cheer svg {
+  flex: none;
+  color: var(--pastel-mint);
+}
+
+/* Đồ án đang làm */
+.today-rings {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.today-ring {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: 12px 8px;
+  border-radius: var(--radius-inner);
+  background: var(--tile-2);
+  text-align: center;
+}
+
+.today-ring__svg {
+  display: block;
+  flex: none;
+}
+
+.today-ring__track,
+.today-ring__value {
+  fill: none;
+  stroke-width: 8;
+}
+
+.today-ring__track {
+  stroke: var(--line);
+}
+
+.today-ring__value--0 {
+  stroke: var(--accent);
+}
+
+.today-ring__value--1 {
+  stroke: var(--pastel-lilac);
+}
+
+.today-ring__value--2 {
+  stroke: var(--pastel-peach);
+}
+
+.today-ring__value--3 {
+  stroke: var(--pastel-mint);
+}
+
+.today-ring__value--4 {
+  stroke: var(--pastel-butter);
+}
+
+.today-ring__text {
+  fill: var(--ink);
+  font-family: var(--font);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.today-ring__none {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 76px;
+  height: 76px;
+  padding: var(--space-2);
+  border: 1.5px dashed var(--ink-2);
+  border-radius: 50%;
+  color: var(--ink-2);
+  font-size: max(11px, 0.6875rem);
+  line-height: 1.2;
+}
+
+.today-ring__title {
+  text-align: center;
+  font-size: 0.84375rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.today-ring__due {
+  color: var(--ink-2);
+  font-size: max(12px, 0.75rem);
+}
+
+.today-project-offer {
+  /* A --tile-2 box inside the tile: its secondary button goes back to --tile, outlined. */
+  --button-2-bg: var(--tile);
+  --button-2-border: var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 12px 14px;
+  border-radius: var(--radius-control);
+  background: var(--tile-2);
+}
+
+.today-project-offer__text {
+  font-size: 0.875rem;
+}
+
+.today-project-offer__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.today-project-offer__later {
+  background: transparent;
+  color: var(--ink-2);
+}
+
+/* Não hôm nay: the heading's link stretches over the whole tile. */
+.today-brain__link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.today-brain__link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-tile);
+}
+
+.today-brain__link:focus-visible {
+  outline: none;
+}
+
+.today-brain__link:focus-visible::after {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.today-tile--brain:hover .today-brain__link {
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+}
+
+.today-brain__map {
+  width: 100%;
+  height: 84px;
+}
+
+.today-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.today-chip {
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  color: var(--ink);
+  font-size: max(12px, 0.78125rem);
+  line-height: 1.4;
+}
+
+.today-chip--notes {
+  background: var(--accent-wash);
+}
+
+.today-chip--links {
+  background: var(--chip-lilac);
+}
+
+.today-chip--ai {
+  background: var(--chip-mint);
+}
+
+/* Ghi nhanh */
+.today-capture {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: var(--capture-input-h);
+  padding: 0 8px 0 16px;
+  border-radius: var(--radius-control);
+  background: var(--tile-2);
+}
+
+.today-capture:has(.today-capture__input:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.today-capture__input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.9375rem;
+}
+
+.today-capture__input::placeholder {
+  color: var(--ink-2);
+}
+
+.today-capture__input[aria-busy='true'] {
+  opacity: 0.7;
+}
+
+.today-capture__save {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-square);
+  background: var(--accent);
+  color: var(--on-accent);
+  cursor: pointer;
+}
+
+.today-capture__save[aria-disabled='true'] {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* 7 ngày ghi chép */
+.today-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  height: 76px;
+}
+
+.today-bars__day {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  min-width: 0;
+  height: 100%;
+}
+
+.today-bars__bar {
+  display: block;
+  width: 100%;
+  max-width: 18px;
+  height: var(--bar-h);
+  border-radius: 8px;
+  background: var(--ink-2);
+  opacity: 0.4;
+  transform-origin: bottom;
+}
+
+.today-bars__bar.is-today {
+  background: var(--accent);
+  opacity: 1;
+}
+
+.today-bars__label {
+  color: var(--ink-2);
+  font-size: max(11px, 0.6875rem);
+  line-height: 1.2;
+}
+
+/* First paint (F35.8): rings run to their percentage and bars grow, ≤ 600 ms, ease-out. */
+.today-rings.is-intro .today-ring__value {
+  animation: today-ring-run 600ms ease-out both;
+}
+
+@keyframes today-ring-run {
+  from {
+    stroke-dashoffset: var(--ring-c);
+  }
+}
+
+.today-bars.is-intro .today-bars__bar {
+  animation: today-bar-grow 600ms ease-out both;
+}
+
+@keyframes today-bar-grow {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+@media (pointer: coarse) {
+  .today-capture__save {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .today-rings.is-intro .today-ring__value,
+  .today-bars.is-intro .today-bars__bar {
+    animation: none;
+  }
+}

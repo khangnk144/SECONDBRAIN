@@ -1,6 +1,7 @@
 import { useId, type CSSProperties, type FocusEvent, type MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  BENTO_LABEL_LINES,
   dayNumberText,
   labelLines,
   longDateText,
@@ -16,6 +17,11 @@ export interface TodayStripCellProps {
   /** Its popover is open. */
   expanded: boolean;
   popoverId: string;
+  /**
+   * Bento only: the cell's place from the left (the bars appear left → right on first paint);
+   * labels then wrap over two lines at most.
+   */
+  introIndex?: number;
   onActivate: (key: string, button: HTMLButtonElement) => void;
   onHint: (key: string | null, button: HTMLButtonElement | null) => void;
 }
@@ -44,13 +50,14 @@ export function TodayStripCell({
   tabStop,
   expanded,
   popoverId,
+  introIndex,
   onActivate,
   onHint,
 }: TodayStripCellProps) {
   const { t, i18n } = useTranslation();
   const descriptionId = useId();
   const label = useCellLabel(cell);
-  const lines = labelLines(cell);
+  const lines = labelLines(cell, introIndex === undefined ? undefined : BENTO_LABEL_LINES);
   const overdue = cell.key === OVERDUE_KEY;
   const classes = ['today-strip__cell'];
   if (overdue) classes.push('today-strip__cell--overdue');
@@ -72,6 +79,11 @@ export function TodayStripCell({
       aria-expanded={expanded}
       aria-controls={expanded ? popoverId : undefined}
       aria-current={cell.isToday ? 'date' : undefined}
+      style={
+        introIndex === undefined
+          ? undefined
+          : ({ '--today-cell-index': introIndex } as CSSProperties)
+      }
       onClick={(event) => onActivate(cell.key, event.currentTarget)}
       onMouseEnter={hint}
       onFocus={hint}

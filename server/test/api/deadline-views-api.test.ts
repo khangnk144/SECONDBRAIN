@@ -42,7 +42,10 @@ describe('Today, Calendar and Tasks agree with the content-class table through t
 
   it('each answer is exactly the deadline service', async () => {
     const { deadlines } = t.context;
-    expect(await get('/api/today')).toEqual(deadlines.today());
+    // M5 (F35.9): Today also carries `activity` (today-activity-api.test.ts checks it).
+    const { activity, ...todayView } = await get('/api/today');
+    expect(todayView).toEqual(deadlines.today());
+    expect(activity).toMatchObject({ days: expect.any(Array), brain: expect.any(Object) });
     for (const includeArchive of [false, true]) {
       expect(await get(`/api/calendar?month=2026-10&includeArchive=${includeArchive}`)).toEqual(
         deadlines.calendar('2026-10', { includeArchive }),

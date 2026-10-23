@@ -32,6 +32,12 @@ export interface GraphCanvasProps {
   onFps?: (fps: number) => void;
   /** "AI vừa chạm" playbacks (full map). */
   aiTouches?: readonly AiTouchPlay[];
+  /** Filter matches of `scene`'s nodes (1 = match); the rest is dimmed (F24.2). */
+  filter?: Uint8Array | null;
+  /** Nodes of `scene` that pulse (edited in the last 24 h, F24.3). */
+  recent?: Int32Array | null;
+  /** A new scene fades in over the previous one (time scrubber; positions are shared). */
+  fadeScenes?: boolean;
 }
 
 /** Areas of the canvas under its overlays (`data-graph-overlay` siblings), in canvas CSS px. */
@@ -125,13 +131,18 @@ export const GraphCanvas = forwardRef<GraphCanvasHandle, GraphCanvasProps>(
     useEffect(() => viewRef.current?.setReducedMotion(reducedMotion), [reducedMotion]);
     useEffect(() => {
       if (!scene) return;
-      viewRef.current?.setScene(scene, { intro: firstScene, fit: firstScene });
+      const fade = latest.current.fadeScenes === true && !firstScene;
+      viewRef.current?.setScene(scene, { intro: firstScene, fit: firstScene, fade });
       // The legend and the controls appear with the first scene.
       if (canvasRef.current) viewRef.current?.setLabelExclusions(overlayRects(canvasRef.current));
     }, [scene, firstScene]);
     useEffect(() => {
       viewRef.current?.setSelection(selection?.id ?? null, selection?.depth ?? 1);
     }, [scene, selection?.id, selection?.depth]);
+    const filter = props.filter ?? null;
+    useEffect(() => viewRef.current?.setFilter(filter), [scene, filter]);
+    const recent = props.recent ?? null;
+    useEffect(() => viewRef.current?.setRecent(recent), [scene, recent]);
     const aiTouches = props.aiTouches;
     useEffect(() => {
       if (aiTouches) viewRef.current?.setAiTouches(aiTouches, Date.now());

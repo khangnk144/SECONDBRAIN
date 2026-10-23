@@ -1,7 +1,7 @@
 import type { VaultPath } from './api/vault-types';
 import { startOpenVaultFile } from '../features/viewer/open-vault-file-in-app';
 import { tabKind, useTabsStore } from './tabs-store';
-import { samePath } from './vault-paths';
+import { pathKey, samePath } from './vault-paths';
 import { subscribeServerEvent } from './ws/server-event-bus';
 
 /**
@@ -13,6 +13,27 @@ let keepTabWhenDeleted: (path: VaultPath) => boolean = () => false;
 
 export function setKeepTabWhenDeleted(predicate: (path: VaultPath) => boolean): void {
   keepTabWhenDeleted = predicate;
+}
+
+/**
+ * Notes the app is about to replace in place (the "Học kỳ này" page's "Tạo lại" moves the edited
+ * copy to the trash and writes a fresh page at the same path, E2E D2): until the deadline their
+ * tab stays when the old file's deletion arrives, and the note screen shows the new file.
+ */
+const recreating = new Map<string, number>();
+export const RECREATE_GRACE_MS = 10_000;
+
+export function expectRecreate(path: VaultPath, now = Date.now()): void {
+  recreating.set(pathKey(path), now + RECREATE_GRACE_MS);
+}
+
+function isBeingRecreated(path: VaultPath, now = Date.now()): boolean {
+  const key = pathKey(path);
+  const until = recreating.get(key);
+  if (until === undefined) return false;
+  if (until >= now) return true;
+  recreating.delete(key);
+  return false;
 }
 
 /** A file tab stays when its file goes: the viewer says it is missing and offers to close. */
@@ -35,6 +56,7 @@ export function startTabsSync(): () => void {
     ),
     subscribeServerEvent('note:deleted', (event) => {
       if (keepTabWhenDeleted(event.path) || isFileTab(event.path)) return;
+      if (isBeingRecreated(event.path)) return;
       useTabsStore.getState().closePaths([event.path], { notify: true });
     }),
     startOpenVaultFile(),

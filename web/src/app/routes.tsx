@@ -16,6 +16,7 @@ import { FileViewerScreen } from '../features/viewer/file-viewer-screen';
 import { FileReferencesPanel } from '../features/viewer/file-references-panel';
 import { ResourcesScreen } from '../features/resources/resources-screen';
 import { AskScreen } from '../features/ai-chat/ask-screen';
+import { ReviewScreen } from '../features/review/review-screen';
 
 /**
  * Route handle read by the layout:
@@ -26,6 +27,7 @@ import { AskScreen } from '../features/ai-chat/ask-screen';
  *   stored pane preferences (`Alt+1`/`Alt+2` still show them for the visit);
  * - `inlineConnectionBanner: true`: the screen shows the backend banner itself, so the layout
  *   leaves out the global one.
+ * Routes with `tabs` (note, file) are also where bento shows the "Thư mục" pane beside the rail.
  */
 export interface AppRouteHandle {
   rightPanel?: boolean;
@@ -60,6 +62,8 @@ export const appRoutes: RouteObject[] = [
       { path: 'file', element: <FileViewerScreen />, handle: fileHandle },
       { path: 'resources', element: <ResourcesScreen /> },
       { path: 'ask', element: <AskScreen /> },
+      // `#/review[?end=YYYY-MM-DD]`: "Tổng kết tuần" any day (M5, F26.2).
+      { path: 'review', element: <ReviewScreen /> },
       { path: '*', element: <NotFoundScreen /> },
     ],
   },

@@ -5,10 +5,12 @@ import {
   FONT_SIZES,
   LANGUAGES,
   PALETTES,
+  STYLES,
   THEMES,
   type FontSize,
   type Language,
   type Palette,
+  type Style,
   type ThemePreference,
   type UiPrefs,
 } from '../../lib/ui-prefs';
@@ -85,12 +87,16 @@ function PaletteSwatch({ color }: { color: string | undefined }) {
   );
 }
 
-/** "Giao diện": name, language, theme, palette, font size; each applies at once (F18.1). */
+/**
+ * "Giao diện": name, language, theme, style (Bento mềm / Yên tĩnh, F35.1), palette, font size;
+ * each applies at once (F18.1).
+ */
 export function AppearanceSection() {
   const { t } = useTranslation();
   const prefs = useUiPrefsStore((state) => state.prefs);
   const language = useSettingSave();
   const theme = useSettingSave();
+  const style = useSettingSave();
   const palette = useSettingSave();
   const fontSize = useSettingSave();
   const shownTheme = resolveTheme(prefs.theme);
@@ -125,6 +131,14 @@ export function AppearanceSection() {
         }))}
         onChange={(value) => set({ theme: value }, theme)}
         status={<SaveStatus state={theme.state} />}
+      />
+      <ChoiceGroup<Style>
+        name="settings-style"
+        legend={t('style.label')}
+        value={prefs.style}
+        choices={STYLES.map((value) => ({ value, label: t(`style.choices.${value}`) }))}
+        onChange={(value) => set({ style: value }, style)}
+        status={<SaveStatus state={style.state} />}
       />
       <ChoiceGroup<Palette>
         name="settings-palette"

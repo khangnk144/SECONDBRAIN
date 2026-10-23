@@ -29,6 +29,9 @@ export function createDelegatingContext(parts: {
     get sampleData() {
       return current().sampleData;
     },
+    get activity() {
+      return current().activity;
+    },
     get now() {
       return current().now;
     },

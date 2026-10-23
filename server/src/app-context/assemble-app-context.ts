@@ -1,6 +1,8 @@
+import { createActivityService } from '../index/activity-service.js';
 import type { DeadlineService, IndexService } from '../index/index-types.js';
 import type { AppLogger } from '../logging/rotating-file-logger.js';
 import { createSampleDataService } from '../sample-data/sample-data-service.js';
+import { generatedEventsOf, isManagedPage } from '../semester/generated-page-registry.js';
 import type { PendingJournalEntry, VaultService } from '../vault/vault-types.js';
 import type { VaultWatcher } from '../vault/vault-watcher.js';
 import type { ServerEvent } from '../ws/server-events.js';
@@ -38,6 +40,15 @@ export function assembleAppContext(parts: ContextParts): AppContext {
     vault,
     index,
     deadlines: parts.deadlines,
+    activity: createActivityService({
+      eventsFile: vault.paths.eventsFile,
+      index,
+      now: parts.now,
+      // The app's own rebuilds of the "Học kỳ này" page are not her writing (F25, F35.9), also
+      // after the page was turned off (its spans, review L2).
+      exclude: (path) => isManagedPage(vault, path),
+      generatedEvents: () => generatedEventsOf(vault),
+    }),
     hub,
     sampleData: createSampleDataService(vault, parts.now),
     logger,

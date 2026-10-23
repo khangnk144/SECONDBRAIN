@@ -91,5 +91,105 @@
     "creating": "Creating…",
     "decline": "No, thanks",
     "created": "Sample data created."
+  },
+  "brain": {
+    "newNotes_one": "{{count}} new note",
+    "newNotes_other": "{{count}} new notes",
+    "editedNotes_one": "{{count}} note edited",
+    "editedNotes_other": "{{count}} notes edited",
+    "newLinks_one": "{{count}} new link",
+    "newLinks_other": "{{count}} new links",
+    "aiPages_one": "AI updated {{count}} page",
+    "aiPages_other": "AI updated {{count}} pages",
+    "separator": ", ",
+    "titlesMore_one": "{{titles}} and {{count}} more note",
+    "titlesMore_other": "{{titles}} and {{count}} more notes",
+    "link": "Today's brain: {{summary}}. Open the brain map on today's notes."
+  },
+  "bento": {
+    "greeting": {
+      "morning": "Good morning,<br/><name>{{name}}</name>",
+      "noon": "Good midday,<br/><name>{{name}}</name>",
+      "afternoon": "Good afternoon,<br/><name>{{name}}</name>",
+      "evening": "Good evening,<br/><name>{{name}}</name>",
+      "late": "Up late,<br/><name>{{name}}</name>"
+    },
+    "date": {
+      "title": "Today's date",
+      "weekday": "dddd",
+      "monthYear": "MMMM YYYY",
+      "full": "dddd, MMMM D, YYYY"
+    },
+    "deadline": {
+      "title": "Nearest deadline",
+      "urgency": {
+        "urgent": "urgent",
+        "soon": "soon",
+        "ok": "later"
+      },
+      "daysLeft_one": "day left",
+      "daysLeft_other": "days left",
+      "today": "Today",
+      "dateFormat": "dddd, MMM D",
+      "dailyNote": "Daily {{date}}",
+      "openTasks_one": "{{count}} open task",
+      "openTasks_other": "{{count}} open tasks",
+      "none": "No deadlines in the next 14 days."
+    },
+    "strip": {
+      "overdue_one": "{{count}} overdue item",
+      "overdue_other": "{{count}} overdue items"
+    },
+    "tasks": {
+      "title": "Today",
+      "progress_one": "{{done}}/{{count}} done",
+      "progress_other": "{{done}}/{{count}} done",
+      "dueToday": "Today, urgent",
+      "overdue_one": "{{count}} day overdue",
+      "overdue_other": "{{count}} days overdue",
+      "daily": "Today's Daily",
+      "all_one": "See the {{count}} task",
+      "all_other": "See all {{count}} tasks",
+      "yesterday_one": "Yesterday you finished {{count}} task. Keep it up.",
+      "yesterday_other": "Yesterday you finished {{count}} tasks. Keep it up.",
+      "empty": "No tasks for today yet. If something comes to mind, type it into Quick capture."
+    },
+    "projects": {
+      "title": "Projects in progress",
+      "ring": "Progress of {{title}}: {{percent}} percent, {{progress}}",
+      "noDeadline": "no deadline",
+      "more_one": "Show {{count}} more project",
+      "more_other": "Show {{count}} more projects",
+      "donePrompt": "Every task of “{{title}}” is done. Mark the project done?"
+    },
+    "brain": {
+      "title": "Today's brain",
+      "open": "{{title}}, open the brain map",
+      "map_one": "A small map of {{count}} note touched today",
+      "map_other": "A small map of {{count}} notes touched today",
+      "notes_one": "+{{count}} note",
+      "notes_other": "+{{count}} notes",
+      "links_one": "+{{count}} link",
+      "links_other": "+{{count}} links",
+      "ai_one": "AI updated {{count}} page",
+      "ai_other": "AI updated {{count}} pages",
+      "titles": "Today's notes: {{titles}}.",
+      "empty": "You haven't touched a note today. Feel like writing something?"
+    },
+    "capture": {
+      "title": "Quick capture",
+      "placeholder": "Type something, then Enter…",
+      "save": "Save to Inbox",
+      "hint": "Saves to Inbox. <kbd>{{keys}}</kbd> works anywhere."
+    },
+    "writing": {
+      "title": "Last 7 days of writing",
+      "chart": "Notes created or edited each day over the last 7 days: {{days}}.",
+      "day_one": "{{day}}: {{count}} note",
+      "day_other": "{{day}}: {{count}} notes",
+      "todayDay": "today",
+      "empty": "Nothing written in the last 7 days. Start a note?"
+    },
+    "unavailable": "Recent activity could not be read. Try reloading the page."
   }
 }

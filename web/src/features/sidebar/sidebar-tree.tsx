@@ -9,6 +9,7 @@ import { useTreeDragDrop } from './tree-drag-drop';
 import { handleTreeKey } from './tree-keyboard';
 import { treeMenuItems } from './tree-menu-items';
 import { folderRowId, noteRowId, visibleRows, type TreeRow } from './tree-model';
+import { useApplyTreeReveal } from './tree-reveal';
 import { TreeRowItem } from './tree-row-item';
 import { useActiveNotePath } from './use-active-note-path';
 import { useRovingTreeFocus } from './use-roving-tree-focus';
@@ -29,6 +30,7 @@ export function SidebarTree({ labelledBy }: { labelledBy: string }) {
   const rows = useMemo(() => visibleRows(tree, expanded), [tree, expanded]);
   const activePath = useActiveNotePath();
   const focus = useRovingTreeFocus(rows, activePath);
+  useApplyTreeReveal(rows, focus.focusRow);
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [menu, setMenu] = useState<MenuState | null>(null);
   const { dropTarget, rowProps } = useTreeDragDrop();

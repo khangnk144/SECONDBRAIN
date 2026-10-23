@@ -1,0 +1,111 @@
+/*
+ * Shell drawer and bottom sheet (shell-overlay.tsx): the folder drawer, the calm sidebar drawer
+ * on phones, the right panel as a bottom sheet and the "Thêm" sheet. Tokens only. The scrim only
+ * dims: clicks go through to the page and close the overlay there (shell-overlay.tsx).
+ */
+.shell-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+}
+
+.shell-overlay__scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+  opacity: 0.55;
+}
+
+.shell-overlay__panel {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  pointer-events: auto;
+}
+
+.shell-overlay__panel:focus {
+  outline: none;
+}
+
+/* Left drawer: the width of the calm sidebar / bento folder pane, the whole height. */
+.shell-overlay__panel--left {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: min(var(--sidebar-w), calc(100vw - var(--space-12)));
+  border-width: 0 1px 0 0;
+  animation: shell-drawer-in var(--dur) var(--ease);
+}
+
+/* Bottom sheet: full width, up to 85 % of the height, above the phone's home indicator. */
+.shell-overlay__panel--bottom {
+  right: 0;
+  bottom: 0;
+  left: 0;
+  max-height: 85vh;
+  padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+  border-width: 1px 0 0;
+  border-radius: var(--radius-l) var(--radius-l) 0 0;
+  animation: shell-sheet-in var(--dur) var(--ease);
+}
+
+.shell-overlay__head {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.shell-overlay__title {
+  flex: 1;
+  min-width: 0;
+  font-size: 1.0625rem;
+}
+
+.shell-overlay__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-height: 0;
+}
+
+/* The content keeps its own look; inside an overlay it is no longer a sticky full-height pane. */
+.shell-overlay__body > .sidebar,
+.shell-overlay__body > .right-panel {
+  position: static;
+  height: auto;
+  padding: 0;
+  border: 0;
+  overflow: visible;
+}
+
+/* No fill-mode: once in place the panel has no transform, so fixed menus inside stay put. */
+@keyframes shell-drawer-in {
+  from {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes shell-sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+/* Phones: 40 px touch targets (design.md §8). */
+@media (pointer: coarse), (max-width: 600px) {
+  .shell-overlay__close {
+    width: 40px;
+    height: 40px;
+  }
+}

@@ -86,6 +86,9 @@ test('S2: course project â†’ deadline and dated subtask on Today and Calendar â†
   await todayPage.goto('/');
   await expect(todayPage.locator('.today-strip')).toBeVisible();
   const calendarPage = await context.newPage();
+  // Tall enough for the whole month: Playwright's HTML5 drag cannot scroll to a drop target
+  // below the fold, and Bento's day cells are taller than calm's.
+  await calendarPage.setViewportSize({ width: 1280, height: 1000 });
   await calendarPage.goto(`/#/calendar?month=${monthOf(deadline)}`);
   await expect(calendarPage.locator(`td[data-date="${deadline}"]`)).toBeVisible();
 

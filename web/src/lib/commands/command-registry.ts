@@ -24,6 +24,8 @@ import {
 import { openAskScreen } from '../../features/ai-chat/open-ask-screen';
 import { AI_ACTION_COMMANDS } from '../../features/ai-actions/ai-action-commands';
 import { AI_INBOX_COMMANDS } from '../../features/ai-inbox/ai-inbox-commands';
+import { REVIEW_COMMANDS } from '../../features/review/review-commands';
+import { SEMESTER_COMMANDS } from '../../features/semester/semester-commands';
 import { openHistoryDialog } from '../../features/history/open-history-dialog';
 import { isImplemented, type AppFeature } from './implemented-features';
 import {
@@ -117,6 +119,9 @@ export const APP_COMMANDS: readonly AppCommand[] = [
   // AI on the editor's selection and Inbox tidying (listed only while they can run).
   ...AI_ACTION_COMMANDS,
   ...AI_INBOX_COMMANDS,
+  // M5: "Tổng kết tuần" (F26.2) and "Mở trang Học kỳ này" (F25, only while the page is on).
+  ...REVIEW_COMMANDS,
+  ...SEMESTER_COMMANDS,
   navigation('openTags', TAGS_ROUTE, 'tags', ['tags', 'thẻ', '#']),
   navigation('openReminders', REMINDERS_ROUTE, 'reminders', ['reminders', 'nhắc', 'notification']),
   navigation('openResources', RESOURCES_ROUTE, 'attachments', [

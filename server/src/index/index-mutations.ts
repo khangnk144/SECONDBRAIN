@@ -12,7 +12,7 @@ import {
   type VaultService,
 } from '../vault/vault-types.js';
 import type { IndexEvent } from './event-log.js';
-import { diffSnapshots, takeSnapshot, type NoteSnapshot } from './index-events.js';
+import { diffSnapshots, isLoggedNote, takeSnapshot, type NoteSnapshot } from './index-events.js';
 import type { IndexWriter } from './index-writer.js';
 import { notesLinkingByKeys, reresolveLinks } from './link-reresolve.js';
 import { pathTargetKey, type PathCatalog } from './link-targets.js';
@@ -112,6 +112,8 @@ export async function applyChanges(ctx: MutationContext, changes: ChangeSet): Pr
   for (const p of gone) catalog.delete(p);
   for (const p of added) catalog.add(p);
   const resolve = catalog.resolver();
+  // Notes whose content changed while the index already had a row for them (`note_edited`).
+  const edited = new Set<VaultPath>();
 
   const apply = db.transaction(() => {
     for (const p of removed) if (writer.deleteNote(p) === null) writer.deleteFile(p);
@@ -141,6 +143,7 @@ export async function applyChanges(ctx: MutationContext, changes: ChangeSet): Pr
           writer.touchNote(state.id, read.mtimeMs, read.size);
         continue;
       }
+      if (state && isLoggedNote(path)) edited.add(path);
       // The row may differ from what load() compared against (a rename moved another row here).
       writer.writeNote(item.record ?? buildRecordSafely(path, read, ctx.warn), resolve);
     }
@@ -158,9 +161,15 @@ export async function applyChanges(ctx: MutationContext, changes: ChangeSet): Pr
   const ts = ctx.now().toISOString();
   const events: IndexEvent[] = [];
   const renamedFrom = new Set(renames.map((r) => r.from));
-  for (const { from, to } of renames)
-    events.push(...diffSnapshots(ts, before.get(from) ?? null, takeSnapshot(db, to), from));
+  // The event log keeps one `note_edited` per note and day; a note created now has none.
+  const editOf = (p: VaultPath, existed: boolean): IndexEvent[] =>
+    existed && edited.has(p) ? [{ ts, event: 'note_edited', path: p }] : [];
+  for (const { from, to } of renames) {
+    const prior = before.get(from) ?? null;
+    events.push(...diffSnapshots(ts, prior, takeSnapshot(db, to), from), ...editOf(to, !!prior));
+  }
   for (const [p, snapshot] of before)
-    if (!renamedFrom.has(p)) events.push(...diffSnapshots(ts, snapshot, takeSnapshot(db, p)));
+    if (!renamedFrom.has(p))
+      events.push(...diffSnapshots(ts, snapshot, takeSnapshot(db, p)), ...editOf(p, !!snapshot));
   ctx.log(events);
 }

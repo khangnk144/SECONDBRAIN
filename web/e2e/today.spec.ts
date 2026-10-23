@@ -15,6 +15,10 @@ import {
   type VaultTree,
 } from './helpers/app-api.js';
 import { e2eVaultDir } from './helpers/vault-api.js';
+import { calmOnly } from './helpers/calm-only.js';
+
+// Calm wording and layout ("…, khangnie.", the summary line): S1 in Bento is bento-today.spec.ts.
+calmOnly();
 
 test.afterEach(async ({ page }) => resetVault(await appApi(page)));
 

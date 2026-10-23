@@ -106,3 +106,48 @@
     border-top: 1px solid var(--line);
   }
 }
+
+/*
+ * Phones (F28.1, both styles): the sidebar is a drawer and the right panel a bottom sheet
+ * (shell-overlay.css); overlays use the full width with 12 px margins. On phones and touch
+ * screens every target is at least 40 px (design.md §8).
+ */
+@media (max-width: 600px) {
+  .app-shell .modal-backdrop {
+    padding: var(--space-3);
+  }
+
+  .app-shell .modal {
+    width: 100%;
+    max-height: calc(100vh - 2 * var(--space-3));
+  }
+
+  .app-shell .capture-layer {
+    padding: var(--space-3);
+  }
+
+  .app-shell .capture-box {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px), (pointer: coarse) {
+  .app-shell .icon-button {
+    width: 40px;
+    height: 40px;
+  }
+
+  .app-shell .button,
+  .app-shell .tab__open {
+    min-height: 40px;
+  }
+
+  .app-shell .tab__close {
+    width: 40px;
+    height: 40px;
+  }
+
+  .app-shell .tree-item {
+    min-height: 40px;
+  }
+}

@@ -2,6 +2,7 @@ import { lstat, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import type { FastifyInstance } from 'fastify';
 import type { AppContext } from '../app-context/create-app-context.js';
+import { registerSystemInfoRoutes } from '../system/system-info-route.js';
 import { revealCommand, spawnDetached, type RevealOptions } from './reveal-command.js';
 
 /** The vault logger's file (see the vault handover logger). */
@@ -34,4 +35,7 @@ export function registerSystemRoutes(
     spawn(revealCommand(platform, hasLog ? logFile : logsDir));
     return reply.code(204).send();
   });
+
+  // F29: how the app runs, the tray helper, "Tạo lại lối tắt" (`GET /api/system`).
+  registerSystemInfoRoutes(app, { platform: options.platform });
 }

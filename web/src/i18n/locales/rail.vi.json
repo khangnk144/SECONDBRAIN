@@ -1,0 +1,25 @@
+{
+  "logo": "sb",
+  "short": {
+    "today": "Hôm nay",
+    "tasks": "Việc",
+    "calendar": "Lịch",
+    "graph": "Não",
+    "ask": "Hỏi AI",
+    "resources": "Tài liệu",
+    "tags": "Thẻ",
+    "reminders": "Nhắc nhở",
+    "folders": "Thư mục",
+    "settings": "Cài đặt",
+    "capture": "Ghi nhanh",
+    "more": "Thêm"
+  },
+  "folders": "Thư mục",
+  "more": "Thêm mục khác",
+  "moreTitle": "Thêm",
+  "close": "Đóng",
+  "menu": "Điều hướng và thư mục",
+  "search": "Tìm ghi chú hoặc hỏi AI…",
+  "searchLabel": "Tìm ghi chú hoặc hỏi AI",
+  "searchKeys": "Ctrl K"
+}

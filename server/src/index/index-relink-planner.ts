@@ -10,6 +10,7 @@ import { isNotePath } from '../markdown/content-classes.js';
 import { planRelinkMoves } from '../markdown/relink.js';
 import type { RelinkPlan, RelinkPlanner, VaultPath, VaultService } from '../vault/vault-types.js';
 import type { IndexService } from './index-types.js';
+import { isManagedPage } from '../semester/generated-page-registry.js';
 
 /** A RelinkPlanner that always answers with the full plan (edits + skipped notes). */
 export interface IndexRelinkPlanner extends RelinkPlanner {
@@ -45,7 +46,7 @@ export function createIndexRelinkPlanner(
     // A note that is not UTF-8 is still parsed (from its lossy decode) to learn whether it links
     // here, but never rewritten: the caller reports it so the user can fix it by hand.
     const notUtf8 = new Set<VaultPath>();
-    const { edits, unresolvable } = await planRelinkMoves({
+    const { edits: planned, unresolvable } = await planRelinkMoves({
       moves,
       catalog: index.linkCatalog(),
       candidates,
@@ -55,8 +56,11 @@ export function createIndexRelinkPlanner(
         return note;
       },
     });
+    // F25: the generated "Học kỳ này" page is rewritten by its generator after the operation;
+    // relinking it too would put it in the journal (an undo would then trip over the new page).
+    const edits = planned.filter((edit) => !isManagedPage(vault, edit.path));
     const unwritable = unresolvable
-      .filter((link) => !notUtf8.has(link.path))
+      .filter((link) => !notUtf8.has(link.path) && !isManagedPage(vault, link.path))
       .map(({ path, raw, line }) => ({ path, raw, line }));
     return {
       edits: edits.filter((edit) => !notUtf8.has(edit.path)),

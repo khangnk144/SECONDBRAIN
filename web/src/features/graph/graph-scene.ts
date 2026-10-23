@@ -40,15 +40,27 @@ export class GraphScene {
   pinnedLabel = -1;
   /** Nodes lit by "AI vừa chạm" (1 = lit), or null; owned by the view's touch effects. */
   touched: Uint8Array | null = null;
+  /** Filter matches (1 = match), or null without a filter: the rest is dimmed (F24.2). */
+  filter: Uint8Array | null = null;
+  /** Notes edited in the last 24 h (indices, by colour group), or null: they pulse (F24.3). */
+  recent: Int32Array | null = null;
+  /** Nodes and edges kept off the normal passes while they fade in (time scrubber). */
+  hiddenNodes: Uint8Array | null = null;
+  hiddenEdges: Uint8Array | null = null;
   private readonly baseX: Float32Array;
   private readonly baseY: Float32Array;
   private readonly phase: Float32Array;
   private readonly grid = new HitGrid();
   private gridStale = true;
 
+  /**
+   * `phaseIndex[i]`: the drift phase of node `i` (default `i`); the time scrubber's week scenes
+   * pass the live node's index so a dot keeps swaying in step when the week changes.
+   */
   constructor(
     readonly model: GraphModel,
     readonly simulation: GraphSimulation,
+    options: { phaseIndex?: ArrayLike<number> } = {},
   ) {
     const n = model.nodes.length;
     this.highlight = new GraphHighlight(model);
@@ -57,7 +69,10 @@ export class GraphScene {
     this.radius = Float32Array.from(model.nodes, (node) => node.radius);
     this.baseX = new Float32Array(n);
     this.baseY = new Float32Array(n);
-    this.phase = Float32Array.from(model.nodes, (node) => driftPhase(node.i));
+    const phaseIndex = options.phaseIndex;
+    this.phase = Float32Array.from(model.nodes, (node) =>
+      driftPhase(phaseIndex?.[node.i] ?? node.i),
+    );
     this.refreshHighlight();
     this.computePositions(1, null, 1);
   }
@@ -69,11 +84,34 @@ export class GraphScene {
       hover: this.hover,
       pinnedLabel: this.pinnedLabel,
       touched: this.touched,
+      filter: this.filter,
+      hiddenNodes: this.hiddenNodes,
+      hiddenEdges: this.hiddenEdges,
     });
   }
 
   setTouched(mask: Uint8Array | null): void {
     this.touched = mask;
+    this.refreshHighlight();
+  }
+
+  /** A mask of another model's size is ignored (no filter). */
+  setFilter(mask: Uint8Array | null): void {
+    const fits = mask !== null && mask.length === this.model.nodes.length;
+    const next = fits ? mask : null;
+    if (next === this.filter) return;
+    this.filter = next;
+    this.refreshHighlight();
+  }
+
+  setRecent(indices: Int32Array | null): void {
+    this.recent = indices;
+  }
+
+  setHidden(nodes: Uint8Array | null, edges: Uint8Array | null): void {
+    if (nodes === this.hiddenNodes && edges === this.hiddenEdges) return;
+    this.hiddenNodes = nodes;
+    this.hiddenEdges = edges;
     this.refreshHighlight();
   }
 
@@ -159,6 +197,9 @@ export class GraphScene {
       labelPass: 0,
       labelExclusions: [],
       touch: null,
+      recent: null,
+      pulse: -1,
+      fade: null,
     };
   }
 

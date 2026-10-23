@@ -1,0 +1,81 @@
+/*
+ * Bento overlays and messages (F35.7): dialogs, the Ctrl+K palette, the shortcut sheet and quick
+ * capture are radius-26 tiles (the backdrop blur stays on overlays only, design.md §12.7); menus
+ * radius 16; toasts and banners radius 16; the shell drawer and sheets are tiles too. Tokens only.
+ */
+:root[data-style='bento'] .modal {
+  --button-2-bg: var(--tile-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-tile);
+  background:
+    linear-gradient(var(--tile), var(--tile)) padding-box,
+    var(--tile-border) border-box;
+}
+
+/* Quick capture keeps its blush surface (--ink on --blush is a checked pair) inside the tile. */
+:root[data-style='bento'] .capture-box {
+  border: 1px solid transparent;
+  border-radius: var(--radius-tile);
+  background:
+    linear-gradient(var(--blush), var(--blush)) padding-box,
+    var(--tile-border) border-box;
+}
+
+:root[data-style='bento'] .popup-menu {
+  border-color: var(--tile-line);
+  border-radius: var(--radius-control);
+  background: var(--tile);
+}
+
+:root[data-style='bento'] .popup-menu__item {
+  border-radius: var(--radius-square);
+}
+
+:root[data-style='bento'] .toast {
+  border-radius: var(--radius-control);
+}
+
+:root[data-style='bento'] :is(.connection-banner, .journal-banner__entry) {
+  border-color: transparent;
+  border-radius: var(--radius-control);
+}
+
+:root[data-style='bento'] .connection-banner,
+:root[data-style='bento'] .journal-banner {
+  margin-bottom: var(--gap-tile);
+}
+
+/* The shell's drawer and sheets (shell-overlay.css) as floating tiles. */
+:root[data-style='bento'] .shell-overlay__panel {
+  --button-2-bg: var(--tile-2);
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--tile), var(--tile)) padding-box,
+    var(--tile-border) border-box;
+}
+
+/* The folder drawer opens beside the rail, as tall as it. */
+:root[data-style='bento'] .shell-overlay__panel--left {
+  top: var(--page-margin);
+  bottom: var(--page-margin);
+  left: calc(2 * var(--page-margin) + var(--rail-w));
+  width: min(var(--folder-pane-w), calc(100vw - 3 * var(--page-margin) - var(--rail-w)));
+  padding: var(--space-3) var(--space-3) var(--space-4);
+  border-radius: var(--radius-tile);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+:root[data-style='bento'] .shell-overlay__panel--bottom {
+  border-radius: var(--radius-tile) var(--radius-tile) 0 0;
+}
+
+@media (max-width: 959px) {
+  /* The rail is a row on top: the drawer floats at the left edge. */
+  :root[data-style='bento'] .shell-overlay__panel--left {
+    top: var(--space-3);
+    bottom: var(--space-3);
+    left: var(--space-3);
+    width: min(300px, calc(100vw - 2 * var(--space-12)));
+  }
+}

@@ -11,7 +11,7 @@
 import type { FrameInput } from './graph-draw';
 import { buildDotObstacles } from './graph-label-obstacles';
 import { HIDDEN, MAX_PLACED_LABELS, PLACED, placeLabel } from './graph-label-place';
-import { MAX_LABELS } from './graph-highlight';
+import { MAX_LABELS, STATE_DIM, STATE_HIDDEN } from './graph-highlight';
 
 /** Candidates at the default (fitted) zoom: only the top hubs, so the map stays calm. */
 export const AMBIENT_LABELS_AT_FIT = 15;
@@ -40,6 +40,9 @@ export function drawAmbientLabels(ctx: CanvasRenderingContext2D, f: FrameInput):
   for (let k = 0; k < highlight.ambientOrder.length && placed < MAX_AMBIENT_LABELS; k++) {
     const i = highlight.ambientOrder[k] ?? 0;
     if (f.labelMark[i] === f.labelPass) continue;
+    // Dots a filter dims (or that are fading in) stay quiet.
+    const state = highlight.nodeState[i];
+    if (state === STATE_DIM || state === STATE_HIDDEN) continue;
     const ranked = tried < budget && (model.nodes[i]?.degree ?? 0) > 0;
     const kind = ranked && tried < HUB_LABELS_OVER_DOTS ? 'hub' : 'quiet';
     const result = placeLabel(ctx, f, i, kind, ranked ? 0 : AMBIENT_LABEL_RADIUS_PX);

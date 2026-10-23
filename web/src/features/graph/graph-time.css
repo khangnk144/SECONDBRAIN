@@ -1,0 +1,156 @@
+/* Brain map filters (F24.2) and time scrubber (F24.1). Colors only from tokens.css. */
+
+/* Over the canvas, under the title and the zoom buttons; drags pass between its controls. */
+.graph-filters {
+  position: absolute;
+  top: 56px;
+  right: var(--space-2);
+  left: var(--space-2);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  pointer-events: none;
+}
+
+.graph-filters > * {
+  pointer-events: auto;
+}
+
+.graph-filters__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.graph-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 28px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+/* Pressed: tinted, outlined and marked with a check (not by colour alone). */
+.graph-chip[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  font-weight: 600;
+}
+
+.graph-chip__check {
+  flex: 0 0 auto;
+}
+
+.graph-filters__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 0 0 var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+  color: var(--ink-2);
+  font-size: 0.8125rem;
+}
+
+.graph-filters__select {
+  min-height: 28px;
+  max-width: 220px;
+  padding: 0 var(--space-2);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.8125rem;
+}
+
+.graph-filters__clear {
+  min-height: 28px;
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+}
+
+/* Bottom of the map: the scrubber above the legend. */
+.graph-time {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: var(--paper);
+}
+
+.graph-time__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+.graph-time__play {
+  gap: var(--space-1);
+  min-height: 32px;
+}
+
+.graph-time__range {
+  flex: 1 1 160px;
+  min-width: 120px;
+  height: 24px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.graph-time__label {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-2);
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.graph-time__week {
+  font-weight: 600;
+}
+
+.graph-time__counts,
+.graph-time__note {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: max(12px, 0.78125rem);
+  line-height: 1.5;
+}
+
+/* "sửa trong 24 giờ" next to a note in the side panel lists. */
+.graph-recent {
+  align-self: flex-start;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  color: var(--ink);
+  font-size: max(12px, 0.75rem);
+  line-height: 1.5;
+}
+
+/* Touch screens: every control of the filters and the scrubber is at least 40 px high. */
+@media (pointer: coarse) {
+  .graph-chip,
+  .graph-filters__select,
+  .graph-filters__clear,
+  .graph-time__play,
+  .graph-time__range {
+    min-height: 40px;
+  }
+}

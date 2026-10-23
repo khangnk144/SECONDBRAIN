@@ -88,8 +88,10 @@ describe('GET /api/settings', () => {
     expect(res.json()).toMatchObject({ port: 4786, ui: DEFAULT_UI_SETTINGS });
     expect(Object.keys(res.json()).sort()).toEqual([
       'ai',
+      'backup',
       'configuredPort',
       'mcp',
+      'notify',
       'port',
       'reminders',
       'restartRequired',
@@ -105,6 +107,7 @@ describe('GET /api/settings', () => {
       'language',
       'name',
       'palette',
+      'style',
       'theme',
     ]);
     await handle.cleanup();
@@ -115,7 +118,7 @@ describe('Global settings sections for reminders, run at login and AI', () => {
   it('fills defaults for a file written before these sections existed', () => {
     const settings = normalizeSettings({});
     expect(settings.reminders).toEqual({ time: '08:00' });
-    expect(settings.system).toEqual({ runAtLogin: false });
+    expect(settings.system).toEqual({ runAtLogin: false, tray: true });
     expect(settings.ai).toEqual({
       provider: 'anthropic',
       apiKeys: {},

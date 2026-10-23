@@ -1,0 +1,214 @@
+/*
+ * The 14-day strip in the Bento style (design.md §12.3, bento-reference.dc.html): each day is a
+ * rounded box (`--tile-2`, radius 18; today on the accent wash with an accent weekday) showing
+ * weekday, day number, a 28×6 bar coloured by the most urgent item (instead of the dot) and up
+ * to two labels. Same markup and behaviour as the calm strip: only the look changes here.
+ * Tokens only (the Bento tokens exist under data-style="bento").
+ */
+.today-strip--bento {
+  --today-strip-gap: 8px;
+  /* Never narrower than the mock's 66 px (scaled with the font size): the day number and two
+     label lines always fit; when 14 days do not, the strip scrolls inside its tile (FIX-B B3/D1,
+     use-strip-visible-days.ts picks how many whole days are visible). */
+  --today-strip-min-cell: max(66px, 4.125rem);
+  --today-strip-line-height: 1.25;
+  margin-top: 0;
+}
+
+.today-strip__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+  margin-bottom: 14px;
+}
+
+.today-strip__aside {
+  font-size: max(12px, 0.78125rem);
+  line-height: 1.4;
+  color: var(--ink-2);
+}
+
+/* No thin line under Bento cells; it stays (invisible) because its 400 ms intro ends the intro. */
+.today-strip--bento .today-strip__line {
+  opacity: 0;
+}
+
+.today-strip--bento .today-strip__track {
+  gap: var(--today-strip-gap);
+}
+
+.today-strip--bento .today-strip__cell {
+  grid-template-rows: auto auto 6px auto;
+  row-gap: 6px;
+  align-content: start;
+  width: max(
+    var(--today-strip-min-cell),
+    calc(
+      (100cqi - (var(--today-strip-days, 14) - 1) * var(--today-strip-gap)) /
+        var(--today-strip-days, 14)
+    )
+  );
+  padding: 10px 4px;
+  border-radius: var(--radius-inner);
+  background: var(--tile-2);
+  color: var(--ink-2);
+  font-size: max(12px, 0.71875rem);
+}
+
+/* Hover: a thin wash of --tile-line over the cell's own background. */
+.today-strip--bento .today-strip__cell:hover {
+  background: linear-gradient(var(--tile-line), var(--tile-line)), var(--tile-2);
+}
+
+.today-strip--bento .today-strip__cell.is-today {
+  background: var(--accent-wash);
+}
+
+.today-strip--bento .today-strip__cell.is-today:hover {
+  background: linear-gradient(var(--tile-line), var(--tile-line)), var(--accent-wash);
+}
+
+.today-strip--bento .today-strip__cell--overdue {
+  width: 4.5rem;
+  margin-right: var(--today-strip-gap);
+}
+
+.today-strip--bento .today-strip__weekday {
+  grid-row: 1;
+}
+
+.today-strip--bento .today-strip__day {
+  grid-row: 2;
+  /* The cell is wide enough for "1/11" or "Nov 1": the number is never cut to "1…". */
+  overflow: visible;
+  text-overflow: clip;
+  color: var(--ink);
+  font-size: max(15px, 1.1875rem);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.today-strip--bento .today-strip__cell.is-today .today-strip__weekday {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.today-strip--bento .today-strip__cell.is-today .today-strip__day {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.today-strip--bento .today-strip__heading {
+  grid-row: 1 / span 2;
+  height: auto;
+  align-self: center;
+}
+
+/* The bar replaces the dot; empty days keep a quiet bar so every cell has the same rhythm. */
+.today-strip--bento .today-strip__dot,
+.today-strip--bento .today-strip__cell.has-items .today-strip__dot,
+.today-strip--bento .today-strip__cell.is-today:not(.has-items) .today-strip__dot,
+.today-strip--bento .today-strip__cell.is-today.has-items .today-strip__dot,
+.today-strip--bento .today-strip__cell.is-today.has-items:hover .today-strip__dot {
+  grid-row: 3;
+  width: 28px;
+  max-width: 100%;
+  height: 6px;
+  border: 0;
+  border-radius: 6px;
+  box-shadow: none;
+  background: var(--today-bar, var(--line));
+}
+
+/* The colour comes from the cell as a custom property: a `.has-items` selector above outranks any
+ * `.today-strip__cell--urgent .today-strip__dot` rule, which left every bar grey. */
+.today-strip--bento .today-strip__cell--urgent {
+  --today-bar: var(--urgent);
+}
+
+.today-strip--bento .today-strip__cell--soon {
+  --today-bar: var(--soon);
+}
+
+.today-strip--bento .today-strip__cell--ok {
+  --today-bar: var(--ok);
+}
+
+.today-strip--bento .today-strip__labels {
+  grid-row: 4;
+  margin-top: 0;
+}
+
+.today-strip--bento .today-strip__label,
+.today-strip--bento .today-strip__cell--urgent .today-strip__label,
+.today-strip--bento .today-strip__cell--soon .today-strip__label,
+.today-strip--bento .today-strip__cell--ok .today-strip__label {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+/* First paint (F35.8): the bars appear left → right within 400 ms. */
+.today-strip--bento.is-intro .today-strip__dot {
+  animation: today-strip-bar-in 160ms var(--ease) both;
+  animation-delay: calc(min(var(--today-cell-index, 0), 14) * 17ms);
+}
+
+@keyframes today-strip-bar-in {
+  from {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.today-strip--bento .today-strip__legend {
+  margin-top: var(--space-3);
+}
+
+.today-strip--bento .today-strip__legend-dot {
+  width: 14px;
+  height: 5px;
+  border-radius: 3px;
+}
+
+.today-strip--bento .today-strip__legend-dot--today {
+  width: 14px;
+  height: 10px;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  background: var(--accent-wash);
+}
+
+.today-strip--bento .today-strip__tooltip,
+.today-strip--bento .today-strip__popover {
+  border-color: var(--tile-line);
+  background: var(--tile);
+}
+
+.today-strip--bento .today-strip__tooltip {
+  border-radius: var(--radius-square);
+}
+
+.today-strip--bento .today-strip__popover {
+  border-radius: var(--radius-inner);
+}
+
+/* Loading: the same boxes, quiet and not interactive. */
+.today-strip-placeholder.today-strip--bento .today-strip__cell:hover {
+  background: var(--tile-2);
+}
+
+.today-strip-placeholder.today-strip--bento .today-strip__cell.is-today:hover {
+  background: var(--accent-wash);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .today-strip--bento.is-intro .today-strip__dot {
+    animation: none;
+  }
+}

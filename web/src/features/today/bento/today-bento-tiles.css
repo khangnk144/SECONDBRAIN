@@ -1,0 +1,248 @@
+/* Inside the Bento Today tiles (design.md §12.3–§12.5). Tokens only. */
+.today-tile__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+}
+
+.today-tile__title {
+  margin: 0;
+  font-size: 0.96875rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+.today-tile__title:focus {
+  outline: none;
+}
+
+.today-tile__meta,
+.today-tile__hint {
+  font-size: max(12px, 0.78125rem);
+  line-height: 1.4;
+  color: var(--ink-2);
+}
+
+.today-tile__empty {
+  color: var(--ink-2);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.today-tile__invite {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+.today-tile__more {
+  align-self: flex-start;
+}
+
+.today-tile__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  border-radius: var(--radius-s);
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-underline-offset: 2px;
+}
+
+.today-tile__link:focus-visible,
+.today-deadline__item:focus-visible,
+.today-task__open:focus-visible,
+.today-ring__title:focus-visible,
+.today-capture__save:focus-visible,
+.today-greeting:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Lời chào */
+.today-greeting {
+  margin: 0;
+  font-size: clamp(1.875rem, 3.2vw, 2.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  overflow-wrap: anywhere;
+}
+
+.today-greeting:focus {
+  outline: none;
+}
+
+.today-greeting[data-pointer-focus]:focus-visible {
+  outline: none;
+}
+
+.today-greeting__name {
+  color: var(--accent);
+}
+
+.today-greeting__flower::before {
+  content: '✿';
+  margin-left: 0.25em;
+  color: var(--accent);
+  font-weight: 400;
+}
+
+.today-greeting__summary,
+.today-greeting__summary-slot {
+  min-height: 1.5em;
+  color: var(--ink-2);
+  font-size: 0.96875rem;
+  line-height: 1.5;
+}
+
+.today-tile--greeting .ai-today-line {
+  --button-2-bg: var(--tile);
+  --button-2-border: var(--line);
+  align-items: center;
+  gap: 10px;
+  max-width: none;
+  margin-top: 6px;
+  padding: 10px 14px;
+  border-radius: var(--radius-control);
+  background: var(--tile-2);
+  color: var(--ink);
+  font-size: 0.84375rem;
+}
+
+.today-tile--greeting .ai-today-line__label {
+  padding: 3px 7px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--chip-lilac);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+/* Ngày */
+.today-date__weekday,
+.today-date__month {
+  font-size: 0.84375rem;
+  line-height: 1.4;
+}
+
+.today-date__weekday {
+  font-weight: 600;
+}
+
+.today-date__day {
+  font-size: 4rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+/* Deadline gần nhất */
+.today-deadline__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.today-deadline__title {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 0.84375rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.today-pill {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--chip-lilac);
+  color: var(--ink);
+  font-size: max(12px, 0.75rem);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.today-pill--urgent {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.today-pill--soon {
+  background: var(--chip-peach);
+}
+
+.today-pill--ok {
+  background: var(--chip-mint);
+}
+
+.today-deadline__count {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.today-deadline__number {
+  color: var(--accent);
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.today-deadline__unit {
+  font-size: 1rem;
+}
+
+.today-deadline__item,
+.today-task__open,
+.today-ring__title {
+  min-height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.today-deadline__item {
+  align-self: flex-start;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.today-deadline__item:hover,
+.today-task__open:hover,
+.today-ring__title:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+}
+
+.today-deadline__detail {
+  color: var(--ink-2);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+@media (pointer: coarse) {
+  .today-deadline__item,
+  .today-task__open,
+  .today-ring__title,
+  .today-tile__link {
+    min-height: 40px;
+  }
+}

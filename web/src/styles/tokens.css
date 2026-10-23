@@ -10,6 +10,9 @@
   --ink-2: #a595ac;
   --line: #352c3c;
   --accent: #d88ab6;
+  /* Accent-colored text and icons on a selected item (the active rail entry, design.md §12.2):
+     the accent itself unless that falls under 4.5:1 on --accent-wash over --tile (checked). */
+  --accent-ink: var(--accent);
   --on-accent: #2a1a24;
   --accent-soft: #3a2c45;
   --blush: #3d2a35;
@@ -119,6 +122,105 @@
   --blush: #f3eef9;
   --focus: #6f52a3;
   --graph-projects: #6f52a3;
+}
+
+/*
+ * Bento mềm (design.md §12, §12.8): the default style since M5, `data-style="bento"` on <html>.
+ * Only surfaces, pastels, radii and spacing change here; ink, accent and status colors still come
+ * from the theme and palette rules above. No [data-palette] rule sets a bento token (except the
+ * one --accent-ink fix at the end), so the palette accent applies on top of bento in both themes
+ * ([data-style][data-theme] has 3 attributes and beats the 2-attribute light rule for --bg). The
+ * calm style uses none of these tokens: bento CSS is written under :root[data-style='bento'].
+ */
+:root[data-style='bento'] {
+  --bg: #15101a;
+  --tile: #1f1726;
+  --tile-2: #271d2e;
+  --tile-line: rgba(255, 255, 255, 0.06);
+  /* 1px gradient border: border: 1px solid transparent;
+     background: linear-gradient(var(--tile), var(--tile)) padding-box, var(--tile-border) border-box; */
+  --tile-border: linear-gradient(
+    140deg,
+    color-mix(in srgb, var(--accent) 55%, transparent),
+    rgba(185, 160, 232, 0.2) 45%,
+    rgba(255, 255, 255, 0.05)
+  );
+  /* Hover only brightens the border (§12.6). */
+  --tile-border-hover: linear-gradient(
+    140deg,
+    color-mix(in srgb, var(--accent) 80%, transparent),
+    rgba(185, 160, 232, 0.36) 45%,
+    rgba(255, 255, 255, 0.1)
+  );
+  /* "Ngày" tile: --on-tint text on a --tint-from → --tint-to gradient (both ends checked). */
+  --tint-from: #e9d7ff;
+  --tint-to: #f7c6e2;
+  --tint: linear-gradient(160deg, var(--tint-from), var(--tint-to));
+  --on-tint: #2b1a38;
+  /* Pastels: charts, dots, chips only (never running text), 3:1 against --tile. */
+  --pastel-lilac: #b9a0e8;
+  --pastel-peach: #ffc9a0;
+  --pastel-mint: #8ee6c9;
+  --pastel-butter: #f7de8a;
+  /* Chip backgrounds (pastel at 15 %, text --ink) and the selected-item wash (accent at 18 %). */
+  --chip-lilac: color-mix(in srgb, var(--pastel-lilac) 15%, transparent);
+  --chip-peach: color-mix(in srgb, var(--pastel-peach) 15%, transparent);
+  --chip-mint: color-mix(in srgb, var(--pastel-mint) 15%, transparent);
+  --chip-butter: color-mix(in srgb, var(--pastel-butter) 15%, transparent);
+  --accent-wash: color-mix(in srgb, var(--accent) 18%, transparent);
+
+  /* Radii (§12.4): tiles 26, right-panel tiles 20, day cells and inner rows 18, buttons, inputs
+     and task rows 16, small square buttons 12, checkboxes 7, pills 999. */
+  --radius-tile: 26px;
+  --radius-panel-tile: 20px;
+  --radius-inner: 18px;
+  --radius-control: 16px;
+  --radius-square: 12px;
+  --radius-check: 7px;
+  --radius-pill: 999px;
+  /* Layout (§12.2): page margin 20, gap between tiles 16, right-panel tiles 12, rail 84. */
+  --page-margin: 20px;
+  --gap-tile: 16px;
+  --gap-panel-tile: 12px;
+  --rail-w: 84px;
+  --folder-pane-w: 260px;
+  /* Primary button and search field height (46), quick-capture input (50). */
+  --control-h: 46px;
+  --capture-input-h: 50px;
+}
+:root[data-style='bento'][data-theme='light'] {
+  --bg: #f5eff7;
+  --tile: #ffffff;
+  --tile-2: #faf6fb;
+  --tile-line: rgba(46, 35, 53, 0.08);
+  --tile-border: linear-gradient(
+    140deg,
+    color-mix(in srgb, var(--accent) 45%, transparent),
+    rgba(123, 94, 167, 0.18) 45%,
+    rgba(46, 35, 53, 0.06)
+  );
+  --tile-border-hover: linear-gradient(
+    140deg,
+    color-mix(in srgb, var(--accent) 70%, transparent),
+    rgba(123, 94, 167, 0.32) 45%,
+    rgba(46, 35, 53, 0.12)
+  );
+  --tint-from: #e7d9fb;
+  --tint-to: #f8d3e6;
+  --on-tint: #2b1a38;
+  --pastel-lilac: #7b5ea7;
+  --pastel-peach: #b8642a;
+  --pastel-mint: #2e7a66;
+  --pastel-butter: #8a6a0b;
+  /* The bento page background is a shade darker than calm's #fbf8fa: secondary text and the
+     "ok" mark get a shade darker too, to keep 4.5:1 and 3:1 on it (check-contrast.ts). */
+  --ink-2: #75667d;
+  --ok: #4a9781;
+}
+/* Light "Hoa đào": its accent reaches only 4.49:1 on --accent-wash over --tile, so the active
+   rail label is 3 % closer to --ink (4.65:1). Every other set keeps --accent-ink = --accent. */
+:root[data-style='bento'][data-palette='hoa-dao'][data-theme='light'] {
+  --accent-ink: #ac3757;
 }
 
 /* Base font size (Settings: 14 / 16 / 18 px). The type scale in base.css is in rem. */

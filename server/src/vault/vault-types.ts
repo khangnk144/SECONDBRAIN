@@ -187,7 +187,9 @@ export type TrashReason =
   | 'sample-data'
   | 'restore-collision'
   | 'history-restore'
-  | 'template-upgrade';
+  | 'template-upgrade'
+  /** F25.3: an edited copy of the generated "Học kỳ này" page, set aside by "Tạo lại". */
+  | 'generated-replaced';
 
 /** `vault/.secondbrain/trash/<id>/meta.json` (SPEC §4.11). */
 export interface TrashMeta {

@@ -17,7 +17,9 @@ export interface ShellValues {
 
 /**
  * Replaces the shell placeholders written by the web app's index.html:
- * __SB_TOKEN__, __SB_LANG__, __SB_THEME__, __SB_PALETTE__, __SB_FONT_SIZE__, __SB_BOOT__ (JSON of ui).
+ * __SB_TOKEN__, __SB_LANG__, __SB_THEME__, __SB_PALETTE__, __SB_FONT_SIZE__, __SB_STYLE__,
+ * __SB_BOOT__ (JSON of ui). `data-style` is set here, before any script runs, so the first paint
+ * already has the right layout (no flash of the other style).
  * Every value is attribute-escaped; the template is never trusted to quote them for us.
  */
 export function renderUiShell(template: string, { token, ui }: ShellValues): string {
@@ -27,12 +29,14 @@ export function renderUiShell(template: string, { token, ui }: ShellValues): str
     __SB_THEME__: ui.theme,
     __SB_PALETTE__: ui.palette,
     __SB_FONT_SIZE__: String(ui.fontSize),
+    __SB_STYLE__: ui.style,
     __SB_BOOT__: JSON.stringify({
       name: ui.name,
       language: ui.language,
       theme: ui.theme,
       palette: ui.palette,
       fontSize: ui.fontSize,
+      style: ui.style,
     }),
   };
   let html = template;

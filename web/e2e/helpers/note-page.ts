@@ -27,12 +27,21 @@ export async function caretToEnd(page: Page): Promise<void> {
     .toBe(true);
 }
 
-/** Caret on a new, empty paragraph at the end of the note; returns that paragraph. */
+/**
+ * Caret on a new, empty paragraph at the end of the note; returns that paragraph. Under load an
+ * Enter pressed in the first instant after the note opened can be lost (seen twice in about 20
+ * runs of responsive.spec.ts while the whole suite ran); Enter is then pressed once more, only
+ * when the last paragraph is still not empty.
+ */
 export async function newLastLine(page: Page) {
-  await caretToEnd(page);
-  await page.keyboard.press('Enter');
   const last = page.locator('.ProseMirror > p:last-child');
-  await expect(last).toHaveText('');
+  let attempt = 0;
+  await expect(async () => {
+    attempt += 1;
+    await caretToEnd(page);
+    if (attempt === 1 || (await last.textContent()) !== '') await page.keyboard.press('Enter');
+    await expect(last).toHaveText('', { timeout: 2_000 });
+  }).toPass({ timeout: 10_000 });
   return last;
 }
 

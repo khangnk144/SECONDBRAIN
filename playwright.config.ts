@@ -5,10 +5,16 @@ import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { defineConfig, devices } from '@playwright/test';
+import { seedStyle } from './web/e2e/helpers/e2e-style.js';
 
 const port = 4799;
 // The config is loaded by the runner and by every worker; the env var keeps one home per run.
-process.env.SB_E2E_HOME ??= mkdtempSync(path.join(tmpdir(), 'sb e2e Đồ án '));
+// A new home starts in the calm layout the specs were written for (`SB_E2E_STYLE=bento` for the
+// Bento pass), seeded once, before the server first starts (F35.1).
+if (!process.env.SB_E2E_HOME) {
+  process.env.SB_E2E_HOME = mkdtempSync(path.join(tmpdir(), 'sb e2e Đồ án '));
+  seedStyle(process.env.SB_E2E_HOME);
+}
 const home = process.env.SB_E2E_HOME;
 
 export default defineConfig({

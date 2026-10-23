@@ -10,6 +10,7 @@ import {
   vaultPathSchema,
   type PathQuery,
 } from './vault-route-schemas.js';
+import { assertNotGeneratedPage } from '../semester/generated-page-registry.js';
 
 interface LinkMentionBody {
   path: string;
@@ -60,6 +61,7 @@ export function registerNoteMentionRoutes(app: FastifyInstance, context: AppCont
     async (request) => {
       const { expectedRevision, start, end } = request.body;
       const path = guardNotePath(request.body.path);
+      await assertNotGeneratedPage(context, path); // F25.2
       const targetPath = guardNotePath(request.body.target);
       const target = await context.vault.stat(targetPath);
       if (!target) {

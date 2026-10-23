@@ -47,7 +47,8 @@ const GROUPS: Readonly<Record<string, GraphGroup>> = {
   daily: 'daily',
 };
 
-const groupOf = (path: VaultPath): GraphGroup =>
+/** Colour group of a path by its first folder (also used for nodes only the history knows). */
+export const groupOf = (path: VaultPath): GraphGroup =>
   GROUPS[topFolderOfPath(path).normalize('NFC').toLowerCase()] ?? 'other';
 
 const byPath = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);

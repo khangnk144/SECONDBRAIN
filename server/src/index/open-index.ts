@@ -55,6 +55,11 @@ class SqliteIndexService extends IndexQueries implements IndexService {
     );
   }
 
+  /** See `IndexService.changeStamp`: the connection plus the change queue's task boundaries. */
+  changeStamp(): string {
+    return `${this.attached}:${this.queue.generation}`;
+  }
+
   open(): Promise<OpenResult> {
     this.opened ??= this.queue.enqueue(async () => {
       // No log yet = the very first index of this vault: history is reconstructed instead.

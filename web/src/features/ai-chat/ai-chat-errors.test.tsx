@@ -1,4 +1,4 @@
-import { act, render, screen, within } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Navigator } from '../../lib/app-navigation';
@@ -47,8 +47,15 @@ describe('chat: AI not ready sends nothing (F33.3)', () => {
     expect(screen.queryByRole('textbox')).toBeNull();
     await askQuestion(THREAD, 'Có gì đến hạn?');
     expect(chat.requests).toHaveLength(0);
+    // Settings is not rendered here: a stand-in for its AI heading lets the opener finish (its
+    // 3 s wait for the section would otherwise outlive this file's document).
+    const heading = document.createElement('h2');
+    heading.id = 'settings-ai';
+    document.body.append(heading);
     await userEvent.setup().click(screen.getByRole('button', { name: 'Mở Cài đặt AI' }));
     expect(navigate).toHaveBeenCalledWith('/settings', undefined);
+    await waitFor(() => expect(heading).toHaveFocus());
+    heading.remove();
   });
 
   it('no key: route B needs a key, route A goes through Claude Desktop', async () => {

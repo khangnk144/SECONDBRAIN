@@ -33,6 +33,7 @@ describe('readBootConfig', () => {
       theme: 'light',
       palette: 'oai-huong',
       fontSize: 18,
+      style: 'bento',
     });
     const config = readBootConfig(docWith('tok_123', boot));
     expect(config.token).toBe('tok_123');
@@ -42,6 +43,7 @@ describe('readBootConfig', () => {
       theme: 'light',
       palette: 'oai-huong',
       fontSize: 18,
+      style: 'bento',
     });
   });
 

@@ -5,6 +5,7 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { expect } from '@playwright/test';
+import { seedStyle } from './e2e-style.js';
 
 export const PERF_PORT = 4798;
 export const PERF_ORIGIN = `http://localhost:${PERF_PORT}`;
@@ -25,6 +26,7 @@ export function perfServer(): PerfServer {
     vaultDir: path.join(home, 'vault'),
     async start() {
       const started = Date.now();
+      seedStyle(home);
       child = spawn('node', ['server/dist/index.js', '--port', String(PERF_PORT), '--home', home], {
         stdio: 'ignore',
       });

@@ -1,0 +1,83 @@
+{
+  "title": "Reminders by Telegram and email",
+  "intro": "Besides notifications on this computer, the app can send deadline reminders to your phone. Each channel stays off until you turn it on.",
+  "test": "Send a test",
+  "testNamed": "Send a test via {{channel}}",
+  "testBusy": "Sending…",
+  "testDone": "Test message sent. Check your {{channel}}.",
+  "testFailed": "Not sent: {{reason}}",
+  "lastSent": "Last sent: {{when}}",
+  "lastError": "The last message failed: {{reason}} The app will try again.",
+  "pending": "Waiting to be sent: {{count}}.",
+  "dateFormat": "HH:mm, D MMM YYYY",
+  "telegram": {
+    "title": "Telegram",
+    "enable": "Send reminders via Telegram",
+    "missing": "Save the bot token and chat ID first to turn this on.",
+    "botToken": "Bot token",
+    "botTokenName": "Telegram bot token",
+    "chatId": "Chat ID",
+    "chatIdHint": "A number (groups start with -) or @channelname.",
+    "howTo": "How to get a bot token and chat ID",
+    "howToSteps": {
+      "one": "In Telegram, open @BotFather, send /newbot and give the bot a name.",
+      "two": "BotFather answers with a token like 123456789:AA…; paste it into Bot token and press Save.",
+      "three": "Open the chat with your bot and press Start (a bot can only message people who pressed Start).",
+      "four": "Open @userinfobot and press Start: it answers with your Id; paste that number into Chat ID."
+    },
+    "consent": "When on, the app sends the deadline title, due date and note path to chat {{chatId}} through Telegram's servers.",
+    "consentNoChat": "When on, the app sends the deadline title, due date and note path to the chat you enter below, through Telegram's servers."
+  },
+  "email": {
+    "title": "Email",
+    "enable": "Send reminders by email",
+    "missing": "Fill in the SMTP server, sender and recipient (and the password if there is a user name) first to turn this on.",
+    "host": "SMTP server",
+    "hostPlaceholder": "smtp.gmail.com",
+    "port": "SMTP port",
+    "portHint": "Usually 587 for STARTTLS, 465 for TLS.",
+    "portInvalid": "Enter a number from 1 to 65535.",
+    "security": "Connection security",
+    "securityChoices": {
+      "starttls": "STARTTLS",
+      "tls": "TLS",
+      "none": "No encryption"
+    },
+    "user": "User name",
+    "userHint": "Leave empty if the server needs no login.",
+    "password": "Password",
+    "passwordName": "email password",
+    "passwordHint": "For Gmail, use an app password, not your main password.",
+    "from": "Sender address",
+    "to": "Send to",
+    "consent": "When on, the app sends the deadline title, due date and note path to {{to}} through the server {{host}}.",
+    "consentIncomplete": "When on, the app sends the deadline title, due date and note path to the recipient, through the SMTP server you enter below.",
+    "securityHint": "No encryption works only with a server on this computer."
+  },
+  "failure": {
+    "auth": "Telegram did not accept the bot token. Check the token from @BotFather.",
+    "chat-not-found": "Telegram cannot find this chat, or you have not pressed Start in the bot. Check the chat ID and press Start.",
+    "rate-limit": "Telegram is limiting messages. Wait a minute and try again.",
+    "network": "the connection failed. Check the network and try again.",
+    "timeout": "the server did not answer in time. Try again in a few minutes.",
+    "smtp-auth": "the email server did not accept the user name or password.",
+    "smtp-connect": "the email server could not be reached. Check the server, port and security setting.",
+    "rejected": "the email server refused the message. Check the sender and recipient addresses.",
+    "not-configured": "fill in every field of this channel first.",
+    "busy": "another test message is being sent.",
+    "interrupted": "the app stopped while sending.",
+    "failed": "something unexpected went wrong. Try again in a few minutes.",
+    "tls-required": "this server is not on your computer, so it cannot be used without encryption. Choose STARTTLS or TLS."
+  },
+  "saveErrors": {
+    "chat-id-format": "A chat ID is a number (groups start with -) or @channelname.",
+    "bot-token-format": "A bot token looks like 123456789:AA… Paste the whole token from @BotFather again.",
+    "host-format": "Enter a server name, for example smtp.gmail.com (no https:// and no port).",
+    "email-format": "Enter one email address, for example you@school.edu.",
+    "control-characters": "The value contains characters that cannot be used.",
+    "too-short": "This field cannot be empty.",
+    "out-of-range": "The value is outside the allowed range.",
+    "pattern": "This value does not have the right form.",
+    "tls-required": "Choose No encryption only for an SMTP server on this computer (localhost, 127.0.0.1). For any other server choose STARTTLS or TLS, so your password is never sent unencrypted."
+  }
+}

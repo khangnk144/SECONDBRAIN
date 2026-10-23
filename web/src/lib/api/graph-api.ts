@@ -1,4 +1,5 @@
 import { api } from '../api';
+import type { GraphHistoryResponse } from './graph-history-types';
 import type { GraphResponse, LocalGraphDepth } from './graph-types';
 import { withQuery } from './query-string';
 import type { VaultPath } from './vault-types';
@@ -11,4 +12,9 @@ export function getGraph(): Promise<GraphResponse> {
 /** Nodes within `depth` hops of `path`, the note itself included; 404 NOT_FOUND for an unknown note. */
 export function getLocalGraph(path: VaultPath, depth: LocalGraphDepth): Promise<GraphResponse> {
   return api().get<GraphResponse>(withQuery('/graph/local', { path, depth }));
+}
+
+/** When each node and edge existed (the time scrubber, SPEC F24.1). */
+export function getGraphHistory(): Promise<GraphHistoryResponse> {
+  return api().get<GraphHistoryResponse>('/graph/history');
 }

@@ -1,0 +1,53 @@
+{
+  "title": "Weekly review",
+  "command": "Weekly review",
+  "range": "{{from}} – {{to}}",
+  "rangeDay": "MMM D",
+  "inbox": {
+    "heading": "Inbox",
+    "count_one": "Your Inbox has {{count}} note.",
+    "count_other": "Your Inbox has {{count}} notes.",
+    "empty": "Your Inbox is clear. Press Alt+Q to capture anything, any time.",
+    "tidy": "Tidy Inbox",
+    "tidyWithAi": "Opens AI suggestions for where your Inbox notes belong.",
+    "tidyWithoutAi": "Opens the folder tree at your Inbox so you can file its notes in folders."
+  },
+  "notes": {
+    "heading": "Notes",
+    "count_one": "You created or edited {{count}} note.",
+    "count_other": "You created or edited {{count}} notes.",
+    "none": "No notes this week yet. How about a few lines?",
+    "created": "new",
+    "edited": "edited",
+    "more_one": "{{count}} more note.",
+    "more_other": "{{count}} more notes."
+  },
+  "tasks": {
+    "heading": "Tasks done",
+    "count_one": "You finished {{count}} task.",
+    "count_other": "You finished {{count}} tasks.",
+    "none": "No tasks were ticked off this week.",
+    "inNote": "in {{title}}",
+    "more_one": "{{count}} more task.",
+    "more_other": "{{count}} more tasks."
+  },
+  "upcoming": {
+    "heading": "Next week",
+    "count_one": "Next week has {{count}} deadline.",
+    "count_other": "Next week has {{count}} deadlines.",
+    "none": "No deadlines next week yet.",
+    "open": "Open Tasks"
+  },
+  "seeAll": "See all",
+  "later": "Later",
+  "laterDone": "Weekly review hidden until next Sunday. The command palette still opens it.",
+  "loadError": "The weekly review could not be loaded. Please try again.",
+  "retry": "Try again",
+  "loading": "Loading the weekly review…",
+  "screen": {
+    "weeks": "Choose a week",
+    "previous": "Previous week",
+    "next": "Next week",
+    "thisWeek": "Back to this week"
+  }
+}

@@ -7,6 +7,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
 import { appApi, localIso, resetVault } from './helpers/app-api.js';
+import { runStyle } from './helpers/e2e-style.js';
 import { appReady, cursorSettled, expectFocus } from './helpers/keyboard.js';
 
 test.afterEach(async ({ page }) => resetVault(await appApi(page)));
@@ -103,6 +104,15 @@ test('every app shortcut fires on its screen (F22.1, browser tab)', async ({ pag
   await page.goto('/');
   await appReady(page);
   await run('toggle-left-pane', async () => {
+    if (runStyle() === 'bento') {
+      // Bento's Today has no folder pane: the shortcut opens and closes the "Thư mục" drawer.
+      const drawer = page.getByRole('dialog', { name: 'Thư mục' });
+      await page.keyboard.press(keysOf('toggle-left-pane'));
+      await expect(drawer).toBeVisible();
+      await page.keyboard.press(keysOf('toggle-left-pane'));
+      await expect(drawer).toHaveCount(0);
+      return;
+    }
     await page.keyboard.press(keysOf('toggle-left-pane'));
     await expect(shell).toHaveClass(/app-shell--left-collapsed/);
     await page.keyboard.press(keysOf('toggle-left-pane'));

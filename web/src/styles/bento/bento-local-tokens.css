@@ -1,0 +1,15 @@
+/*
+ * Bento tokens derived from tokens.css by reference only (raw colors and color-mix() live in
+ * tokens.css alone, check-raw-colors.ts):
+ * - --hover-wash: a rail entry / quiet button under the pointer. --tile-line is the 6 % white
+ *   (dark) / 8 % ink (light) wash the mock uses for hover; --ink-2 on it stays ≥ 4.7:1.
+ * - --button-2-bg: background of a secondary button; --tile on the page, --tile-2 inside a tile
+ *   (set by every tile-like container), so the button never melts into its surface. Inside a
+ *   --tile-2 box within a tile it is --tile again, with --button-2-border (--line) around it so
+ *   it still reads as a button in light mode (white on near-white).
+ */
+:root[data-style='bento'] {
+  --hover-wash: var(--tile-line);
+  --button-2-bg: var(--tile);
+  --button-2-border: transparent;
+}

@@ -94,14 +94,21 @@ export function buildStrip(view: TodayView, keepOverdue = false): StripModel {
   };
 }
 
+/** Bento: a label wraps over at most two lines (the cell still reserves three for "+n"). */
+export const BENTO_LABEL_LINES = 2;
+
 /**
  * How many lines each label may wrap to: the lines left after "+n" go to the first label, the
- * others get one each (one item: three lines; two items: two and one; two plus "+n": one each).
+ * others get one each (one item: three lines; two items: two and one; two plus "+n": one each),
+ * never more than `maxPerLabel`.
  */
-export function labelLines(cell: Pick<StripCell, 'labels' | 'more'>): number[] {
+export function labelLines(
+  cell: Pick<StripCell, 'labels' | 'more'>,
+  maxPerLabel = LABEL_LINES,
+): number[] {
   const free = LABEL_LINES - (cell.more > 0 ? 1 : 0);
   return cell.labels.map((_, index) =>
-    index === 0 ? Math.max(1, free - (cell.labels.length - 1)) : 1,
+    index === 0 ? Math.min(maxPerLabel, Math.max(1, free - (cell.labels.length - 1))) : 1,
   );
 }
 

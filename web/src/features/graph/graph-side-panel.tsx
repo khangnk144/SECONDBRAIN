@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { GraphFilterMask } from './graph-filter-state';
 import type { GraphModel } from './graph-model';
 import { GraphNodeDetails } from './graph-node-details';
 import { GraphNodeSearch } from './graph-node-search';
@@ -14,6 +15,10 @@ export interface GraphSidePanelProps {
   onClear: () => void;
   /** "AI vừa cập nhật" (shown under the search box when the AI touched the vault). */
   aiTouch?: ReactNode;
+  /** Active filter (F24.2): the lists show only its matches. */
+  filter?: GraphFilterMask | null;
+  /** Notes edited in the last 24 h (F24.3), marked in every list. */
+  recent?: ReadonlySet<string> | null;
 }
 
 /**
@@ -35,7 +40,12 @@ export function GraphSidePanel(props: GraphSidePanelProps) {
 
   return (
     <aside className="graph-panel" aria-label={t('graph.panel.label')}>
-      <GraphNodeSearch model={model} onSelect={onSelect} />
+      <GraphNodeSearch
+        model={model}
+        onSelect={onSelect}
+        filter={props.filter}
+        recent={props.recent}
+      />
       {props.aiTouch}
       <p role="status" className="visually-hidden">
         {announcement}
@@ -48,6 +58,7 @@ export function GraphSidePanel(props: GraphSidePanelProps) {
           onDepthChange={props.onDepthChange}
           onOpen={props.onOpen}
           onClear={props.onClear}
+          recent={props.recent}
         />
       ) : (
         <p className="graph-panel__hint">{t('graph.panel.nothingSelected')}</p>

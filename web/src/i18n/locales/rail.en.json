@@ -1,0 +1,25 @@
+{
+  "logo": "sb",
+  "short": {
+    "today": "Today",
+    "tasks": "Tasks",
+    "calendar": "Calendar",
+    "graph": "Brain",
+    "ask": "Ask AI",
+    "resources": "Documents",
+    "tags": "Tags",
+    "reminders": "Reminders",
+    "folders": "Folders",
+    "settings": "Settings",
+    "capture": "Capture",
+    "more": "More"
+  },
+  "folders": "Folders",
+  "more": "More places",
+  "moreTitle": "More",
+  "close": "Close",
+  "menu": "Navigation and folders",
+  "search": "Search notes or ask AI…",
+  "searchLabel": "Search notes or ask AI",
+  "searchKeys": "Ctrl K"
+}

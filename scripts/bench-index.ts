@@ -1,10 +1,14 @@
 // Measures the index numbers of SPEC §5 on a freshly generated vault (default 5,000 notes):
 // cold full index, incremental update of one file, the "open note" service path, search server
 // query, Today, and the HTTP answers of Today, Calendar and the graph (Fastify inject on a real
-// app context, warm index). Prints a JSON report and a Markdown table with the machine it ran on.
+// app context, warm index). Then `events.jsonl` is grown to `--log-lines` (default 150,000: heavy
+// use over a year, AI ingests, relinks) and Today is measured with one new line before each
+// request (every save writes one), plus a second open of the graph history (review A, M3).
+// Prints a JSON report and a Markdown table with the machine it ran on.
 // Never touches the real vault: the vault is generated into a new temp folder and removed after.
-// Usage: npx tsx scripts/bench-index.ts [--notes 5000] [--seed 42] [--keep] [--strict]
-import { appendFileSync, mkdtempSync, rmSync } from 'node:fs';
+// Usage: npx tsx scripts/bench-index.ts [--notes 5000] [--seed 42] [--log-lines 150000] [--keep]
+//        [--strict]
+import { appendFileSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
@@ -28,6 +32,7 @@ const BUDGETS = {
   searchP95: 50,
   todayP95: 200,
   todayApiP95: 200,
+  todayApiGrowingLogP95: 200,
   graphApiP95: 300,
 };
 /** Only the Host header of injected requests: nothing listens on it. */
@@ -61,10 +66,35 @@ async function samples(n: number, fn: (i: number) => unknown): Promise<number[]>
 }
 
 /**
+ * Appends synthetic lines to `events.jsonl` until it holds `lines`: edits and link changes of the
+ * vault's notes spread over the past year, in time order, ending a day ago.
+ */
+function growEventLog(file: string, paths: readonly string[], lines: number): number {
+  const existing = readFileSync(file, 'utf8').split('\n').filter(Boolean).length;
+  const missing = Math.max(0, lines - existing);
+  const now = Date.now();
+  let chunk = '';
+  for (let i = 0; i < missing; i += 1) {
+    const ts = new Date(now - 365 * 86_400_000 + (i / missing) * 364 * 86_400_000).toISOString();
+    const p = paths[(i * 7919) % paths.length];
+    const q = paths[(i * 104_729) % paths.length];
+    const kind = i % 3;
+    const event = kind === 0 ? 'note_edited' : kind === 1 ? 'link_added' : 'link_removed';
+    chunk += `${JSON.stringify(kind === 0 ? { ts, event, path: p } : { ts, event, path: p, target: q })}\n`;
+    if (chunk.length > 1e6) {
+      appendFileSync(file, chunk);
+      chunk = '';
+    }
+  }
+  appendFileSync(file, chunk);
+  return existing + missing;
+}
+
+/**
  * The screens' HTTP answers on a real app context over the already indexed vault (warm index,
  * no watcher), through Fastify inject: what the browser waits for, minus the socket.
  */
-async function apiBench(home: string, root: string) {
+async function apiBench(home: string, root: string, logLines: number) {
   const settings = normalizeSettings({ vaultPath: root });
   const logger = createSilentLogger();
   const context = await createAppContext({ home, settings, logger, watcher: false });
@@ -94,8 +124,28 @@ async function apiBench(home: string, root: string) {
       edges: unknown[];
     };
     const hub = graph.nodes.reduce((a, b) => (b.degree > a.degree ? b : a));
+    const todayApiP95 = await p95('/api/today', 50);
+    // A long log that keeps growing: every save writes one line before Today is fetched again.
+    const file = context.vault.paths.eventsFile;
+    const paths = context.index.listNotes().map((note) => note.path);
+    const lines = growEventLog(file, paths, logLines);
+    await get('/api/today'); // the reader catches up with the grown file once
+    const save = (i: number) =>
+      appendFileSync(
+        file,
+        `${JSON.stringify({ ts: new Date().toISOString(), event: 'note_edited', path: paths[i % paths.length] })}\n`,
+      );
+    const growing = await samples(50, async (i) => {
+      save(i);
+      return get('/api/today');
+    });
+    const historyFirst = await time(() => get('/api/graph/history'));
     return {
-      todayApiP95: await p95('/api/today', 50),
+      todayApiP95,
+      todayApiGrowingLogP95: percentile(growing, 95),
+      eventLogLines: lines + 50,
+      graphHistoryFirst: historyFirst,
+      graphHistoryApiP95: await p95('/api/graph/history', 10),
       calendarApiP95: await p95(`/api/calendar?month=${toLocalDate(new Date()).slice(0, 7)}`, 50),
       graphApiP95: await p95('/api/graph', 20),
       graphLocalApiP95: await p95(
@@ -118,7 +168,12 @@ const machine = () => ({
   node: process.version,
 });
 
-export async function runBench(options: { notes: number; seed: number; keep: boolean }) {
+export async function runBench(options: {
+  notes: number;
+  seed: number;
+  keep: boolean;
+  logLines: number;
+}) {
   const base = mkdtempSync(path.join(os.tmpdir(), 'sb bench index Đồ án '));
   const root = path.join(base, 'vault');
   try {
@@ -176,7 +231,7 @@ export async function runBench(options: { notes: number; seed: number; keep: boo
     const todayRuns = await samples(50, () => deadlines.today());
     index.close();
     await vault.close();
-    const api = await apiBench(base, root);
+    const api = await apiBench(base, root, options.logLines);
 
     const ms = (n: number) => Math.round(n * 10) / 10;
     const results = {
@@ -187,6 +242,9 @@ export async function runBench(options: { notes: number; seed: number; keep: boo
       searchP95: ms(percentile(search, 95)),
       todayP95: ms(percentile(todayRuns, 95)),
       todayApiP95: ms(api.todayApiP95),
+      todayApiGrowingLogP95: ms(api.todayApiGrowingLogP95),
+      graphHistoryFirst: ms(api.graphHistoryFirst),
+      graphHistoryApiP95: ms(api.graphHistoryApiP95),
       calendarApiP95: ms(api.calendarApiP95),
       graphApiP95: ms(api.graphApiP95),
       graphLocalApiP95: ms(api.graphLocalApiP95),
@@ -200,6 +258,7 @@ export async function runBench(options: { notes: number; seed: number; keep: boo
       mb: Math.round(summary.bytes / 1e5) / 10,
       links: summary.links.total,
       tasks: summary.tasks.total,
+      eventLogLines: api.eventLogLines,
     };
     return {
       machine: machine(),
@@ -231,6 +290,13 @@ export function markdownTable(report: Report): string {
     ],
     ['Today service, p95 (50 runs)', report.results.todayP95, BUDGETS.todayP95],
     ['GET /api/today, p95 (50 runs)', report.results.todayApiP95, BUDGETS.todayApiP95],
+    [
+      `GET /api/today, a new log line before each (${report.vault.eventLogLines} lines), p95 (50 runs)`,
+      report.results.todayApiGrowingLogP95,
+      BUDGETS.todayApiGrowingLogP95,
+    ],
+    ['GET /api/graph/history, first open (long log)', report.results.graphHistoryFirst, null],
+    ['GET /api/graph/history, next opens, p95 (10 runs)', report.results.graphHistoryApiP95, null],
     ['GET /api/calendar (this month), p95 (50 runs)', report.results.calendarApiP95, null],
     [
       `GET /api/graph (${report.graph.nodes} nodes, ${report.graph.edges} edges), p95 (20 runs)`,
@@ -256,11 +322,14 @@ export function markdownTable(report: Report): string {
 if (isMainModule(import.meta.url)) {
   const flag = { type: 'boolean' } as const;
   const text = { type: 'string' } as const;
-  const { values } = parseArgs({ options: { notes: text, seed: text, keep: flag, strict: flag } });
+  const { values } = parseArgs({
+    options: { notes: text, seed: text, 'log-lines': text, keep: flag, strict: flag },
+  });
   runBench({
     notes: Number(values.notes ?? 5000),
     seed: Number(values.seed ?? 42),
     keep: values.keep === true,
+    logLines: Number(values['log-lines'] ?? 150_000),
   })
     .then((report) => {
       console.log(JSON.stringify(report, null, 2));

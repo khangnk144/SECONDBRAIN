@@ -61,9 +61,16 @@ describe('GET/PUT /api/settings (F18.1, F18.2, F18.6)', () => {
       port: PORT,
       configuredPort: PORT,
       restartRequired: false,
-      ui: { name: 'khangnie', language: 'vi', theme: 'dark', palette: 'dau-tam', fontSize: 16 },
+      ui: {
+        name: 'khangnie',
+        language: 'vi',
+        theme: 'dark',
+        palette: 'dau-tam',
+        fontSize: 16,
+        style: 'bento',
+      },
       reminders: { time: '08:00' },
-      system: { runAtLogin: false, runAtLoginSupported: true, platform: 'windows' },
+      system: { runAtLogin: false, runAtLoginSupported: true, platform: 'windows', tray: true },
       vault: {
         path: t.vaultRoot,
         id: t.context.vault.id,
@@ -88,6 +95,35 @@ describe('GET/PUT /api/settings (F18.1, F18.2, F18.6)', () => {
         monthlyTokenLimit: 2_000_000,
       },
       mcp: { allowNoteEdits: false },
+      // M5 sections (F27, F31): defaults, secrets only as status.
+      backup: {
+        schedule: {
+          enabled: false,
+          folder: null,
+          time: '21:00',
+          keep: 14,
+          defaultFolder: path.join(t.home, 'Backups'),
+        },
+        github: {
+          enabled: false,
+          remoteUrl: null,
+          branch: 'main',
+          token: { set: false, last4: null },
+        },
+      },
+      notify: {
+        telegram: { enabled: false, chatId: null, botToken: { set: false, last4: null } },
+        email: {
+          enabled: false,
+          host: null,
+          port: 587,
+          security: 'starttls',
+          user: null,
+          from: null,
+          to: null,
+          password: { set: false, last4: null },
+        },
+      },
     });
   });
 
@@ -101,6 +137,7 @@ describe('GET/PUT /api/settings (F18.1, F18.2, F18.6)', () => {
       theme: 'light',
       palette: 'dau-tam',
       fontSize: 18,
+      style: 'bento',
     });
     expect(res.json()).toEqual((await t.call('GET', '/api/settings')).json());
     expect(t.settings.ui.theme).toBe('light'); // the live object other modules read
@@ -200,6 +237,7 @@ describe('GET/PUT /api/settings (F18.1, F18.2, F18.6)', () => {
       runAtLogin: true,
       runAtLoginSupported: true,
       platform: 'windows',
+      tray: true,
     });
     expect(readFileSync(lnk, 'utf8')).toBe('lnk');
     expect(stored().system.runAtLogin).toBe(true);
@@ -247,6 +285,7 @@ describe('run at login off Windows', () => {
         runAtLogin: false,
         runAtLoginSupported: false,
         platform: 'other',
+        tray: true,
       });
       const res = await t.call('PUT', '/api/settings', { system: { runAtLogin: true } });
       expect(res.statusCode).toBe(400);

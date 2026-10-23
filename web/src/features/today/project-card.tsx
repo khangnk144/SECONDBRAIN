@@ -1,13 +1,11 @@
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { urgencyOf } from '../../editor/local-dates';
 import type { ProjectSummary } from '../../lib/api/deadlines-types';
 import { useTabsStore } from '../../lib/tabs-store';
 import { noteLinkHandlers } from '../backlinks/open-note-at-line';
-import { showToast } from '../../lib/toast-store';
-import { showUndoToast } from '../../lib/undo-toast';
-import { setNoteDone } from '../deadline-items/deadline-actions';
 import { dueLabel } from '../deadline-items/urgency-label';
+import { useMarkProjectDone } from './use-mark-project-done';
 
 export interface ProjectCardProps {
   project: ProjectSummary;
@@ -34,7 +32,7 @@ export function ProjectCard({
 }: ProjectCardProps) {
   const { t } = useTranslation();
   const titleRef = useRef<HTMLButtonElement>(null);
-  const [busy, setBusy] = useState(false);
+  const { busy, markDone } = useMarkProjectDone(project, onMarkedDone, refresh);
   const { progress } = project;
   const allDone = progress !== null && progress.total > 0 && progress.done === progress.total;
   const urgency = project.daysLeft === null ? null : urgencyOf(project.daysLeft);
@@ -42,23 +40,6 @@ export function ProjectCard({
     ? t('today.projects.progress', { done: progress.done, count: progress.total })
     : '';
   const percent = progress ? Math.round((100 * progress.done) / Math.max(1, progress.total)) : 0;
-
-  async function markDone() {
-    if (busy) return;
-    setBusy(true);
-    const target = { path: project.path, revision: project.revision, title: project.title };
-    const outcome = await setNoteDone(target, true, { refresh });
-    setBusy(false);
-    if (outcome !== 'done') return;
-    onMarkedDone();
-    // Undo puts `status: doing` back, checked against the revision our own write left (a note
-    // changed elsewhere meanwhile is refused and named, never overwritten).
-    showUndoToast(t('today.projects.markedDone', { title: project.title }), async () => {
-      if ((await setNoteDone(target, false, { refresh })) === 'done') {
-        showToast({ message: t('operations.undone') });
-      }
-    });
-  }
 
   function later() {
     onDismissOffer();

@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { getCalendar } from '../../lib/api/deadlines-api';
 import type { DeadlineItem } from '../../lib/api/deadlines-types';
 import { isoMonth } from '../../lib/local-day';
-import { usePanesStore } from '../../lib/panes-store';
 import { useLiveQuery } from '../../lib/use-live-query';
 import { CalendarHeader } from './calendar-header';
 import { CalendarMonthGrid } from './calendar-month-grid';
@@ -18,6 +17,7 @@ import {
 import { rescheduleCalendarItem } from './calendar-reschedule';
 import { useCalendarStore, useIncludeArchive } from './calendar-store';
 import { useCalendarRoute } from './use-calendar-route';
+import { useShowDayPanel } from './use-reveal-day-pane';
 import '../deadline-items/deadline-items.css';
 import './calendar-screen.css';
 import './calendar-compact.css';
@@ -29,7 +29,8 @@ export function calendarQueryKey(month: string, includeArchive: boolean): string
 /**
  * "Lịch" (SPEC F11): the month of deadline items from `GET /calendar`, kept current by vault
  * events and the day change. The month and the opened day live in the URL; opening a day shows it
- * in the right pane (expanding the pane when it was collapsed). Items move by drag here, or by
+ * in the right pane (expanding the pane when it was collapsed; on phones it opens as a bottom
+ * sheet). Items move by drag here, or by
  * "Dời ngày…" in the pane.
  */
 export function CalendarScreen() {
@@ -56,13 +57,13 @@ export function CalendarScreen() {
   }, [data, failed, refresh, mutate]);
   useEffect(() => () => useCalendarStore.getState().publish(null), []);
 
+  // The right panel (pane, or bottom sheet on phones) shows once the URL has the opened day.
+  useShowDayPanel(day);
   const openDay = useCallback(
     (date: string) => {
       setFocused(date);
       update({ day: date });
       useCalendarStore.getState().requestReveal(date);
-      const panes = usePanesStore.getState();
-      if (panes.rightCollapsed) panes.toggleRight();
     },
     [update],
   );

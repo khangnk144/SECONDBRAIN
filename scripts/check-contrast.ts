@@ -1,12 +1,26 @@
 /**
- * Contrast check for the design tokens (design.md §2.5).
+ * Contrast check for the design tokens (design.md §2.5, and §12.8 for the Bento style).
  * Parses web/src/styles/tokens.css, composes every theme × palette combination the
- * way the CSS cascade would, and verifies each listed pair. Exit code 1 on failure.
+ * way the CSS cascade would – for the calm style and under `data-style="bento"` – and verifies
+ * each listed pair. Exit code 1 on failure.
  * Fix failing token values in tokens.css; never lower the thresholds.
  */
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { opaqueHex, parseHex, resolveColor } from './contrast-colors.js';
+import { PAIRS_BY_STYLE, type ContrastPair, type Style } from './contrast-pairs.js';
+
+export { opaqueHex, parseHex, resolveColor } from './contrast-colors.js';
+export {
+  BENTO_PAIRS,
+  BENTO_SELECTED_PAIRS,
+  BENTO_STATUS_PAIRS,
+  PAIRS,
+  PAIRS_BY_STYLE,
+  type ContrastPair,
+  type Style,
+} from './contrast-pairs.js';
 
 export type Theme = 'dark' | 'light';
 export type Palette = 'dau-tam' | 'hoa-dao' | 'oai-huong';
@@ -18,42 +32,6 @@ export interface TokenRule {
   vars: Record<string, string>; // e.g. { '--bg': '#FBF8FA' }
   order: number;
 }
-
-export interface ContrastPair {
-  fg: string;
-  bg: string;
-  min: number;
-  kind: 'text' | 'non-text';
-}
-
-/** Pairs from design.md §2.5: 4.5:1 for text, 3:1 for focus ring and status dots. */
-export const PAIRS: ContrastPair[] = [
-  ...(
-    [
-      ['--ink', '--bg'],
-      ['--ink', '--paper'],
-      ['--ink-2', '--bg'],
-      ['--ink-2', '--paper'],
-      ['--on-accent', '--accent'],
-      ['--accent', '--accent-soft'],
-      // Text on selected rows and other --accent-soft surfaces (secondary text included).
-      ['--ink', '--accent-soft'],
-      ['--toast-fg', '--toast-bg'],
-      ['--urgent-text', '--bg'],
-      ['--soon-text', '--bg'],
-      ['--ok-text', '--bg'],
-      ['--ink', '--blush'],
-    ] as const
-  ).map(([fg, bg]) => ({ fg, bg, min: 4.5, kind: 'text' as const })),
-  ...(
-    [
-      ['--focus', '--bg'],
-      ['--urgent', '--bg'],
-      ['--soon', '--bg'],
-      ['--ok', '--bg'],
-    ] as const
-  ).map(([fg, bg]) => ({ fg, bg, min: 3, kind: 'non-text' as const })),
-];
 
 /**
  * Parses `[data-x="y"]`, `[data-x='y']` and `[data-x=y]` parts of a `:root` selector.
@@ -90,19 +68,21 @@ export function parseTokenRules(css: string): TokenRule[] {
 }
 
 /** Applies matching rules in cascade order (specificity = attribute count, then source order). */
-export function composeTokens(rules: TokenRule[], theme: Theme, palette: Palette) {
-  const active: Record<string, string> = { 'data-theme': theme, 'data-palette': palette };
+export function composeTokens(
+  rules: TokenRule[],
+  theme: Theme,
+  palette: Palette,
+  style: Style = 'calm',
+) {
+  const active: Record<string, string> = {
+    'data-theme': theme,
+    'data-palette': palette,
+    'data-style': style,
+  };
   const matching = rules
     .filter((rule) => Object.entries(rule.attrs).every(([k, v]) => active[k] === v))
     .sort((a, b) => Object.keys(a.attrs).length - Object.keys(b.attrs).length || a.order - b.order);
   return Object.assign({}, ...matching.map((rule) => rule.vars)) as Record<string, string>;
-}
-
-export function parseHex(color: string): [number, number, number] {
-  const hex = color.trim().replace(/^#/, '');
-  const full = hex.length === 3 ? [...hex].map((c) => c + c).join('') : hex;
-  if (!/^[0-9a-fA-F]{6}$/.test(full)) throw new Error(`Not a hex color: ${color}`);
-  return [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16)) as [number, number, number];
 }
 
 /** WCAG 2.x relative luminance. */
@@ -125,6 +105,7 @@ export function contrastRatio(a: string, b: string): number {
 export interface ContrastResult extends ContrastPair {
   theme: Theme;
   palette: Palette;
+  style: Style;
   ratio: number;
   pass: boolean;
 }
@@ -132,16 +113,23 @@ export interface ContrastResult extends ContrastPair {
 export function checkContrast(css: string): ContrastResult[] {
   const rules = parseTokenRules(css);
   const results: ContrastResult[] = [];
-  for (const theme of THEMES) {
-    for (const palette of PALETTES) {
-      const tokens = composeTokens(rules, theme, palette);
-      for (const pair of PAIRS) {
-        const fg = tokens[pair.fg];
-        const bg = tokens[pair.bg];
-        if (!fg || !bg)
-          throw new Error(`Missing token ${!fg ? pair.fg : pair.bg} (${theme}/${palette})`);
-        const ratio = contrastRatio(fg, bg);
-        results.push({ ...pair, theme, palette, ratio, pass: ratio >= pair.min });
+  for (const style of ['calm', 'bento'] as const) {
+    for (const theme of THEMES) {
+      for (const palette of PALETTES) {
+        const tokens = composeTokens(rules, theme, palette, style);
+        for (const pair of PAIRS_BY_STYLE[style]) {
+          const missing = [pair.fg, pair.bg, pair.over].find((n) => n && !tokens[n]);
+          if (missing) throw new Error(`Missing token ${missing} (${style}/${theme}/${palette})`);
+          // Values may be var() references or a wash laid over `over` (contrast-colors.ts).
+          const under = pair.over ? resolveColor(tokens[pair.over] as string, tokens) : undefined;
+          const bg = opaqueHex(resolveColor(tokens[pair.bg] as string, tokens), under);
+          const fg = opaqueHex(resolveColor(tokens[pair.fg] as string, tokens), {
+            rgb: parseHex(bg),
+            alpha: 1,
+          });
+          const ratio = contrastRatio(fg, bg);
+          results.push({ ...pair, theme, palette, style, ratio, pass: ratio >= pair.min });
+        }
       }
     }
   }
@@ -155,8 +143,8 @@ function main(): void {
   const rows = results.map((r) =>
     [
       r.pass ? 'ok  ' : 'FAIL',
-      `${r.theme}/${r.palette}`.padEnd(16),
-      `${r.fg} on ${r.bg}`.padEnd(28),
+      `${r.style}/${r.theme}/${r.palette}`.padEnd(22),
+      `${r.fg} on ${r.bg}${r.over ? ` over ${r.over}` : ''}`.padEnd(32),
       r.ratio.toFixed(2).padStart(6),
       `(min ${r.min})`,
     ].join('  '),
@@ -169,7 +157,9 @@ function main(): void {
     );
     process.exit(1);
   }
-  console.log(`\nAll ${results.length} contrast checks pass (2 themes x 3 palettes).`);
+  console.log(
+    `\nAll ${results.length} contrast checks pass (2 themes x 3 palettes, calm and bento).`,
+  );
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main();

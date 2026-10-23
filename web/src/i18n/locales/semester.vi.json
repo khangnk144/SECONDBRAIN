@@ -1,0 +1,40 @@
+{
+  "command": "Mở trang Học kỳ này",
+  "timeFormat": "HH:mm, D/M/YYYY",
+  "settings": {
+    "label": "Trang Học kỳ này",
+    "hint": "Một trang {{name}} ở gốc kho ghi chú, liệt kê các môn học và đồ án đang làm. App tự cập nhật trang này, bạn không cần sửa tay.",
+    "trashed": "Đã chuyển trang Học kỳ này vào thùng rác."
+  },
+  "state": {
+    "ok": "App đang tự cập nhật trang {{name}}. Lần cuối: {{time}}.",
+    "edited": "Trang {{name}} đã được sửa bên ngoài app, nên app không ghi đè nữa. Bấm Tạo lại để có trang mới (bản đã sửa vào thùng rác).",
+    "missing": "Trang {{name}} đã bị xóa. Bấm Tạo lại nếu bạn muốn có lại trang.",
+    "pending": "Chưa tạo được trang {{name}}. Bấm Tạo lại để thử lần nữa.",
+    "offKept": "Trang {{name}} vẫn còn trong kho như một ghi chú thường."
+  },
+  "actions": {
+    "open": "Mở trang",
+    "regenerate": "Tạo lại",
+    "trash": "Chuyển trang vào thùng rác"
+  },
+  "done": {
+    "enable": "Đã bật. Trang {{name}} nằm ở gốc kho ghi chú.",
+    "disable": "Đã tắt. Trang {{name}} vẫn còn trong kho.",
+    "regenerate": "Đã tạo lại trang {{name}}.",
+    "trash": "Đã chuyển trang {{name}} vào thùng rác."
+  },
+  "banner": {
+    "generated": "Trang này do app tạo tự động. Muốn đổi thì sửa các ghi chú môn học và đồ án.",
+    "edited": "Trang này đã được sửa bên ngoài app, nên app không cập nhật nó nữa. Bấm Tạo lại để có trang mới (bản đã sửa vào thùng rác).",
+    "settings": "Cài đặt"
+  },
+  "errors": {
+    "generatedPage": "Trang Học kỳ này do app tạo nên không sửa, đổi tên hay di chuyển được. Muốn giữ nó như ghi chú thường thì tắt trang trong Cài đặt."
+  },
+  "confirm": {
+    "title": "Tạo lại trang Học kỳ này?",
+    "body": "Bản đang có đã được sửa bên ngoài app. Bản đó sẽ vào thùng rác (khôi phục được), rồi app tạo trang mới từ các ghi chú môn học và đồ án.",
+    "cancel": "Giữ nguyên"
+  }
+}

@@ -2,9 +2,11 @@ import { useTranslation } from 'react-i18next';
 import type { VaultInfo } from '../../lib/api/settings-types';
 import { BackupExportRow } from './backup-export-row';
 import { BackupRestoreForm } from './backup-restore-form';
+import { BackupScheduleSection } from './backup-schedule-section';
 import { IndexRebuildRow } from './index-rebuild-row';
 import { SettingsSection } from './settings-section';
 import { TemplatesUpgradeRow } from './templates-upgrade-row';
+import { SemesterPageRow } from './semester-page-row';
 import { LogsRevealRow, SampleDataRow, TemplatesRestoreRow } from './vault-maintenance-rows';
 import { VaultSwitchForm } from './vault-switch-form';
 
@@ -28,10 +30,12 @@ export function VaultSection({ vault }: { vault: VaultInfo | null }) {
       <div className="settings-field">
         <BackupRestoreForm />
       </div>
+      <BackupScheduleSection />
       <TemplatesRestoreRow />
       <TemplatesUpgradeRow />
       <SampleDataRow />
       <LogsRevealRow />
+      <SemesterPageRow />
     </SettingsSection>
   );
 }

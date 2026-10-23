@@ -91,5 +91,105 @@
     "creating": "Đang tạo…",
     "decline": "Không, cảm ơn",
     "created": "Đã tạo dữ liệu mẫu."
+  },
+  "brain": {
+    "newNotes_one": "{{count}} ghi chú mới",
+    "newNotes_other": "{{count}} ghi chú mới",
+    "editedNotes_one": "{{count}} ghi chú đã sửa",
+    "editedNotes_other": "{{count}} ghi chú đã sửa",
+    "newLinks_one": "{{count}} liên kết mới",
+    "newLinks_other": "{{count}} liên kết mới",
+    "aiPages_one": "AI cập nhật {{count}} trang",
+    "aiPages_other": "AI cập nhật {{count}} trang",
+    "separator": ", ",
+    "titlesMore_one": "{{titles}} và {{count}} ghi chú khác",
+    "titlesMore_other": "{{titles}} và {{count}} ghi chú khác",
+    "link": "Não hôm nay: {{summary}}. Mở Bản đồ não với các ghi chú hôm nay."
+  },
+  "bento": {
+    "greeting": {
+      "morning": "Chào buổi sáng,<br/><name>{{name}}</name>",
+      "noon": "Chào buổi trưa,<br/><name>{{name}}</name>",
+      "afternoon": "Chào buổi chiều,<br/><name>{{name}}</name>",
+      "evening": "Chào buổi tối,<br/><name>{{name}}</name>",
+      "late": "Chào khuya,<br/><name>{{name}}</name>"
+    },
+    "date": {
+      "title": "Ngày hôm nay",
+      "weekday": "dddd",
+      "monthYear": "[tháng] M, YYYY",
+      "full": "dddd, D [tháng] M, YYYY"
+    },
+    "deadline": {
+      "title": "Deadline gần nhất",
+      "urgency": {
+        "urgent": "gấp",
+        "soon": "sắp",
+        "ok": "ổn"
+      },
+      "daysLeft_one": "ngày nữa",
+      "daysLeft_other": "ngày nữa",
+      "today": "Hôm nay",
+      "dateFormat": "dddd D/M",
+      "dailyNote": "Daily {{date}}",
+      "openTasks_one": "{{count}} việc còn mở",
+      "openTasks_other": "{{count}} việc còn mở",
+      "none": "Không có deadline nào trong 14 ngày tới."
+    },
+    "strip": {
+      "overdue_one": "{{count}} việc quá hạn",
+      "overdue_other": "{{count}} việc quá hạn"
+    },
+    "tasks": {
+      "title": "Hôm nay",
+      "progress_one": "{{done}}/{{count}} xong",
+      "progress_other": "{{done}}/{{count}} xong",
+      "dueToday": "Hôm nay, gấp",
+      "overdue_one": "Quá hạn {{count}} ngày",
+      "overdue_other": "Quá hạn {{count}} ngày",
+      "daily": "Daily hôm nay",
+      "all_one": "Xem tất cả {{count}} việc",
+      "all_other": "Xem tất cả {{count}} việc",
+      "yesterday_one": "Hôm qua bạn xong {{count}} việc. Giữ nhịp nhé.",
+      "yesterday_other": "Hôm qua bạn xong {{count}} việc. Giữ nhịp nhé.",
+      "empty": "Hôm nay chưa có việc nào. Nhớ ra việc gì thì gõ vào Ghi nhanh nhé."
+    },
+    "projects": {
+      "title": "Đồ án đang làm",
+      "ring": "Tiến độ {{title}}: {{percent}} phần trăm, {{progress}}",
+      "noDeadline": "chưa đặt hạn",
+      "more_one": "Xem thêm {{count}} đồ án",
+      "more_other": "Xem thêm {{count}} đồ án",
+      "donePrompt": "“{{title}}” xong hết việc rồi. Đánh dấu dự án xong?"
+    },
+    "brain": {
+      "title": "Não hôm nay",
+      "open": "{{title}}, mở Bản đồ não",
+      "map_one": "Chòm sao {{count}} ghi chú chạm hôm nay",
+      "map_other": "Chòm sao {{count}} ghi chú chạm hôm nay",
+      "notes_one": "+{{count}} ghi chú",
+      "notes_other": "+{{count}} ghi chú",
+      "links_one": "+{{count}} liên kết",
+      "links_other": "+{{count}} liên kết",
+      "ai_one": "AI cập nhật {{count}} trang",
+      "ai_other": "AI cập nhật {{count}} trang",
+      "titles": "Ghi chú hôm nay: {{titles}}.",
+      "empty": "Hôm nay chưa chạm ghi chú nào. Viết gì đó nhé?"
+    },
+    "capture": {
+      "title": "Ghi nhanh",
+      "placeholder": "Gõ gì đó rồi Enter…",
+      "save": "Lưu vào Inbox",
+      "hint": "Lưu vào Inbox. <kbd>{{keys}}</kbd> ở bất cứ đâu."
+    },
+    "writing": {
+      "title": "7 ngày ghi chép",
+      "chart": "Số ghi chú tạo hoặc sửa mỗi ngày trong 7 ngày qua: {{days}}.",
+      "day_one": "{{day}}: {{count}} ghi chú",
+      "day_other": "{{day}}: {{count}} ghi chú",
+      "todayDay": "hôm nay",
+      "empty": "7 ngày qua chưa có ghi chép nào. Bắt đầu một ghi chú nhé?"
+    },
+    "unavailable": "Chưa đọc được hoạt động gần đây. Bạn thử tải lại trang nhé."
   }
 }

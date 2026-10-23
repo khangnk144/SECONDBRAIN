@@ -42,10 +42,15 @@ export function firstVisibleIndex(scrollLeft: number, scrollWidth: number, cells
   return Math.max(0, Math.min(cells - 1, Math.round(scrollLeft / (scrollWidth / cells))));
 }
 
-export function useStripCaption(
-  dayKeys: readonly string[],
-  visibleDays: number,
-): { caption: string; onScroll: (event: UIEvent<HTMLElement>) => void } {
+export interface StripCaption {
+  /** "14 ngày tới" at the start, else the visible range. */
+  caption: string;
+  /** The visible range once scrolled; null while the strip shows its start. */
+  range: string | null;
+  onScroll: (event: UIEvent<HTMLElement>) => void;
+}
+
+export function useStripCaption(dayKeys: readonly string[], visibleDays: number): StripCaption {
   const { t, i18n } = useTranslation();
   const [first, setFirst] = useState(0);
   const onScroll = (event: UIEvent<HTMLElement>) => {
@@ -54,9 +59,9 @@ export function useStripCaption(
   };
   const from = dayKeys[first];
   const to = dayKeys[Math.min(dayKeys.length - 1, first + visibleDays - 1)];
-  const caption =
+  const range =
     first === 0 || from === undefined || to === undefined
-      ? t('today.strip.caption')
+      ? null
       : visibleRangeText(from, to, i18n.language, t);
-  return { caption, onScroll };
+  return { caption: range ?? t('today.strip.caption'), range, onScroll };
 }
